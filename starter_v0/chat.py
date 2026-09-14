@@ -63,7 +63,8 @@ def tool_results_message(events: list[dict[str, Any]]) -> dict[str, str]:
             "TOOL_RESULTS_JSON:\n"
             f"{json_text(events, max_chars=24000)}\n\n"
             "Use only these tool results. If the user asked for an incident report and the findings are ready, "
-            "call the reporting tool. Otherwise answer directly, state uncertainty, and give the safest next step."
+            "call the reporting tool. Otherwise answer directly, state uncertainty, and give the safest next step. "
+            "Keep the output format required by the system prompt."
         ),
     }
 

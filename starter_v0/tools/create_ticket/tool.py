@@ -12,7 +12,9 @@ from tools._shared import ROOT, err
 TICKET_DIR = ROOT / "tickets"
 ASSET_ID_PATTERN = re.compile(r"^(?:LT|DT|MB|PR|RM)-\d+$", re.IGNORECASE)
 SENSITIVE_DATA_PATTERN = re.compile(
-    r"\b(?:password|passwd|token|api[ _-]?key|mfa|otp|recovery[ _-]?code)(?:\s*[:=]\s*|\s+(?:is|la|là)\s+)\S+",
+    r"\b(?:password|passwd|token|api[ _-]?key|mfa|otp|recovery[ _-]?code)"
+    # Bare-space form ("OTP 123456") only matches value-like tokens, so "password reset" stays allowed.
+    r"(?:\s+code)?(?:\s*[:=]\s*|\s+(?:is|la|là)\s+|\s+(?=\S*[\d!@#$%^&*]))\S+",
     re.IGNORECASE,
 )
 

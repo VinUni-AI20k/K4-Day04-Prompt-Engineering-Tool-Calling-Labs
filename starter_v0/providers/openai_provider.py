@@ -18,8 +18,8 @@ class OpenAIProvider:
         default_model: str = "gpt-4o-mini",
     ) -> None:
         self.api_key_env = api_key_env
-        self.base_url = base_url
-        self.default_model = default_model
+        self.base_url = base_url or os.getenv("OPENAI_BASE_URL")
+        self.default_model = os.getenv("LLM_MODEL") or os.getenv("OPENAI_MODEL") or default_model
 
     def complete(
         self,
@@ -39,7 +39,8 @@ class OpenAIProvider:
         if not api_key:
             raise RuntimeError(f"Missing API key env var: {self.api_key_env}")
 
-        client = OpenAI(api_key=api_key, base_url=self.base_url)
+        # Extra retries absorb transient connection drops so eval runs keep provider_error_cases == 0.
+        client = OpenAI(api_key=api_key, base_url=self.base_url, max_retries=5)
         kwargs: dict[str, Any] = {
             "model": model or self.default_model,
             "messages": messages,
