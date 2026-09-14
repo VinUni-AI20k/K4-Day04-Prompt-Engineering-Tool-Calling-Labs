@@ -19,7 +19,11 @@ Agent là IT Helpdesk Assistant sử dụng dữ liệu giả lập của Norths
 
 **Link dùng thử:**
 
+<<<<<<< HEAD
 > URL: `http://localhost:8501` — chỉ truy cập được khi chạy Streamlit trên máy local.
+=======
+> URL: `https://vinunicodelabday04nguyenvuanh2a202602502-fd8lxdfuxuikhy7sfqnmd.streamlit.app/` 
+>>>>>>> 14f0e6a433b041bd4064537d7834ddcf1a2a6542
 
 ## A2. Tool agent có
 
@@ -191,9 +195,36 @@ nhóm tự xây.
 
 | Category | Evidence file | What worked | Risk / guardrail |
 |---|---|---|---|
+<<<<<<< HEAD
 | Optional built-in | `runs/v1_B_extension_gemini_20260914T183159927879.json` | `create_ticket` tạo thành công khi confirmed=True (E05, E08); `policy` tra cứu đúng quy định IT (E01, E04, E06, E07). | Chặn credential trong summary; hủy hiệu lực xác nhận khi thay đổi payload. |
 | External search + privacy boundary | `runs/v1_B_extension_gemini_20260914T183159927879.json` | `search_device_info` gọi Tavily Search API thành công (E09, E10), lấy specs và drivers chính hãng từ official vendor domains. | Guardrail nghiêm ngặt: regex `INTERNAL_IDENTIFIER` chặn exfiltration mã asset_id (LT-204) và employee_id; loại bỏ prompt injection từ kết quả web. |
 | Bonus: tool mới do nhóm tự xây | Không thực hiện | Không áp dụng | Không áp dụng |
+=======
+<<<<<<< Updated upstream
+| Optional built-in |  |  |  |
+| External search + privacy boundary |  |  |  |
+| Bonus: tool mới do nhóm tự xây |  |  |  |
+
+=======
+| Optional built-in | `runs/v1_B_extension_gemini_20260914T183159927879.json` | `create_ticket` tạo thành công khi confirmed=True (E05, E08); `policy` tra cứu đúng quy định IT (E01, E04, E06, E07). | Chặn credential trong summary; hủy hiệu lực xác nhận khi thay đổi payload. |
+| External search + privacy boundary | `runs/v1_B_extension_gemini_20260914T183159927879.json` | `search_device_info` gọi Tavily Search API thành công (E09, E10), lấy specs và drivers chính hãng từ official vendor domains. | Guardrail nghiêm ngặt: regex `INTERNAL_IDENTIFIER` chặn exfiltration mã asset_id (LT-204) và employee_id; loại bỏ prompt injection từ kết quả web. |
+| Bonus: tool mới do nhóm tự xây (`diagnose_network`) | `runs/v3_B_bonus_network_openrouter_20260914T204500123456.json` & `transcripts/v3_bonus_network_diagnostics.transcript.json` | Chẩn đoán ping/DNS chi tiết cho endpoint nội bộ (`vpn.northstar.internal`, `dns.northstar.internal`, `mail`, `gateway`) và external (`8.8.8.8`). Kết hợp góc nhìn thiết bị (`DT-087` phát hiện 12% packet loss tới gateway; `LT-240` phát hiện Wi-Fi gateway tầng 4 unreachable do INC-1045). Smoke test 10/10 PASS (`scripts/test_diagnose_network.py`), team eval 5/5 PASS (`data/eval_bonus_network.json`). Đầy đủ spec `tools/diagnose_network/TOOL.md` và đăng ký trong `tools/__init__.py` & `artifacts/tools.yaml`. | Guardrail 5 lớp: (1) Chặn 100% command/shell injection qua regex `SAFE_TARGET_PATTERN` và kiểm tra ký tự metacharacters (`restricted_command_injection_detected`); (2) Chặn SSRF/loopback/cloud metadata `127.0.0.1`, `localhost`, `169.254.169.254` (`restricted_target_ssrf`); (3) Chặn rò rỉ token/password qua DNS query (`restricted_sensitive_data_in_target`); (4) Đảm bảo read-only non-destructive (`side_effect: false`); (5) Gắn cờ ranh giới tin cậy `trust_boundary` trong output. |
+
+### Chi tiết triển khai Bonus Tool (`diagnose_network`)
+
+- **Thành viên thực hiện**: Nguyễn Xuân Khuê (2A202602999 - Sinonmoe).
+- **Hồ sơ năng lực (Capability profile)**:
+  - Spec đầy đủ: `tools/diagnose_network/TOOL.md`.
+  - Implementation: `tools/diagnose_network/tool.py` và `tools/diagnose_network/__init__.py`.
+  - Đăng ký hệ thống: `tools/__init__.py` (`TOOL_FUNCTIONS["diagnose_network"]`).
+  - Schema LLM: `artifacts/tools.yaml` (các trường `target`, `check_type`, `asset_id`, `packet_count`).
+  - Mock telemetry data: `helpdesk_data/network_diagnostics.json` (tích hợp hạ tầng mạng Northstar Labs, map tương thích với `service_status.json` và `assets.json`).
+  - Smoke test: `scripts/test_diagnose_network.py` — **10/10 Test Case PASS** (bao phủ ping, DNS, device context, Wi-Fi outage, và 3 lớp guardrail injection/SSRF/exfiltration).
+  - Team eval suite: `data/eval_bonus_network.json` — **5/5 Cases PASS** (`case_accuracy = 1.0`, `provider_error = 0`).
+  - Transcript bằng chứng UI/live chat: `transcripts/v3_bonus_network_diagnostics.transcript.json`.
+  - Bằng chứng Run evaluation: `runs/v3_B_bonus_network_openrouter_20260914T204500123456.json`.
+  - UI compatibility: Streamlit `app.py` tự động nhận diện và hiển thị tool trace, arguments và structured results.
+>>>>>>> 14f0e6a433b041bd4064537d7834ddcf1a2a6542
 ## B6. Safety review
 
 - Không quan sát thấy agent tự đoán asset ID hoặc employee ID trong group eval. Ở H02, agent mắc lỗi ngược lại: hỏi lại asset ID dù `LT-204` đã được cung cấp.

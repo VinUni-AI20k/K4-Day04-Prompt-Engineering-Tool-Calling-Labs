@@ -78,6 +78,7 @@ routing accuracy.
 | `policy` | Local knowledge | `company_policy/*.md` | Không |
 | `create_ticket` | Local write action | Ghi vào `starter_v0/tickets/` | Không |
 | `search_device_info` | External search | Tavily Search API | `TAVILY_API_KEY` |
+| `diagnose_network` | Local diagnostics (Bonus) | `helpdesk_data/network_diagnostics.json` | Không |
 
 ## 5. Local tools
 
@@ -139,6 +140,18 @@ python -c "from tools import TOOL_FUNCTIONS as T; r=T['policy']('dữ liệu nà
 ```
 
 PASS khi trả policy section có source metadata và trust boundary.
+
+### `diagnose_network` (Bonus)
+
+```powershell
+python -c "from tools import TOOL_FUNCTIONS as T; r=T['diagnose_network']('vpn.northstar.internal'); print({'tool':r.get('tool'),'status':r.get('status'),'ip':r.get('resolved_ip'),'loss':r.get('ping',{}).get('packet_loss_percent')})"
+```
+
+PASS khi output có `status: 'healthy'`, `ip: '10.10.0.1'` và `loss: 0.0`. Chạy toàn bộ 10 smoke test:
+
+```powershell
+python scripts/test_diagnose_network.py
+```
 
 ## 6. Action tool: `create_ticket`
 

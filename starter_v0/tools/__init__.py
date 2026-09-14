@@ -14,6 +14,7 @@ from .lookup_user.tool import lookup_user
 from .policy.tool import search_company_policy
 from .search_kb.tool import search_kb
 from .search_device_info.tool import search_device_info
+from .diagnose_network.tool import diagnose_network
 
 
 # NOTE (starter_v0): these keys are the names the model sees AND the names
@@ -31,6 +32,7 @@ TOOL_FUNCTIONS = {
     "format_incident_report": format_incident_report,
     "policy": search_company_policy,
     "create_ticket": create_ticket,
+    "diagnose_network": diagnose_network,
 }
 
 

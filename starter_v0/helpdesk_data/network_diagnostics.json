@@ -1,0 +1,293 @@
+{
+  "snapshot_at": "2026-09-14T09:00:00+07:00",
+  "dns_servers": {
+    "primary": {
+      "ip": "10.0.0.2",
+      "hostname": "dns.northstar.internal",
+      "location": "Bangkok Datacenter",
+      "status": "healthy",
+      "avg_latency_ms": 1.8
+    },
+    "secondary": {
+      "ip": "10.0.0.3",
+      "hostname": "dns2.northstar.internal",
+      "location": "Singapore Datacenter",
+      "status": "healthy",
+      "avg_latency_ms": 15.2
+    }
+  },
+  "default_gateways": {
+    "bangkok_floor_2": {"ip": "10.10.2.1", "status": "healthy", "latency_ms": 1.1},
+    "bangkok_floor_3": {"ip": "10.10.3.1", "status": "healthy", "latency_ms": 1.2},
+    "bangkok_floor_4_wired": {"ip": "10.10.4.1", "status": "healthy", "latency_ms": 1.5},
+    "bangkok_floor_4_wifi": {"ip": "10.10.4.254", "status": "unreachable", "error": "AP controller link down (INC-1045)", "packet_loss": 100},
+    "singapore_floor_6": {"ip": "10.20.6.1", "status": "healthy", "latency_ms": 2.0},
+    "remote_tunnel": {"ip": "172.16.0.1", "status": "healthy", "latency_ms": 42.0}
+  },
+  "endpoints": {
+    "vpn.northstar.internal": {
+      "ip": "10.10.0.1",
+      "service": "vpn",
+      "record_type": "A",
+      "ttl": 300,
+      "dns_status": "resolved",
+      "ping": {
+        "status": "healthy",
+        "packets_sent": 4,
+        "packets_received": 4,
+        "packet_loss_percent": 0.0,
+        "latency_ms": {"min": 22.4, "avg": 24.1, "max": 26.8, "jitter": 1.8},
+        "ttl": 60
+      },
+      "note": "Network layer and ICMP are healthy; authentication layer degraded per incident INC-1042."
+    },
+    "dns.northstar.internal": {
+      "ip": "10.0.0.2",
+      "service": "dns",
+      "record_type": "A",
+      "ttl": 86400,
+      "dns_status": "resolved",
+      "ping": {
+        "status": "healthy",
+        "packets_sent": 4,
+        "packets_received": 4,
+        "packet_loss_percent": 0.0,
+        "latency_ms": {"min": 1.2, "avg": 1.8, "max": 2.3, "jitter": 0.3},
+        "ttl": 64
+      },
+      "note": "Primary internal recursive resolver."
+    },
+    "dns2.northstar.internal": {
+      "ip": "10.0.0.3",
+      "service": "dns",
+      "record_type": "A",
+      "ttl": 86400,
+      "dns_status": "resolved",
+      "ping": {
+        "status": "healthy",
+        "packets_sent": 4,
+        "packets_received": 4,
+        "packet_loss_percent": 0.0,
+        "latency_ms": {"min": 14.1, "avg": 15.2, "max": 16.9, "jitter": 0.9},
+        "ttl": 64
+      },
+      "note": "Secondary internal resolver in Singapore."
+    },
+    "mail.northstar.internal": {
+      "ip": "10.20.1.5",
+      "service": "email",
+      "record_type": "A",
+      "ttl": 300,
+      "dns_status": "resolved",
+      "mx_record": "10 mail.northstar.internal",
+      "ping": {
+        "status": "healthy",
+        "packets_sent": 4,
+        "packets_received": 4,
+        "packet_loss_percent": 0.0,
+        "latency_ms": {"min": 3.8, "avg": 4.5, "max": 5.2, "jitter": 0.5},
+        "ttl": 64
+      },
+      "note": "Production mail connector endpoint."
+    },
+    "sso.northstar.internal": {
+      "ip": "10.10.2.10",
+      "service": "sso",
+      "record_type": "A",
+      "ttl": 300,
+      "dns_status": "resolved",
+      "ping": {
+        "status": "healthy",
+        "packets_sent": 4,
+        "packets_received": 4,
+        "packet_loss_percent": 0.0,
+        "latency_ms": {"min": 7.1, "avg": 8.0, "max": 9.3, "jitter": 0.7},
+        "ttl": 62
+      },
+      "note": "Internal SSO identity provider."
+    },
+    "gateway": {
+      "ip": "10.10.3.1",
+      "service": "network",
+      "record_type": "PTR",
+      "ttl": 3600,
+      "dns_status": "resolved",
+      "ping": {
+        "status": "healthy",
+        "packets_sent": 4,
+        "packets_received": 4,
+        "packet_loss_percent": 0.0,
+        "latency_ms": {"min": 0.8, "avg": 1.1, "max": 1.6, "jitter": 0.2},
+        "ttl": 255
+      },
+      "note": "Bangkok floor 3 default gateway."
+    },
+    "wifi-gw-fl4.northstar.internal": {
+      "ip": "10.10.4.254",
+      "service": "wifi",
+      "record_type": "A",
+      "ttl": 60,
+      "dns_status": "resolved",
+      "ping": {
+        "status": "unreachable",
+        "packets_sent": 4,
+        "packets_received": 0,
+        "packet_loss_percent": 100.0,
+        "latency_ms": null,
+        "error": "Request timed out; destination host unreachable"
+      },
+      "note": "Access points on Floor 4 are down due to INC-1045 switch stack outage."
+    },
+    "print-server.northstar.internal": {
+      "ip": "10.0.2.20",
+      "service": "printing",
+      "record_type": "A",
+      "ttl": 600,
+      "dns_status": "resolved",
+      "ping": {
+        "status": "healthy",
+        "packets_sent": 4,
+        "packets_received": 4,
+        "packet_loss_percent": 0.0,
+        "latency_ms": {"min": 2.8, "avg": 3.4, "max": 4.1, "jitter": 0.4},
+        "ttl": 64
+      },
+      "note": "Central print spooler service."
+    },
+    "8.8.8.8": {
+      "ip": "8.8.8.8",
+      "service": "public_dns",
+      "record_type": "A",
+      "ttl": 86400,
+      "dns_status": "resolved",
+      "ping": {
+        "status": "healthy",
+        "packets_sent": 4,
+        "packets_received": 4,
+        "packet_loss_percent": 0.0,
+        "latency_ms": {"min": 20.5, "avg": 22.3, "max": 24.8, "jitter": 1.2},
+        "ttl": 118
+      },
+      "note": "Google Public DNS."
+    },
+    "1.1.1.1": {
+      "ip": "1.1.1.1",
+      "service": "public_dns",
+      "record_type": "A",
+      "ttl": 86400,
+      "dns_status": "resolved",
+      "ping": {
+        "status": "healthy",
+        "packets_sent": 4,
+        "packets_received": 4,
+        "packet_loss_percent": 0.0,
+        "latency_ms": {"min": 16.9, "avg": 18.1, "max": 20.2, "jitter": 0.8},
+        "ttl": 58
+      },
+      "note": "Cloudflare DNS."
+    },
+    "google.com": {
+      "ip": "142.250.190.46",
+      "service": "internet",
+      "record_type": "A",
+      "ttl": 300,
+      "dns_status": "resolved",
+      "ping": {
+        "status": "healthy",
+        "packets_sent": 4,
+        "packets_received": 4,
+        "packet_loss_percent": 0.0,
+        "latency_ms": {"min": 23.1, "avg": 25.4, "max": 28.0, "jitter": 1.5},
+        "ttl": 116
+      },
+      "note": "External public web connectivity verification."
+    },
+    "support.lenovo.com": {
+      "ip": "23.50.62.115",
+      "service": "vendor_support",
+      "record_type": "A",
+      "ttl": 300,
+      "dns_status": "resolved",
+      "ping": {
+        "status": "healthy",
+        "packets_sent": 4,
+        "packets_received": 4,
+        "packet_loss_percent": 0.0,
+        "latency_ms": {"min": 40.2, "avg": 42.5, "max": 46.1, "jitter": 2.1},
+        "ttl": 55
+      },
+      "note": "Lenovo official vendor support portal."
+    },
+    "dell.com": {
+      "ip": "143.166.135.105",
+      "service": "vendor_support",
+      "record_type": "A",
+      "ttl": 300,
+      "dns_status": "resolved",
+      "ping": {
+        "status": "healthy",
+        "packets_sent": 4,
+        "packets_received": 4,
+        "packet_loss_percent": 0.0,
+        "latency_ms": {"min": 45.8, "avg": 48.2, "max": 52.0, "jitter": 2.0},
+        "ttl": 52
+      },
+      "note": "Dell vendor support portal."
+    }
+  },
+  "asset_network_overrides": {
+    "LT-240": {
+      "location": "Bangkok floor 4",
+      "interface_in_use": "Wi-Fi",
+      "target_overrides": {
+        "wifi-gw-fl4.northstar.internal": {
+          "ping": {
+            "status": "unreachable",
+            "packet_loss_percent": 100.0,
+            "error": "Wi-Fi link down on floor 4 (INC-1045)"
+          }
+        },
+        "gateway": {
+          "ip": "10.10.4.254",
+          "ping": {
+            "status": "unreachable",
+            "packet_loss_percent": 100.0,
+            "error": "Cannot reach gateway via corporate Wi-Fi"
+          }
+        }
+      }
+    },
+    "DT-087": {
+      "location": "Bangkok floor 4",
+      "interface_in_use": "Wired Ethernet",
+      "target_overrides": {
+        "gateway": {
+          "ip": "10.10.4.1",
+          "ping": {
+            "status": "degraded",
+            "packets_sent": 4,
+            "packets_received": 3,
+            "packet_loss_percent": 12.0,
+            "latency_ms": {"min": 3.1, "avg": 4.2, "max": 9.8, "jitter": 2.5},
+            "note": "Intermittent packet loss 12% to default gateway (matches asset diagnostics)"
+          }
+        }
+      }
+    },
+    "LT-411": {
+      "location": "Remote - Vietnam",
+      "interface_in_use": "VPN Tunnel",
+      "dns_override": {
+        "active_resolver": "10.0.0.3",
+        "note": "DNS fallback server active (Singapore 10.0.0.3)"
+      },
+      "latency_multiplier": 2.95
+    },
+    "PR-404": {
+      "location": "Bangkok floor 4",
+      "interface_in_use": "Wired Ethernet",
+      "all_unreachable": true,
+      "reason": "Printer network link down; switch port reports link down"
+    }
+  }
+}

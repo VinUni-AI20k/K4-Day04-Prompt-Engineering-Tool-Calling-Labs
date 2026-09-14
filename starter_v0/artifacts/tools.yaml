@@ -205,3 +205,38 @@ tools:
           default: false
           description: "Cờ xác nhận: BẮT BUỘC là true khi người dùng đã xác nhận rõ ràng. Nếu chưa xác nhận, không được gọi tool này mà phải gọi clarify."
       required: [summary]
+
+  # ---------------- Bonus tool ----------------
+  - name: diagnose_network
+    description: >-
+      Thực hiện chẩn đoán chuyên sâu mạng viễn thông (đo ping latency, packet loss, jitter, và phân giải tên miền DNS) tới một target cụ thể (hostname, địa chỉ IP, hoặc dịch vụ nội bộ như 'vpn.northstar.internal', 'gateway', 'dns.northstar.internal', 'mail.northstar.internal', 'sso.northstar.internal', '8.8.8.8', 'google.com').
+      Có thể kết hợp với 'asset_id' để chẩn đoán theo góc nhìn và vị trí vật lý của thiết bị cụ thể (ví dụ: mất gói tin gateway trên DT-087, mất kết nối Wi-Fi tầng 4 trên LT-240).
+      PHÂN BIỆT RÕ RÀNG:
+      (1) Dùng diagnose_network khi cần kiểm tra kết nối chi tiết (ping/DNS/latency/packet loss) tới một endpoint hoặc nghi ngờ đường truyền mạng.
+      (2) KHÔNG dùng tool này để kiểm tra trạng thái hoạt động dịch vụ chung toàn công ty (dùng check_service_status).
+      (3) KHÔNG dùng tool này để kiểm tra phần cứng/phần mềm tổng thể của máy tính (dùng inspect_device).
+      RANH GIỚI AN TOÀN BẮT BUỘC:
+      - CẤM truyền ký tự metacharacters hoặc lệnh shell vào target.
+      - CẤM quét các địa chỉ loopback (localhost, 127.0.0.1) và cloud metadata (169.254.169.254).
+      - CẤM đưa mật khẩu, token, API key vào target.
+    parameters:
+      type: object
+      properties:
+        target:
+          type: string
+          description: "Tên miền (hostname), địa chỉ IP, hoặc endpoint nội bộ cần chẩn đoán (ví dụ: 'vpn.northstar.internal', 'dns.northstar.internal', 'gateway', 'mail.northstar.internal', '8.8.8.8'). Không chứa ký tự đặc biệt hoặc lệnh shell."
+        check_type:
+          type: string
+          enum: [all, ping, dns]
+          default: "all"
+          description: "Phạm vi chẩn đoán: 'all' (kiểm tra cả ping và DNS), 'ping' (chỉ đo độ trễ và mất gói tin ping), hoặc 'dns' (chỉ phân giải DNS và trạng thái resolver)."
+        asset_id:
+          type: string
+          default: ""
+          description: "Mã định danh tài sản của thiết bị gửi yêu cầu (ví dụ: 'LT-204', 'DT-087', 'LT-240') nếu muốn chẩn đoán từ góc nhìn giao diện mạng và vị trí của thiết bị đó."
+        packet_count:
+          type: integer
+          default: 4
+          description: "Số lượng gói tin ping thử nghiệm (từ 1 đến 10). Mặc định là 4."
+      required: [target]
+
