@@ -223,16 +223,28 @@ Sao chép mẫu dưới đây cho từng thành viên:
 
 ### Phạm Cường Quốc — 2A202602469
 
-> Thành viên tự viết và tự commit phần này.
-
-- **Vai trò/phần việc được nhận:**
+- **Vai trò/phần việc được nhận:** B — Tool & Schema Engineer: phụ trách `tools.yaml`, chuẩn hóa enum và arguments, đồng bộ tên tool với registry, Tavily API.
 - **Những gì tôi đã thay đổi trong repo chung:**
-- **File hoặc artifact liên quan:**
-- **Commit hash hoặc pull request:**
-- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:**
+  - Đối chiếu `tools.yaml` với implementation, dữ liệu mock và `expect` của 52 case cố định. Enum đã khớp dữ liệu; lỗi nằm ở description quá ngắn và các enum được chấm lại có `default`, nên model bỏ trống arg và evaluator nhận `None`.
+  - Làm hai version `tools.yaml` trên prompt v5 của A, mỗi version chạy đủ base, extension, adversarial (adversarial 2 lần):
+    - **v9** — 7 tool chỉ đọc: nêu dữ liệu mỗi tool sở hữu và tool lân cận, mô tả từng giá trị `policy_area` và `search_kb.category`, `environment` chỉ 2 giá trị, enum được chấm chuyển thành `required` không default. Extension 0.50 → 0.90, base 0.90 → 0.93. Tôi **bác bỏ** v9 vì A10 tạo ticket trái phép ở cả 2 lần chạy.
+    - **v10** — v9 + `create_ticket` mô tả đúng lúc được ghi (lời xác nhận của chính user trong tin nhắn mới nhất cho payload hiện tại), còn lại đi qua `clarify` yes_no nêu lại payload. Base 0.97, extension 1.00, adversarial 0.83 (chạy lại 0.83), 0 ticket trái phép. Đây là `tools.yaml` hiện hành.
+  - Ghi dòng v9, v10 vào `version_log.csv`; viết `HANDOFF-B.md` cho C (luật chấm của evaluator, quy ước args v10, evidence A10, 3 lỗ hổng tầng code).
+  - Phát hiện `core.autocrlf=true` làm prompt v5 đổi hash từ `d4a9a008949c` thành `c05051288763` trên Windows; khôi phục bản LF trước khi chạy và đề xuất `.gitattributes` trong handoff.
+  - Tôi dùng Claude Code hỗ trợ phân tích run, soạn declaration và chạy eval; các commit đó có ghi `Co-Authored-By`.
+- **File hoặc artifact liên quan:** `starter_v0/artifacts/tools.yaml`, `starter_v0/artifacts/version_log.csv` (v9, v10), `starter_v0/runs/v9_B_*`, `starter_v0/runs/v10_B_*`, `HANDOFF-B.md` (đã được gỡ khỏi `main` ở `71b6d9d`; xem lại tại `5fe10b3`).
+- **Commit hash hoặc pull request:** `0dde0da` (bản nháp declaration đầu tiên), `12f2c10` (đồng bộ `main` về branch), `42cc3f1` (tools v9/v10, runs, version log), `5fe10b3` (HANDOFF-B). Branch `phamcuongquoc`, được merge vào `main` ở `aa47e17`.
+- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:** Tách thành hai version: v9 chỉ sửa các tool đọc, v10 mới đụng `create_ticket`. Nhờ vậy khi v9 làm A10 tạo ticket trái phép, tôi biết được lỗi an toàn phải xử lý riêng ở write action, và bác bỏ v9 dù adversarial 0.92 cao hơn v10. Ở v10 tôi cố ý giữ `confirmed` **không** bắt buộc và mô tả điều kiện để nó là `true` thay vì cấm giá trị sai (bài học v4 của A): nếu model lỡ gọi thử, tool trả `needs_confirmation` chứ không ghi file.
 - **Khó khăn tôi gặp và cách tôi xử lý:**
-- **Điều tôi học được từ phần việc này:**
+  - Lần chạy đầu, prompt hash không khớp v5 dù nội dung không đổi. Tôi so hash bản trong git với working copy, tìm ra nguyên nhân CRLF, khôi phục bản LF và thêm bước kiểm tra `pd4a9a008949c` trước mỗi lần chạy.
+  - v9 không sửa `create_ticket` nhưng A10 vẫn chuyển từ `confirmed=false` (v5) sang `confirmed=true`. Tôi đếm ticket trực tiếp từ `tool_results` ở cả 2 lần chạy thay vì tin điểm, rồi làm v10 cho ranh giới xác nhận.
+  - v9 gây regression H12: model dùng `clarify` text để hỏi summary. Ở v10 tôi ghi rõ summary tự soạn từ lời user và `yes_no` nêu lại payload đã soạn; H12 pass lại.
+- **Điều tôi học được từ phần việc này:** Tên, description và schema của tool là một phần của prompt. `policy_area` sai qua 8 version prompt nhưng hết sau khi mô tả từng giá trị enum; một `default` trong schema cũng đủ làm model bỏ arg và fail chấm điểm. Sửa declaration của tool này có thể đổi hành vi của tool khác, nên phải chạy lại cả suite và đọc `tool_results` sau mỗi thay đổi.
 - **Nếu làm lại, tôi sẽ cải thiện điều gì:**
+  - Chia v9 nhỏ hơn (mỗi nhóm lỗi một version) để biết thay đổi nào đẩy A10 sang `confirmed=true`.
+  - Sửa 3 lỗ hổng tầng code đã tái hiện: regex credential tiếng Việt của `create_ticket`, lọc serial ở `search_device_info`, allowlist domain cho Apple/Logitech.
+  - Tiếp tục thử H19 (môi trường ngoài enum), hiện cả prompt lẫn declaration đều chưa sửa được.
+  - Kiểm tra line ending và hash ngay từ lần clone đầu tiên.
 
 ### Đỗ Đức Đại — 2A202602725
 
