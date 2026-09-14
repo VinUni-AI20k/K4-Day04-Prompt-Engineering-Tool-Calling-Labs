@@ -14,7 +14,7 @@ Repository chung: https://github.com/tungdaisy7it/K4A-Day04-Aura
 
 | Thành viên | Commit |
 |---|---|
-| Lê Thanh Tùng | `0772a43` (merge PR #1), commit tích hợp Module 5 |
+| Lê Thanh Tùng | `0772a43` (merge PR #1), `ff66229` (tích hợp Module 5) |
 | Nguyễn Hồ Nam | `8f32dbb` (qua PR #1) |
 | Đậu Văn Thạch | `5341b44`, `15513ca` |
 | Nguyễn Thu Hằng | `15ee398`, `81a2ad0` |
