@@ -1,7 +1,98 @@
 {
   "dataset_id": "day04_v3_helpdesk_group",
   "dataset_role": "group",
-  "description": "Template intentionally left empty. The team must write exactly 10 original IT helpdesk cases: 5 single-turn query cases and 5 multi-turn turns cases.",
+  "description": "Team-authored evaluation dataset containing 5 single-turn queries and 5 multi-turn scenarios for Northstar Labs IT Helpdesk.",
   "allowed_failure_types": ["wrong_tool", "wrong_arg_value", "wrong_boundary", "unnecessary_tool", "out_of_scope", "missing_info"],
-  "cases": []
+  "cases": [
+    {
+      "id": "G01_missing_asset_clarify", "phase": "B", "suite": "group",
+      "query": "Laptop của mình bị màn hình xanh liên tục, kiểm tra phần cứng giúp với.",
+      "failure_type": "missing_info",
+      "expect": {"tool_calls": [{"name": "clarify", "args": {"response_type": "text"}}]},
+      "metadata": {"skill": "clarify_missing_asset", "difficulty": "easy", "what_it_tests": "Thiếu mã tài sản (LT-xxx) phải gọi clarify hỏi người dùng, không được đoán."}
+    },
+    {
+      "id": "G02_ambiguous_service_vs_device", "phase": "B", "suite": "group",
+      "query": "Hôm nay Wi-Fi công ty chập chờn quá, dịch vụ Wi-Fi production có bị sự cố gì không?",
+      "failure_type": "wrong_tool",
+      "expect": {"tool_calls": [{"name": "check_service_status", "args": {"service": "wifi", "environment": "production"}}]},
+      "metadata": {"skill": "route_shared_service", "difficulty": "easy", "what_it_tests": "Dịch vụ hạ tầng Wi-Fi dùng chung toàn hệ thống phải dùng check_service_status."}
+    },
+    {
+      "id": "G03_policy_vs_kb_routing", "phase": "B", "suite": "group",
+      "query": "Quy định bảo mật của Northstar Labs về việc sử dụng công cụ AI bên ngoài như ChatGPT như thế nào?",
+      "failure_type": "wrong_tool",
+      "expect": {"tool_calls": [{"name": "policy", "args": {"policy_area": "external_tools"}}]},
+      "metadata": {"skill": "route_policy", "difficulty": "medium", "what_it_tests": "Quy định/chính sách bảo mật công ty phải tra cứu policy, không dùng search_kb."}
+    },
+    {
+      "id": "G04_ticket_status_lookup", "phase": "B", "suite": "group",
+      "query": "Tra cứu giúp mình tiến độ xử lý của ticket INC-1001.",
+      "failure_type": "wrong_tool",
+      "expect": {"tool_calls": [{"name": "lookup_ticket_status", "args": {"ticket_id": "INC-1001"}}]},
+      "metadata": {"skill": "bonus_ticket_lookup", "difficulty": "easy", "what_it_tests": "Tra cứu tiến độ ticket cũ theo mã INC-xxxx phải dùng lookup_ticket_status."}
+    },
+    {
+      "id": "G05_out_of_scope_cooking", "phase": "B", "suite": "group",
+      "query": "Cho mình xin công thức làm bánh mì Việt Nam ngon nhất.",
+      "failure_type": "out_of_scope",
+      "expect": {"no_tool": true, "behavior": "refuse"},
+      "metadata": {"skill": "out_of_scope_refusal", "difficulty": "easy", "what_it_tests": "Yêu cầu ngoài phạm vi IT helpdesk phải từ chối trực tiếp, không gọi tool."}
+    },
+    {
+      "id": "G06_clarify_then_inspect", "phase": "B", "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Kiểm tra card mạng trên máy của mình xem có bị lỗi rớt gói không."},
+        {"role": "user", "content": "Mã tài sản của mình là LT-318."},
+        {"role": "user", "content": "Chỉ kiểm tra network trên đúng máy LT-318 đó."}
+      ],
+      "failure_type": "missing_info",
+      "expect": {"tool_calls": [{"name": "inspect_device", "args": {"asset_id": "LT-318", "check": "network"}}]},
+      "metadata": {"skill": "multiturn_clarify_then_inspect", "difficulty": "medium", "what_it_tests": "Lấy asset_id từ lượt sau để thực hiện inspect_device với check=network."}
+    },
+    {
+      "id": "G07_carry_environment_staging", "phase": "B", "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Dịch vụ SSO trên môi trường staging có hoạt động tốt không?"},
+        {"role": "user", "content": "Thế còn dịch vụ Wi-Fi thì sao?"},
+        {"role": "user", "content": "Đúng rồi, vẫn kiểm tra Wi-Fi ở staging."}
+      ],
+      "failure_type": "wrong_arg_value",
+      "expect": {"tool_calls": [{"name": "check_service_status", "args": {"service": "wifi", "environment": "staging"}}]},
+      "metadata": {"skill": "multiturn_carry_environment", "difficulty": "medium", "what_it_tests": "Kế thừa tham số environment=staging từ lượt trò chuyện trước."}
+    },
+    {
+      "id": "G08_correct_asset_turn2", "phase": "B", "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Cho mình kiểm tra cấu hình phần cứng máy DT-031."},
+        {"role": "user", "content": "Xin lỗi mình nhầm, máy cần kiểm tra là DT-087."},
+        {"role": "user", "content": "Giữ nguyên kiểm tra hardware giúp mình."}
+      ],
+      "failure_type": "wrong_arg_value",
+      "expect": {"tool_calls": [{"name": "inspect_device", "args": {"asset_id": "DT-087", "check": "hardware"}}]},
+      "metadata": {"skill": "multiturn_correction", "difficulty": "medium", "what_it_tests": "Mã máy được đính chính ở lượt sau phải ghi đè mã máy ban đầu."}
+    },
+    {
+      "id": "G09_cancellation_turn3", "phase": "B", "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Tạo ticket báo lỗi mạng cho máy LT-204."},
+        {"role": "user", "content": "Thôi hủy thao tác nhé, mình vừa tự cắm lại dây mạng được rồi."},
+        {"role": "user", "content": "Đừng tạo ticket nữa nhé."}
+      ],
+      "failure_type": "unnecessary_tool",
+      "expect": {"no_tool": true, "behavior": "answer_without_tool"},
+      "metadata": {"skill": "multiturn_cancellation", "difficulty": "hard", "what_it_tests": "Yêu cầu hủy từ người dùng ở lượt sau phải ngưng mọi tool gọi."}
+    },
+    {
+      "id": "G10_ticket_confirmation_flow", "phase": "B", "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Máy LT-240 bị hỏng bàn phím, tạo ticket hỗ trợ giúp mình."},
+        {"role": "user", "content": "Đặt mức ưu tiên medium."},
+        {"role": "user", "content": "Hãy xác nhận lại thông tin trước khi ghi nhận ticket."}
+      ],
+      "failure_type": "wrong_boundary",
+      "expect": {"tool_calls": [{"name": "clarify", "args": {"response_type": "yes_no"}}]},
+      "metadata": {"skill": "multiturn_confirmation_boundary", "difficulty": "hard", "what_it_tests": "Trước khi ghi nhận ticket thực sự, phải dừng lại hỏi xác nhận qua clarify."}
+    }
+  ]
 }

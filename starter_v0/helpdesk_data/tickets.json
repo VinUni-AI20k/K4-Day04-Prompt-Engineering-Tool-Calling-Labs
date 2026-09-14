@@ -1,0 +1,35 @@
+{
+  "snapshot_at": "2026-03-14T08:00:00Z",
+  "tickets": [
+    {
+      "ticket_id": "INC-1001",
+      "summary": "High latency on VPN production gateway",
+      "priority": "high",
+      "status": "in_progress",
+      "assigned_to": "NetOps Team",
+      "asset_id": "LT-204",
+      "created_at": "2026-03-13T14:30:00Z",
+      "updated_at": "2026-03-14T07:15:00Z"
+    },
+    {
+      "ticket_id": "INC-1002",
+      "summary": "Wi-Fi connection drop on 4th floor",
+      "priority": "medium",
+      "status": "resolved",
+      "assigned_to": "Field Support",
+      "asset_id": "LT-240",
+      "created_at": "2026-03-12T09:00:00Z",
+      "updated_at": "2026-03-13T16:45:00Z"
+    },
+    {
+      "ticket_id": "INC-1003",
+      "summary": "Outlook profile corrupt after Windows update",
+      "priority": "low",
+      "status": "open",
+      "assigned_to": "Helpdesk Tier 1",
+      "asset_id": "DT-031",
+      "created_at": "2026-03-14T07:50:00Z",
+      "updated_at": "2026-03-14T07:50:00Z"
+    }
+  ]
+}
