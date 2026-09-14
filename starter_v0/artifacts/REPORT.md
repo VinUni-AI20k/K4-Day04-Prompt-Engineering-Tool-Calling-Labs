@@ -77,7 +77,7 @@ Sau khi tích hợp bonus tool của E, artifact version hiện tại của `sys
 
 ## B3. Team eval cases
 
-Nhóm đã viết đúng 10 case trong `data/eval_group.json`: 5 single-turn và 5 multi-turn.
+Liệt kê đúng 10 case tự viết: 5 single-turn và 5 multi-turn do thành viên C (`vukhai248`) thiết kế.
 
 | Case ID | Nội dung kiểm tra | Hành vi kỳ vọng | Kết quả |
 |---|---|---|---|
@@ -177,15 +177,26 @@ Failure quan trọng còn lại là G03, G05 và G09 trong group eval, tương �
 
 **Evidence liên quan:**
 
-- `starter_v0/app.py`
-- `starter_v0/artifacts/system_prompt.md`
-- `starter_v0/artifacts/tools.yaml`
-- `starter_v0/data/eval_group.json`
-- `starter_v0/data/eval_bonus.json`
-- `starter_v0/runs/v3_B_group_openai_20260914T194102935417.json`
-- `starter_v0/transcripts/ui_20260914T194553484133.transcript.json`
+### Vũ Gia Khải — MSSV: 2A202602786 (GitHub: @vukhai248)
 
-## C2. Self-reflection của từng thành viên
+- **Vai trò/phần việc được nhận:** Thành viên C — Eval Author (Chịu trách nhiệm thiết kế bộ kiểm thử 10 test case của nhóm: `eval_group.json` G01 $\to$ G10 và bảng B3).
+- **Những gì tôi đã thay đổi trong repo chung:** 
+  - Soạn thảo và kiểm chuẩn 10 test case nguyên bản (5 single-turn, 5 multi-turn) trong `starter_v0/data/eval_group.json` bao phủ 10 failure modes theo `LAB-GUIDE.md`.
+  - Hoàn thiện bảng tổng kết B3 trong `starter_v0/artifacts/REPORT.md`.
+  - Thiết lập và cập nhật tài liệu điều phối dự án `TASK_TRACING.md`.
+- **File hoặc artifact liên quan:** 
+  - `starter_v0/data/eval_group.json`
+  - `starter_v0/artifacts/REPORT.md` (mục B3, C2)
+  - `TASK_TRACING.md`
+- **Commit hash hoặc pull request:** Commit `85efe09` (Branch: `contrib/vukhai248` / PR: https://github.com/y0sh1da-available/K4-DAY04-2A202602572-DangHuuCuong/pull/new/contrib/vukhai248)
+- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:** 
+  - Đảm bảo trường `"phase": "B"` và `failure_type` chuẩn chỉ cho toàn bộ 10 cases để tương thích hoàn toàn với bộ phân loại lỗi tự động của `run_eval.py`.
+  - Thiết kế case `G09_multiturn_stale_confirmation` để kiểm thử ranh giới an toàn tối quan trọng: khi người dùng đổi độ ưu tiên ticket ở lượt sau, payload thay đổi khiến confirmation cũ bị vô hiệu, agent bắt buộc phải yêu cầu xác nhận lại thay vì tự ý tạo ticket.
+- **Khó khăn tôi gặp và cách tôi xử lý:** Cần phải hiểu rõ cấu trúc mock data (`assets.json`, `users.json`, `service_status.json`) để thiết kế các case query vừa tự nhiên, vừa phản ánh đúng các tình huống thực tế của IT Helpdesk mà không bị mâu thuẫn với schema định nghĩa trong `tools.yaml`.
+- **Điều tôi học được từ phần việc này:** Hiểu sâu về cách thức đánh giá tự động (automated evaluation) cho LLM Agent; cách phân loại lỗi (routing, arguments, context carry-over, safety boundary); và tầm quan trọng của việc xây dựng test suite đa dạng trước khi tối ưu prompt.
+- **Nếu làm lại, tôi sẽ cải thiện điều gì:** Mở rộng thêm các kịch bản test kết hợp giữa lỗi mạng và phần cứng trên cùng một thiết bị, hoặc kiểm thử tương thích với Bonus Tool mới do nhóm phát triển.
+
+### [Họ tên Thành viên khác] — MSSV
 
 ### TODO - Thành viên A
 

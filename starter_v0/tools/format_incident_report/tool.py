@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Any
 
 
+
 def _line(item: dict[str, Any]) -> str:
     label = str(item.get("label") or item.get("source") or "Finding").strip()
     detail = str(item.get("detail") or item.get("summary") or item.get("status") or "").strip()
