@@ -2,9 +2,9 @@
 
 ## Team
 
-- Team:
-- Members:
-- Provider/model:
+- Team: Goose Goose Duck
+- Members: Nguyễn Trung Kiên (Leader) và 4 thành viên (chi tiết xem TEAMMATES.md)
+- Provider/model: OpenAI / gpt-4o-mini
 
 # PHẦN A — Giới thiệu agent
 
@@ -44,7 +44,7 @@ total_cases`, và tool result error đã được review thủ công.
 
 | Version | Prompt/tool change | Hypothesis | Metric | Before | After | Run file |
 |---|---|---|---|---:|---:|---|
-| v0 | baseline |  |  |  |  |  |
+| v0 | baseline | Đo lường hành vi chưa tối ưu của starter trước khi sửa | case_accuracy | - | 0.70 | runs/v0_B_base_openai_20260914T184037608852.json |
 | v1 |  |  |  |  |  |  |
 | v2 |  |  |  |  |  |  |
 | v3 |  |  |  |  |  |  |
@@ -133,22 +133,13 @@ repository chung. Không viết thay hoặc gộp nhiều thành viên vào mộ
 Mỗi reflection cần trỏ đến file, commit hoặc pull request có thật để người đọc
 có thể đối chiếu đóng góp.
 
-Sao chép mẫu dưới đây cho từng thành viên:
+Mỗi thành viên tự viết một file riêng trong thư mục `starter_v0/artifacts/reflections/` để đảm bảo độc lập và không xảy ra xung đột khi merge:
 
-### Họ tên — MSSV
-
-- **Vai trò/phần việc được nhận:**
-- **Những gì tôi đã thay đổi trong repo chung:**
-- **File hoặc artifact liên quan:**
-- **Commit hash hoặc pull request:**
-- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:**
-- **Khó khăn tôi gặp và cách tôi xử lý:**
-- **Điều tôi học được từ phần việc này:**
-- **Nếu làm lại, tôi sẽ cải thiện điều gì:**
-
-Mỗi thành viên phải tự commit phần self-reflection của mình bằng Git identity
-tương ứng. Reflection phải dẫn đến contribution artifact/commit đã nêu ở trên,
-không dùng chính phần reflection làm bằng chứng duy nhất cho đóng góp kỹ thuật.
+- [Thành viên 1 — Nguyễn Trung Kiên (Leader)](reflections/member1_lead.md)
+- [Thành viên 2 — Prompt Engineer](reflections/member2_prompt.md)
+- [Thành viên 3 — Tool Interface Engineer](reflections/member3_tools.md)
+- [Thành viên 4 — Evaluation Specialist](reflections/member4_eval.md)
+- [Thành viên 5 — Security & Demo Specialist](reflections/member5_security.md)
 
 ## C3. Final checkout
 
