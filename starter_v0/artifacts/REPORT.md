@@ -2,8 +2,13 @@
 
 ## Team
 
-- Team:
+- Team: K4-Day04-2A202602758-HoangMinhTuan
 - Members:
+  - Hoàng Minh Tuấn - 2A202602758 (`tuanhm21122004`)
+  - Trần Chí Vĩ - 2A202602968 (`civi0411`)
+  - Nguyễn Nam Khánh - 2A202602568 (`KanaxNguyen`)
+  - Nguyễn Phi Nhật - 2A202602658 (`nhatgudboi`)
+  - Trần Đức Quân - 2A202602922 (`ducquan19`)
 - Provider/model:
 
 # PHẦN A — Giới thiệu agent
@@ -134,10 +139,53 @@ Mỗi reflection cần trỏ đến file, commit hoặc pull request có thật 
 có thể đối chiếu đóng góp.
 
 Sao chép mẫu dưới đây cho từng thành viên:
+### Hoàng Minh Tuấn — 2A202602758 (Vai trò 1)
 
-### Họ tên — MSSV
+- **Vai trò/phần việc được nhận:** Project Lead & Core Prompt Engineer
+- **Những gì tôi đã thay đổi trong repo chung:**
+- **File hoặc artifact liên quan:**
+- **Commit hash hoặc pull request:**
+- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:**
+- **Khó khăn tôi gặp và cách tôi xử lý:**
+- **Điều tôi học được từ phần việc này:**
+- **Nếu làm lại, tôi sẽ cải thiện điều gì:**
 
-- **Vai trò/phần việc được nhận:**
+### Trần Chí Vĩ — 2A202602968 (Vai trò 2)
+
+- **Vai trò/phần việc được nhận:** Tool Declaration & Schema Specialist
+- **Những gì tôi đã thay đổi trong repo chung:**
+- **File hoặc artifact liên quan:**
+- **Commit hash hoặc pull request:**
+- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:**
+- **Khó khăn tôi gặp và cách tôi xử lý:**
+- **Điều tôi học được từ phần việc này:**
+- **Nếu làm lại, tôi sẽ cải thiện điều gì:**
+
+### Nguyễn Nam Khánh — 2A202602568 (Vai trò 3)
+
+- **Vai trò/phần việc được nhận:** Benchmark & Team Eval Specialist
+- **Những gì tôi đã thay đổi trong repo chung:**
+- **File hoặc artifact liên quan:**
+- **Commit hash hoặc pull request:**
+- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:**
+- **Khó khăn tôi gặp và cách tôi xử lý:**
+- **Điều tôi học được từ phần việc này:**
+- **Nếu làm lại, tôi sẽ cải thiện điều gì:**
+
+### Nguyễn Phi Nhật — 2A202602658 (Vai trò 4)
+
+- **Vai trò/phần việc được nhận:** Security, Adversarial & QA Lead
+- **Những gì tôi đã thay đổi trong repo chung:**
+- **File hoặc artifact liên quan:**
+- **Commit hash hoặc pull request:**
+- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:**
+- **Khó khăn tôi gặp và cách tôi xử lý:**
+- **Điều tôi học được từ phần việc này:**
+- **Nếu làm lại, tôi sẽ cải thiện điều gì:**
+
+### Trần Đức Quân — 2A202602922 (Vai trò 5)
+
+- **Vai trò/phần việc được nhận:** UI & Bonus Capability Developer
 - **Những gì tôi đã thay đổi trong repo chung:**
 - **File hoặc artifact liên quan:**
 - **Commit hash hoặc pull request:**
