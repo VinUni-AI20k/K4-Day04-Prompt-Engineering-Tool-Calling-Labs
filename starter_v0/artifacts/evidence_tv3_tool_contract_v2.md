@@ -124,3 +124,46 @@ issue, not a declaration issue.
 - A formal schema validator could be added outside TV3 scope.
 - `artifacts/system_prompt.md`, evaluation datasets, UI/application code, and
   business logic were intentionally not modified.
+
+## Post-Main Sync Validation
+
+After pulling the newest main-branch artifacts, the registry and implementations
+still matched the v2 declaration. The only contract-level improvement made was
+to expand the `policy` description and `policy/TOOL.md` with explicit routing
+guidance for each existing `policy_area` enum. No implementation or dataset was
+changed.
+
+Focused extension validation after that change:
+
+```text
+total_cases: 10
+measured_cases: 10
+provider_error_cases: 0
+passed_cases: 10
+case_accuracy: 1.0
+argument_accuracy: 1.0
+```
+
+Full validation with OpenRouter (`openai/gpt-4o-mini`):
+
+| Suite | Passed | Total | Case accuracy | Provider errors |
+|---|---:|---:|---:|---:|
+| base | 26 | 30 | 0.8667 | 0 |
+| group | 8 | 10 | 0.8000 | 0 |
+| extension | 10 | 10 | 1.0000 | 0 |
+| adversarial | 7 | 12 | 0.5833 | 0 |
+
+Deterministic checks:
+
+```text
+compile: PASS
+registry_declaration: PASS
+local_smoke: PASS
+action_safety: PASS
+tavily_smoke: PASS 2
+```
+
+Remaining failures are agent behavior failures outside the TV3 declaration
+surface: base/group routing and missing-information cases, plus adversarial
+confirmation/exfiltration boundaries. They should be addressed by the prompt
+or evaluation owner, not by changing tool schemas or expected datasets.
