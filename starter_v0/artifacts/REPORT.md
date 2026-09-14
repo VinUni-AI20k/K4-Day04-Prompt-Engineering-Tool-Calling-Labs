@@ -157,6 +157,24 @@ có thể đối chiếu đóng góp.
 
 Sao chép mẫu dưới đây cho từng thành viên:
 
+### Lương Khánh Toàn — 2A202602836
+
+- **Vai trò/phần việc được nhận:** C (Eval & Red-Team Engineer).
+- **Những gì tôi đã thay đổi trong repo chung:**
+  + Thiết kế và hiện thực hóa đầy đủ 10 test cases (`G01` → `G10`) trong `starter_v0/data/eval_group.json`, gồm 5 single-turn và 5 multi-turn, bao phủ toàn diện các ranh giới: ambiguous intent, missing identifier, specific argument extraction, format-only request, external data boundary protection, multi-turn correction, cancellation, multiple assets, stale confirmation và clarification follow-up.
+  + Kiểm thử và đánh giá 12 kịch bản tấn công đối kháng trong `starter_v0/data/eval_adversarial.json`.
+  + Trực tiếp phân tích 3 ca tấn công trọng điểm (`A03`, `A05`, `A06`) cho mục B4a, trả lời 4 câu hỏi kiểm định an toàn tại mục B6, và thực hiện kiểm toán thủ công rò rỉ dữ liệu cùng hệ thống file trong `tickets/`.
+- **File hoặc artifact liên quan:**
+  + `starter_v0/data/eval_group.json`
+  + `starter_v0/artifacts/REPORT.md` (Mục B3, B4a, B6, C2)
+- **Commit hash hoặc pull request:** Commit `831af8e`, `aed8602` (Branch `contrib/LuongToan12`, PR: `https://github.com/tuanfptu/K4-Day04-2A202602982-HaManhTuan/pull/new/contrib/LuongToan12`)
+- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:** Tôi quyết định thiết kế các ca kiểm thử mang tính thử thách phân nhánh rõ rệt (như case `G05` cố tình nhồi IP nội bộ và vị trí phòng ban để kiểm tra khả năng lọc sạch dữ liệu trước khi search web; case `G09` bẫy xác nhận cũ khi người dùng thay đổi thiết bị mục tiêu) thay vì chỉ viết các case đơn giản. Điều này giúp cả nhóm đo lường chính xác ranh giới an toàn thực tế của Agent.
+- **Khó khăn tôi gặp và cách tôi xử lý:** Đảm bảo toàn bộ cấu trúc arguments, cú pháp multi-turn và các trường `failure_type` phải khớp tuyệt đối với engine kiểm thử tự động của `run_eval.py`. Tôi đã chạy script thẩm định dữ liệu (validation script) độc lập trước khi commit để đảm bảo không gây lỗi khi chạy eval tự động.
+- **Điều tôi học được từ phần việc này:** Hiểu rõ bản chất của phương pháp "Evidence-Driven Development" và "Prompt as Code". Đánh giá một Agent không thể dựa vào cảm tính mà phải đo lường định lượng qua Routing Accuracy, Argument Accuracy và khả năng bảo vệ ranh giới dữ liệu khi bị tấn công đối kháng.
+- **Nếu làm lại, tôi sẽ cải thiện điều gì:** Nếu có thêm thời gian, tôi sẽ xây dựng thêm các kịch bản hội thoại multi-turn dài từ 4–5 turns với các luồng rẽ nhánh phức tạp hơn để kiểm tra hiện tượng trôi ngữ cảnh (context drift) của mô hình.
+
+---
+<!-- Mẫu sao chép cho các thành viên tiếp theo -->
 ### Họ tên — MSSV
 
 - **Vai trò/phần việc được nhận:**
