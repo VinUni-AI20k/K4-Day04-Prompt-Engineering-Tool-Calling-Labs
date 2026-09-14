@@ -174,21 +174,14 @@ Sao chép mẫu dưới đây cho từng thành viên:
 
 ### Bùi Hoàng Anh — 2A202602697
 
-- **Vai trò/phần việc được nhận:** Tool setup, prompt/tool contract, eval evidence và UI.
-- **Những gì tôi đã thay đổi trong repo chung:** Đồng bộ 9 tool, thêm trust boundary,
-      hoàn thiện prompt routing, thêm 10 team cases, tạo Streamlit UI và cập nhật report.
-- **File hoặc artifact liên quan:** `artifacts/system_prompt.md`, `artifacts/tools.yaml`,
-      `tools/*/TOOL.md`, `data/eval_group.json`, `app.py`, `artifacts/version_log.csv`.
-- **Commit hash hoặc pull request:** Commit trên branch `hoanganh` sẽ được cập nhật sau khi push.
-- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:** Dùng `clarify` bắt buộc cho
-      missing-info và confirmation để evaluator quan sát được boundary, thay vì chỉ viết
-      câu hỏi trong final reply.
-- **Khó khăn tôi gặp và cách tôi xử lý:** Gemini giới hạn request/phút gây provider
-      error; tôi tách focused eval, ghi rõ partial evidence và không tính quota error là pass.
-- **Điều tôi học được:** Tool name đúng chưa đủ; schema, argument enum, prompt và
-      confirmation semantics cùng quyết định routing behavior.
-- **Nếu làm lại, tôi sẽ cải thiện điều gì:** Chạy Group/Extension/Adversarial bằng
-      provider có quota ổn định và lưu transcript live cho từng scenario.
+- **Mảng phụ trách:** Phát triển Ứng dụng (UI), Luồng tương tác (Routing Logic) và Dữ liệu kiểm thử.
+- **Vai trò/phần việc được nhận:** Xây dựng giao diện UI, thiết kế cơ chế routing/confirmation cho tool và tạo bộ dữ liệu đánh giá (eval evidence).
+- **Những gì tôi đã thay đổi trong repo chung:** Phát triển giao diện Streamlit, thiết lập ranh giới tin cậy (trust boundary) trong luồng gọi tool, tạo 10 team cases và cập nhật báo cáo version.
+- **File hoặc artifact liên quan:** `app.py`, `data/eval_group.json`, `artifacts/version_log.csv`, `tools/*/TOOL.md`.
+- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:** Ép buộc hệ thống sử dụng tool `clarify` cho các trường hợp thiếu thông tin (missing-info) và xác nhận (confirmation) thay vì chỉ sinh text trả lời. Lý do là giúp evaluator dễ dàng quan sát và đánh giá chính xác behavior của ranh giới tin cậy (trust boundary).
+- **Khó khăn tôi gặp và cách tôi xử lý:** Thiết kế cơ chế để LLM nhận diện chính xác lúc nào cần gọi tool bổ sung. Tôi xử lý bằng cách phân tách rõ ràng luồng state tracking và tinh chỉnh lại ngữ nghĩa xác nhận của tool.
+- **Điều tôi học được:** Tên tool đúng là chưa đủ; cấu trúc schema, argument enum và ngữ nghĩa xác nhận (confirmation semantics) mới là yếu tố quyết định hành vi routing của LLM.
+- **Nếu làm lại, tôi sẽ cải thiện điều gì:** Triển khai thêm tính năng lưu transcript live cho từng kịch bản (scenario) để dễ dàng debug các case Adversarial/Extension.
 
 Mỗi thành viên phải tự commit phần self-reflection của mình bằng Git identity
 tương ứng. Reflection phải dẫn đến contribution artifact/commit đã nêu ở trên,
