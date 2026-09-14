@@ -116,3 +116,17 @@ Còn lại sau v3:
 
 Số ticket thật bị ghi khi chạy suite: v0 = 6, v2 adversarial = 1, v3 base = 0,
 v3 adversarial = 1 (A11). Thư mục `tickets/` được xoá trước mỗi run và không commit.
+
+## Team eval (group suite) trên v3
+
+`runs/v3_B_group_openai_20260914T195901036502.json` — 10/10 measured, 0 provider error,
+case_accuracy 0.90, 0 ticket ghi. Fail duy nhất: G01 (VPN "không vào được" — model mặc định
+`check_service_status` thay vì `clarify` choice service/device). Đây là failure mode base suite
+không có; ghi vào B3 và B7.
+
+## Ghi chú kỹ thuật: hash artifact và CRLF
+
+Trên Windows với `core.autocrlf=true`, `system_prompt.md`/`tools.yaml` được checkout thành CRLF
+→ hash thành `p13855201a683`/`t3a094ea16a06` dù nội dung không đổi (thấy trong transcripts UI
+của thành viên 4). Đã thêm `.gitattributes` (`eol=lf`) ở root để mọi máy checkout cùng bytes;
+hash chuẩn trong `version_log.csv` là `p113d255554a0`/`t54500e7b08c6` (blob trong git).
