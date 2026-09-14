@@ -2,9 +2,14 @@
 
 ## Team
 
-- Team:
+- Team: Octocat
 - Members:
-- Provider/model:
+  1. Trần Phạm Thái Vũ (2A202602695) - Nhóm trưởng
+  2. Nguyễn Tiến Tuân (2A202602595)
+  3. Võ Minh Quân (2A202602429)
+  4. Vũ Duy Điệp (2A202602703)
+  5. Võ Phú Hãn (2A202602628)
+- Provider/model: Gemini
 
 # PHẦN A — Giới thiệu agent
 
@@ -133,13 +138,55 @@ repository chung. Không viết thay hoặc gộp nhiều thành viên vào mộ
 Mỗi reflection cần trỏ đến file, commit hoặc pull request có thật để người đọc
 có thể đối chiếu đóng góp.
 
-Sao chép mẫu dưới đây cho từng thành viên:
+### 1. Trần Phạm Thái Vũ — 2A202602695 (Nhóm trưởng)
 
-### Họ tên — MSSV
-
-- **Vai trò/phần việc được nhận:**
+- **Vai trò/phần việc được nhận:** Nhóm trưởng (Team Lead) — Quản trị dự án & Git Release Manager, Phụ trách `system_prompt.md`, Quản lý `version_log.csv` & Báo cáo tổng thể
 - **Những gì tôi đã thay đổi trong repo chung:**
-- **File hoặc artifact liên quan:**
+- **File hoặc artifact liên quan:** `TEAMMATES.md`, `starter_v0/artifacts/system_prompt.md`, `starter_v0/artifacts/version_log.csv`, `starter_v0/artifacts/REPORT.md`
+- **Commit hash hoặc pull request:**
+- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:**
+- **Khó khăn tôi gặp và cách tôi xử lý:**
+- **Điều tôi học được từ phần việc này:**
+- **Nếu làm lại, tôi sẽ cải thiện điều gì:**
+
+### 2. Nguyễn Tiến Tuân — 2A202602595
+
+- **Vai trò/phần việc được nhận:** Tool Calling & Schema Engineer — Phụ trách `tools.yaml`, Ranh giới dữ liệu & Smoke test các tool local, Báo cáo A2, B7
+- **Những gì tôi đã thay đổi trong repo chung:**
+- **File hoặc artifact liên quan:** `starter_v0/artifacts/tools.yaml`, `starter_v0/tools/__init__.py`, `starter_v0/artifacts/REPORT.md`
+- **Commit hash hoặc pull request:**
+- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:**
+- **Khó khăn tôi gặp và cách tôi xử lý:**
+- **Điều tôi học được từ phần việc này:**
+- **Nếu làm lại, tôi sẽ cải thiện điều gì:**
+
+### 3. Võ Minh Quân — 2A202602429
+
+- **Vai trò/phần việc được nhận:** Evaluation & Benchmarking Lead — Đo lường & vận hành `run_eval.py`, Thiết kế 10 test cases trong `eval_group.json`, Báo cáo B1, B2, B3
+- **Những gì tôi đã thay đổi trong repo chung:**
+- **File hoặc artifact liên quan:** `starter_v0/data/eval_group.json`, `starter_v0/runs/*.json`, `starter_v0/artifacts/REPORT.md`
+- **Commit hash hoặc pull request:**
+- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:**
+- **Khó khăn tôi gặp và cách tôi xử lý:**
+- **Điều tôi học được từ phần việc này:**
+- **Nếu làm lại, tôi sẽ cải thiện điều gì:**
+
+### 4. Vũ Duy Điệp — 2A202602703
+
+- **Vai trò/phần việc được nhận:** Security, Safety & Red-teaming Specialist — Chạy bộ test `eval_adversarial.json`, Manual review 3 security cases & kiểm tra filesystem, Báo cáo B4a, B6
+- **Những gì tôi đã thay đổi trong repo chung:**
+- **File hoặc artifact liên quan:** `starter_v0/data/eval_adversarial.json`, `starter_v0/tickets/`, `starter_v0/artifacts/REPORT.md`
+- **Commit hash hoặc pull request:**
+- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:**
+- **Khó khăn tôi gặp và cách tôi xử lý:**
+- **Điều tôi học được từ phần việc này:**
+- **Nếu làm lại, tôi sẽ cải thiện điều gì:**
+
+### 5. Võ Phú Hãn — 2A202602628
+
+- **Vai trò/phần việc được nhận:** UI/UX & Live Demonstration Lead — Phát triển Streamlit UI (`app.py`), Thu thập 4 file transcript live chat, Kịch bản demo & Hỗ trợ Bonus tool
+- **Những gì tôi đã thay đổi trong repo chung:**
+- **File hoặc artifact liên quan:** `starter_v0/app.py`, `starter_v0/transcripts/*.json`, `starter_v0/artifacts/REPORT.md`
 - **Commit hash hoặc pull request:**
 - **Một quyết định kỹ thuật tôi đã đưa ra và lý do:**
 - **Khó khăn tôi gặp và cách tôi xử lý:**
@@ -167,4 +214,4 @@ repository chung:
 
 **URL repository chung dùng để nộp:**
 
-> URL:
+> URL: https://github.com/elysszxje/K4A-Day04-Octocat
