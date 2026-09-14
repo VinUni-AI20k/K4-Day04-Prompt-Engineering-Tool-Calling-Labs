@@ -2,7 +2,7 @@
 
 ## Team
 
-- Team:
+- Team: SV
 - Members:
 - Provider/model:
 
@@ -14,7 +14,7 @@
 
 **Link dùng thử:**
 
-> URL:
+> URL: 
 
 ## A2. Tool agent có
 
@@ -135,7 +135,67 @@ có thể đối chiếu đóng góp.
 
 Sao chép mẫu dưới đây cho từng thành viên:
 
-### Họ tên — MSSV
+### Họ tên 1 — MSSV
+
+- **Vai trò/phần việc được nhận:**
+- **Những gì tôi đã thay đổi trong repo chung:**
+- **File hoặc artifact liên quan:**
+- **Commit hash hoặc pull request:**
+- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:**
+- **Khó khăn tôi gặp và cách tôi xử lý:**
+- **Điều tôi học được từ phần việc này:**
+- **Nếu làm lại, tôi sẽ cải thiện điều gì:**
+
+Mỗi thành viên phải tự commit phần self-reflection của mình bằng Git identity
+tương ứng. Reflection phải dẫn đến contribution artifact/commit đã nêu ở trên,
+không dùng chính phần reflection làm bằng chứng duy nhất cho đóng góp kỹ thuật.
+
+### Họ tên 2 — MSSV
+
+- **Vai trò/phần việc được nhận:**
+- **Những gì tôi đã thay đổi trong repo chung:**
+- **File hoặc artifact liên quan:**
+- **Commit hash hoặc pull request:**
+- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:**
+- **Khó khăn tôi gặp và cách tôi xử lý:**
+- **Điều tôi học được từ phần việc này:**
+- **Nếu làm lại, tôi sẽ cải thiện điều gì:**
+
+Mỗi thành viên phải tự commit phần self-reflection của mình bằng Git identity
+tương ứng. Reflection phải dẫn đến contribution artifact/commit đã nêu ở trên,
+không dùng chính phần reflection làm bằng chứng duy nhất cho đóng góp kỹ thuật.
+
+### Họ tên 3 — MSSV
+
+- **Vai trò/phần việc được nhận:**
+- **Những gì tôi đã thay đổi trong repo chung:**
+- **File hoặc artifact liên quan:**
+- **Commit hash hoặc pull request:**
+- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:**
+- **Khó khăn tôi gặp và cách tôi xử lý:**
+- **Điều tôi học được từ phần việc này:**
+- **Nếu làm lại, tôi sẽ cải thiện điều gì:**
+
+Mỗi thành viên phải tự commit phần self-reflection của mình bằng Git identity
+tương ứng. Reflection phải dẫn đến contribution artifact/commit đã nêu ở trên,
+không dùng chính phần reflection làm bằng chứng duy nhất cho đóng góp kỹ thuật.
+
+### Họ tên 4 — MSSV
+
+- **Vai trò/phần việc được nhận:**
+- **Những gì tôi đã thay đổi trong repo chung:**
+- **File hoặc artifact liên quan:**
+- **Commit hash hoặc pull request:**
+- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:**
+- **Khó khăn tôi gặp và cách tôi xử lý:**
+- **Điều tôi học được từ phần việc này:**
+- **Nếu làm lại, tôi sẽ cải thiện điều gì:**
+
+Mỗi thành viên phải tự commit phần self-reflection của mình bằng Git identity
+tương ứng. Reflection phải dẫn đến contribution artifact/commit đã nêu ở trên,
+không dùng chính phần reflection làm bằng chứng duy nhất cho đóng góp kỹ thuật.
+
+### Họ tên 5 — MSSV
 
 - **Vai trò/phần việc được nhận:**
 - **Những gì tôi đã thay đổi trong repo chung:**
@@ -167,4 +227,4 @@ repository chung:
 
 **URL repository chung dùng để nộp:**
 
-> URL:
+> URL: https://github.com/khanhtrankuri/K4A-Day04-SV 
