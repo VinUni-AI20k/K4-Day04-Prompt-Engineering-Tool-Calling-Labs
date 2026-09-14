@@ -1,1 +1,3 @@
 version,author,changed_artifact,artifact_version,prompt_hash,tools_hash,reason,hypothesis,metric_name,metric_before,metric_after,run_file
+v0,Role C (thanhnvhust514),baseline,v0+p27467914bc4d+t86e19195220e,27467914bc4d,86e19195220e,baseline,Thiết lập baseline chưa tối ưu làm mốc so sánh cho cả nhóm,case_accuracy,,0.7000,runs/v0_B_base_openai_20260914T192749735306.json
+v2,Role B (dungna),artifacts/tools.yaml,v2+p27467914bc4d+tb1ecdb76fac0,27467914bc4d,b1ecdb76fac0,tool_contracts,"Nếu descriptions/schema nêu rõ capability ownership, argument semantics, multi-call và safety boundaries thì routing/argument accuracy sẽ tăng mà không có provider error.",case_accuracy,0.7000,0.9000,runs/v2_B_base_openai_20260914T193748932332.json
