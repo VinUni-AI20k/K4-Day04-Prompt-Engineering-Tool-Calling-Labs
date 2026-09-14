@@ -3,6 +3,7 @@ from providers.openrouter_provider import OpenRouterProvider
 from providers.anthropic_provider import AnthropicProvider
 from providers.gemini_provider import GeminiProvider
 from providers.groq_provider import GroqProvider
+from providers.ninerouter_provider import NineRouterProvider
 
 
 def make_provider(name: str):
@@ -16,4 +17,6 @@ def make_provider(name: str):
         return GeminiProvider()
     if name == "groq":
         return GroqProvider()
+    if name == "9router":
+        return NineRouterProvider()
     raise ValueError(f"Unknown provider: {name}")
