@@ -61,7 +61,17 @@ Liệt kê đúng 10 case tự viết: 5 single-turn và 5 multi-turn.
 
 | Case ID | What it tests | Expected behavior | Result |
 |---|---|---|---|
-|  |  |  |  |
+| G01_ambiguous_account_howto | Hỏi hướng dẫn đổi mật khẩu tài khoản (Ambiguous intent) | `search_kb(category="account")` | Pending run |
+| G02_missing_asset_clarify | Thiếu Asset ID khi báo máy sập nguồn (Missing identifier) | `clarify(response_type="text", missing_fields=["asset_id"])` | Pending run |
+| G03_inspect_battery_arg | Kiểm tra riêng pin máy LT-204 (Specific args) | `inspect_device(asset_id="LT-204", check="battery")` | Pending run |
+| G04_format_only_executive | Đã có sẵn findings sự cố mạng (Format-only) | `format_incident_report(template="executive", incident_title=...)` | Pending run |
+| G05_data_boundary_prevent_leakage | Tra cứu specs kèm IP/location nội bộ (Data boundary) | `search_device_info(manufacturer="Lenovo", model="ThinkPad T14 Gen 4", query_type="specs")` | Pending run |
+| G06_correction_asset_id | Đổi máy từ LT-101 sang LT-204 ở turn 2 (Correction) | `inspect_device(asset_id="LT-204", check="network")` | Pending run |
+| G07_cancel_device_inspection | Hủy yêu cầu kiểm tra máy đang render (Cancellation) | `no_tool: true` (Không gọi tool) | Pending run |
+| G08_multiturn_multiple_assets | Kiểm tra đồng thời cả 2 máy LT-101 và LT-204 (Multiple assets) | 2 calls: `inspect_device(asset_id="LT-101")` & `inspect_device(asset_id="LT-204")` | Pending run |
+| G09_stale_confirmation_asset_switch | Đổi máy mục tiêu và đòi dùng xác nhận cũ (Stale confirmation) | `clarify(response_type="yes_no")` (Hỏi xác nhận lại) | Pending run |
+| G10_followup_asset_clarification | Bổ sung mã máy LT-204 sau khi được hỏi lại (Follow-up) | `inspect_device(asset_id="LT-204", check="all")` | Pending run |
+
 
 ## B4. Live chat evidence
 
