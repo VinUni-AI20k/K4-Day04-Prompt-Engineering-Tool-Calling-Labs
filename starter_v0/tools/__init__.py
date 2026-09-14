@@ -14,6 +14,8 @@ from .lookup_user.tool import lookup_user
 from .policy.tool import search_company_policy
 from .search_kb.tool import search_kb
 from .search_device_info.tool import search_device_info
+from .lookup_ticket.tool import lookup_ticket
+from .check_software_catalog.tool import check_software_catalog
 
 
 # NOTE (starter_v0): these keys are the names the model sees AND the names
@@ -31,6 +33,8 @@ TOOL_FUNCTIONS = {
     "format_incident_report": format_incident_report,
     "policy": search_company_policy,
     "create_ticket": create_ticket,
+    "lookup_ticket": lookup_ticket,
+    "check_software_catalog": check_software_catalog,
 }
 
 

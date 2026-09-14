@@ -30,3 +30,11 @@ Chỉ action tool mới dùng `requires_confirmation`. Nếu nhóm chọn làm b
 tool đó phải dùng dữ liệu giả lập, output JSON ổn định, có lỗi rõ ràng cho input
 không tồn tại và có smoke test. Không thêm dữ liệu thật, credential hoặc thông
 tin cá nhân.
+
+## Registered Tools
+- Core tools: `clarify`, `search_kb`, `check_service_status`, `inspect_device`, `lookup_user`, `format_incident_report`
+- Advanced built-in: `policy`, `create_ticket`, `search_device_info`
+- Team Bonus tools:
+  - `lookup_ticket`: Tra cứu chi tiết và trạng thái ticket (mock records & local session tickets).
+  - `check_software_catalog`: Tra cứu danh mục phần mềm được duyệt, cần phê duyệt và bị cấm.
+

@@ -32,7 +32,9 @@
 | search_device_info | Tìm kiếm thông tin công khai (specs, drivers, compatibility) của model thiết bị trên web | optional built-in |
 | policy | Tra cứu quy định, chính sách IT nội bộ theo policy_area | optional built-in |
 | create_ticket | Tạo ticket hỗ trợ sự cố trên hệ thống Helpdesk khi đã được xác nhận | optional built-in |
-|  |  |  |
+| lookup_ticket | Tra cứu trạng thái, tiến độ và thông tin chi tiết của ticket hỗ trợ theo ticket_id | team-built bonus |
+| check_software_catalog | Tra cứu danh mục phần mềm được phê duyệt, cần duyệt hoặc bị cấm theo chính sách công ty | team-built bonus |
+
 
 ## A3. Câu hỏi mẫu
 
@@ -63,6 +65,7 @@ total_cases`, và tool result error đã được review thủ công.
 | v1 | Thêm core routing rules & safety boundaries trong system_prompt.md | Định hướng công cụ cốt lõi sẽ giảm sai sót sai tool routing | case_accuracy | 0.7778 | 0.8000 | runs/v1_B_base_gemini_20260914T191837462859.json |
 | v2 | Cập nhật required: [question, response_type] trong tools.yaml & làm rõ boundary | Bắt buộc tham số response_type trong schema giúp loại bỏ lỗi missing_info | case_accuracy | 0.8000 | 0.9630 | runs/v2_B_base_gemini_20260914T192800458124.json |
 | v3 | Bổ sung required: [query, policy_area] cho policy, hoàn thiện ranh giới pseudo-code, payload revision và 3-source triage | Bắt buộc policy_area và chuẩn hóa quy tắc xác nhận giúp đạt độ chính xác tuyệt đối trên cả 4 bộ test | case_accuracy | 0.9630 | 1.0000 | runs/v1_B_base_gemini_20260915T003406590299.json |
+| v4 | Tích hợp 2 bonus tools (`lookup_ticket`, `check_software_catalog`) vào tools.yaml, system_prompt.md và thêm bộ test data/eval_bonus.json | Mở rộng tính năng tra cứu ticket và danh mục phần mềm công ty với 100% độ chính xác routing/argument | case_accuracy | 1.0000 | 1.0000 | runs/v4_B_bonus_gemini_20260915T043121045224.json |
 
 ## B2. Failure analysis
 
@@ -128,7 +131,19 @@ nhóm tự xây.
 |---|---|---|---|
 | Optional built-in | data/eval_helpdesk_extension.json (E01-E04, E06) | Route chính xác theo 6 danh mục policy_area (access_control, data_privacy, external_tools, incident_response, service_operations, ticketing). | Thêm policy_area vào required trong tools.yaml để đảm bảo tham số không bị rỗng. |
 | External search + privacy boundary | data/eval_helpdesk_extension.json (E09, E10), data/eval_adversarial.json (A06) | Đã bóc tách thông tin công khai (manufacturer, model) để tìm kiếm specs/drivers trên web. | Nghiêm cấm đưa asset_id, employee_id, vị trí hoặc log chẩn đoán nội bộ vào tham số tìm kiếm ngoài. |
-| Bonus: tool mới do nhóm tự xây | N/A | Dùng các optional tool built-in có sẵn trong hệ thống | Phân định ranh giới an toàn cho tất cả công cụ |
+| Bonus: tool mới do nhóm tự xây | `tests/test_tools.py`, `data/eval_bonus.json`, `runs/v4_B_bonus_gemini_20260915T043121045224.json` | Triển khai hoàn chỉnh 2 bonus tools: `lookup_ticket` (tra cứu trạng thái ticket) và `check_software_catalog` (tra cứu catalog phần mềm). Đạt 17/17 automated unit tests và 4/4 LLM Eval cases (100% accuracy). | Hoàn toàn read-only (`side_effect: false`); validate chặt chẽ format `ticket_id`, chống path traversal, phân định rõ ràng với `create_ticket` và `search_device_info`. |
+
+### Chi tiết các test cases đánh giá bonus tools (`data/eval_bonus.json`):
+
+| Case ID | Type | Query / Flow | Tool Call & Arguments kỳ vọng | Kết quả Eval |
+|---|---|---|---|---|
+| `B01_lookup_ticket_status` | Single-turn | "Kiểm tra tiến độ và trạng thái của ticket LAB-B4A1C802 giúp tôi." | `lookup_ticket(ticket_id="LAB-B4A1C802")` | **PASS** |
+| `B02_software_catalog_platform` | Single-turn | "Kiểm tra xem Docker Desktop có được phép cài đặt trên laptop macOS của công ty không?" | `check_software_catalog(software_name="Docker Desktop", platform="macos")` | **PASS** |
+| `B03_software_catalog_compliance` | Single-turn | "Phần mềm BitTorrent có được phép sử dụng trong mạng nội bộ công ty không?" | `check_software_catalog(software_name="BitTorrent")` | **PASS** |
+| `B04_multiturn_ticket_tracking` | Multi-turn | 3 lượt hội thoại hỏi tiến độ sự cố mạng, cung cấp mã INC-1002 và yêu cầu tra cứu người phụ trách | `lookup_ticket(ticket_id="INC-1002")` | **PASS** |
+
+*Run evidence file*: `starter_v0/runs/v4_B_bonus_gemini_20260915T043121045224.json` (Total: 4, Passed: 4, Accuracy: 1.0, Provider Errors: 0).
+
 
 ## B6. Safety review
 

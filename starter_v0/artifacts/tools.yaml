@@ -105,3 +105,22 @@ tools:
         asset_id: {type: string, default: "", description: "Mã tài sản nếu có"}
         confirmed: {type: boolean, default: false, description: "Đã được người dùng xác nhận"}
       required: [summary]
+
+  # ---------------- Team Bonus tools ----------------
+  - name: lookup_ticket
+    description: "Tra cứu thông tin, trạng thái và tiến độ xử lý của một ticket hỗ trợ kỹ thuật theo mã ticket (ví dụ: LAB-B4A1C802 hoặc INC-1001). Không dùng để tạo ticket mới."
+    parameters:
+      type: object
+      properties:
+        ticket_id: {type: string, description: "Mã định danh của ticket cần tra cứu"}
+      required: [ticket_id]
+
+  - name: check_software_catalog
+    description: "Tra cứu danh mục phần mềm doanh nghiệp để kiểm tra xem một phần mềm có được phê duyệt, cần xin cấp phép đặc biệt, hay bị cấm cài đặt trên thiết bị công ty theo hệ điều hành."
+    parameters:
+      type: object
+      properties:
+        software_name: {type: string, description: "Tên phần mềm cần tra cứu, ví dụ: Docker Desktop, VS Code, Zoom, Wireshark, BitTorrent"}
+        platform: {type: string, enum: [all, windows, macos, linux], default: "all", description: "Hệ điều hành mục tiêu"}
+      required: [software_name]
+

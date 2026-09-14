@@ -1,0 +1,105 @@
+{
+  "snapshot_at": "2026-09-14T09:00:00+07:00",
+  "software": [
+    {
+      "name": "Docker Desktop",
+      "aliases": ["docker", "docker desktop", "container"],
+      "status": "approved",
+      "category": "development",
+      "license_type": "Enterprise Subscription required",
+      "platforms": ["windows", "macos", "linux"],
+      "install_source": "Company Portal / Self-Service (tag: dev-tools)",
+      "notes": "Requires company enterprise license assigned via IT portal before first sign-in."
+    },
+    {
+      "name": "Visual Studio Code",
+      "aliases": ["vscode", "vs code", "visual studio code"],
+      "status": "approved",
+      "category": "development",
+      "license_type": "Free / MIT",
+      "platforms": ["windows", "macos", "linux"],
+      "install_source": "Company Portal / Self-Service",
+      "notes": "Pre-approved for all technical staff. Extensions must comply with SEC-P03."
+    },
+    {
+      "name": "Zoom",
+      "aliases": ["zoom", "zoom client", "zoom meetings"],
+      "status": "approved",
+      "category": "collaboration",
+      "license_type": "Enterprise SSO",
+      "platforms": ["windows", "macos", "linux"],
+      "install_source": "Pre-installed / Company Portal",
+      "notes": "Sign in using corporate SSO only. Recording requires host consent."
+    },
+    {
+      "name": "Slack",
+      "aliases": ["slack", "slack app"],
+      "status": "approved",
+      "category": "collaboration",
+      "license_type": "Enterprise Grid",
+      "platforms": ["windows", "macos", "linux"],
+      "install_source": "Pre-installed / Company Portal",
+      "notes": "Standard communication platform. External channels subject to data sharing policy."
+    },
+    {
+      "name": "Postman",
+      "aliases": ["postman", "postman client"],
+      "status": "approved",
+      "category": "development",
+      "license_type": "Free Tier / Enterprise License on request",
+      "platforms": ["windows", "macos", "linux"],
+      "install_source": "Company Portal / Self-Service",
+      "notes": "Approved for API development. Storing production tokens or credentials in sync workspaces is strictly prohibited."
+    },
+    {
+      "name": "Google Chrome",
+      "aliases": ["chrome", "google chrome"],
+      "status": "approved",
+      "category": "browser",
+      "license_type": "Enterprise Managed",
+      "platforms": ["windows", "macos", "linux"],
+      "install_source": "Pre-installed",
+      "notes": "Default corporate browser. Extensions managed centrally via Google Admin."
+    },
+    {
+      "name": "Wireshark",
+      "aliases": ["wireshark", "packet analyzer"],
+      "status": "requires_approval",
+      "category": "network",
+      "license_type": "Open Source / GPL",
+      "platforms": ["windows", "macos", "linux"],
+      "install_source": "Requires Security Team Approval Ticket",
+      "notes": "Packet sniffing capability poses internal security risk. Requires manager sign-off and explicit business justification."
+    },
+    {
+      "name": "DBeaver Enterprise",
+      "aliases": ["dbeaver", "dbeaver enterprise", "sql client"],
+      "status": "requires_approval",
+      "category": "database",
+      "license_type": "Commercial Paid License",
+      "platforms": ["windows", "macos", "linux"],
+      "install_source": "Requires Department Budget & Manager Approval Ticket",
+      "notes": "Community edition is not permitted on enterprise database servers."
+    },
+    {
+      "name": "BitTorrent",
+      "aliases": ["bittorrent", "torrent", "utorrent", "qbittorrent"],
+      "status": "prohibited",
+      "category": "p2p_sharing",
+      "license_type": "Prohibited",
+      "platforms": ["windows", "macos", "linux"],
+      "install_source": "Blocked by IT Security Policy (SEC-P04)",
+      "notes": "P2P file sharing software is strictly prohibited on all company-owned devices due to copyright and malware risks."
+    },
+    {
+      "name": "Tor Browser",
+      "aliases": ["tor", "tor browser", "onion browser"],
+      "status": "prohibited",
+      "category": "anonymizer",
+      "license_type": "Prohibited",
+      "platforms": ["windows", "macos", "linux"],
+      "install_source": "Blocked by IT Security Policy (SEC-P04)",
+      "notes": "Darknet and anonymizing proxy browsers bypass perimeter network defenses and are strictly banned."
+    }
+  ]
+}

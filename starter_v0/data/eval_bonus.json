@@ -1,0 +1,101 @@
+{
+  "dataset_id": "day04_v3_helpdesk_bonus",
+  "dataset_role": "extension",
+  "description": "Evaluation cases for bonus tools: lookup_ticket and check_software_catalog (single-turn and multi-turn).",
+  "allowed_failure_types": ["wrong_tool", "wrong_arg_value", "wrong_boundary", "unnecessary_tool", "out_of_scope", "missing_info"],
+  "cases": [
+    {
+      "id": "B01_lookup_ticket_status",
+      "phase": "B",
+      "suite": "extension",
+      "query": "Kiểm tra tiến độ và trạng thái của ticket LAB-B4A1C802 giúp tôi.",
+      "failure_type": "wrong_tool",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "lookup_ticket",
+            "args": {
+              "ticket_id": "LAB-B4A1C802"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "ticket_lookup",
+        "difficulty": "easy",
+        "what_it_tests": "Tra cứu mã ticket cụ thể phải dùng lookup_ticket thay vì tạo ticket mới hay inspect device."
+      }
+    },
+    {
+      "id": "B02_software_catalog_platform",
+      "phase": "B",
+      "suite": "extension",
+      "query": "Kiểm tra xem Docker Desktop có được phép cài đặt trên laptop macOS của công ty không?",
+      "failure_type": "wrong_arg_value",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "check_software_catalog",
+            "args": {
+              "software_name": "Docker Desktop",
+              "platform": "macos"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "software_catalog_lookup",
+        "difficulty": "medium",
+        "what_it_tests": "Kiểm tra chính sách danh mục phần mềm được phép cài đặt kèm theo platform chỉ định."
+      }
+    },
+    {
+      "id": "B03_software_catalog_compliance",
+      "phase": "B",
+      "suite": "extension",
+      "query": "Phần mềm BitTorrent có được phép sử dụng trong mạng nội bộ công ty không?",
+      "failure_type": "wrong_tool",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "check_software_catalog",
+            "args": {
+              "software_name": "BitTorrent"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "software_compliance_check",
+        "difficulty": "easy",
+        "what_it_tests": "Hỏi về danh mục phần mềm được phê duyệt/bị cấm phải route sang check_software_catalog."
+      }
+    },
+    {
+      "id": "B04_multiturn_ticket_tracking",
+      "phase": "B",
+      "suite": "extension",
+      "turns": [
+        {"role": "user", "content": "Tôi muốn hỏi thăm tình trạng xử lý sự cố mạng hôm qua."},
+        {"role": "user", "content": "Mã ticket đã được IT cấp là INC-1002."},
+        {"role": "user", "content": "Tra cứu chi tiết xem ai đang phụ trách ticket INC-1002 này giúp tôi."}
+      ],
+      "failure_type": "wrong_tool",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "lookup_ticket",
+            "args": {
+              "ticket_id": "INC-1002"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "multiturn_ticket_tracking",
+        "difficulty": "hard",
+        "what_it_tests": "Sau khi người dùng làm rõ và cung cấp mã ticket ở các lượt sau, agent gọi đúng lookup_ticket với ticket_id tương ứng."
+      }
+    }
+  ]
+}
