@@ -15,7 +15,7 @@ tools:
         question: {type: string, default: "", description: "Câu hỏi"}
         response_type: {type: string, enum: [text, yes_no, choice], default: "text", description: "Kiểu trả lời"}
         options: {type: array, default: [], items: {type: string}, description: "Các lựa chọn"}
-      required: [question, response_type]
+      required: [question]
 
   - name: search_kb
     description: "Find technical instructions and troubleshooting articles in the local KB, not live service health or asset diagnostics."
@@ -33,8 +33,8 @@ tools:
       type: object
       properties:
         service: {type: string, enum: [vpn, email, sso, wifi, printing], description: "Tên dịch vụ"}
-        environment: {type: string, enum: [production, staging], description: "Môi trường đã rõ trong hội thoại. Nếu thiếu hoặc demo/QA mơ hồ: gọi clarify choice với options production, staging; không đoán."}
-      required: [service, environment]
+        environment: {type: string, enum: [production, staging], default: "production", description: "Môi trường"}
+      required: [service]
 
   - name: inspect_device
     description: "Read inventory and diagnostics for a specific asset, not employee account data, assigned-device lists or shared service health."

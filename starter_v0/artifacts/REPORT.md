@@ -1,9 +1,9 @@
 # Day 04 Lab v3 Report — IT Helpdesk Agent
 
-> Phạm vi hiện tại: **v1 — Routing**, xem [VERSION-SCOPE.md](VERSION-SCOPE.md).
-> V2 Arguments và V3 Context & Clarify chờ yêu cầu riêng. Các kết quả cũ trong
-> [V1-REVIEW.md](V1-REVIEW.md) thuộc bản trộn phạm vi, không phải điểm v1 Routing.
-> Bản routing hiện tại chưa chạy model eval; các mục v2/v3 bên dưới còn là template.
+> Đã lấy v2 từ main và triển khai **v3 — Context & Clarify** trên `phuc`.
+> Xem [VERSION-SCOPE.md](VERSION-SCOPE.md) và [V3-REVIEW.md](V3-REVIEW.md)
+> để biết phạm vi, kết quả và giới hạn. Các kết quả cũ trong V1-REVIEW.md
+> thuộc bản trộn phạm vi; các bảng template bên dưới chưa thay thế báo cáo v3 riêng.
 
 ## Team
 

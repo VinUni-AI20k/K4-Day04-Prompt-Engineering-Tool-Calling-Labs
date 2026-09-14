@@ -1,15 +1,16 @@
 # Phân nhóm phiên bản theo yêu cầu đã chốt
 
-Trạng thái hiện tại: chỉ thực hiện **v1 — Routing**. Chưa thực hiện v2/v3;
-chờ người dùng yêu cầu riêng. Case 6 và Case 7 trong danh sách ghi chú ban đầu
-thuộc bạn B, không chỉnh các phần đó.
+Trạng thái hiện tại: người dùng đã yêu cầu **v3 — Context & Clarify** trên nền
+v2 được merge vào `main` tại `08da03c`. Triển khai trên nhánh `phuc`, chỉ push
+`phuc`. Case 6 và Case 7 thuộc bạn B: giữ nguyên phần `inspect_device.check`
+và `search_kb.query` đã nhận từ main.
 
 | Phiên bản | Phạm vi | Case eval liên quan |
 |---|---|---|
 | v1 — Routing | Phân biệt shared service, asset diagnostic, hướng dẫn KB và directory; gọi đủ nguồn được yêu cầu | H01–H04; phần chọn tool của H13, H15–H18 |
 | v2 — Arguments | Chuẩn hóa và trích xuất check, category, environment; các tham số cụ thể | H05, H06; phần arguments của H03, H13, H15–H18 |
 | v3 — Context & Clarify | Thiếu ID/thông tin gọi clarify; carry-over, correction, cancellation; đổi template báo cáo | H07, H10, H11, H19, H20; M01–M10 |
-| Nhóm xác nhận/an toàn, để sau | Xác nhận action và payload thay đổi; chưa tối ưu trong v1 | H12, M05, M09; adversarial suite |
+| Xác nhận trong v3 | Xác nhận action và payload thay đổi | H12, M05, M09; adversarial là bộ kiểm tra an toàn riêng |
 | Kiểm tra hồi quy phạm vi | Ngoài helpdesk, câu hỏi về năng lực | H08, H09, H14 |
 
 Các case có nhiều khía cạnh được phân theo **loại lỗi**, không sửa tất cả hành
@@ -37,5 +38,11 @@ phải evidence cho v1 Routing**. Bảng log cũ được lưu riêng tại
 `evidence/v1/mixed-scope-version-log.csv`. Không dùng kết quả 30/30 cũ để báo
 điểm cho bản chỉ routing hiện tại.
 
-Schema hiện tại giữ nguyên toàn bộ parameters của baseline; chỉ sửa description
-của bốn tool routing. Prompt hiện tại chỉ thêm hướng dẫn phân định bốn tool.
+V1 chỉ sửa routing. V2 của bạn B đã bổ sung required check và bỏ required query.
+V3 bổ sung prompt về context, clarify và template; làm rõ description của
+clarify, status, create_ticket và format_incident_report. Schema v3 yêu cầu
+response_type để câu hỏi có kiểu rõ ràng; bỏ default production và yêu cầu
+environment để tránh dùng mặc định thay cho việc hỏi lại. Giữ nguyên tất cả
+enums và nguyên trạng các declaration inspect_device/search_kb từ v2.
+
+Điểm và giới hạn của v3 được ghi riêng trong [V3-REVIEW.md](V3-REVIEW.md).
