@@ -16,11 +16,11 @@ INSTRUCTOR-GUIDE.md
 starter/
 starter_v0/tests/
 
-# Local action/scratch output
+# Local action/scratch output — generated tickets must never be submitted
 /starter_v0/tickets/
-/starter_v0/runs/
-/starter_v0/transcripts/
 /starter_v0/analysis/
+
+# Run JSON and transcripts ARE required deliverables (README) — tracked intentionally.
 
 # OS / editor
 .DS_Store

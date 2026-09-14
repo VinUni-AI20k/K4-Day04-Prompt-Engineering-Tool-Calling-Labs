@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import json
 import os
+import re
+import time
 from typing import Any
 
 from providers.base import ModelResponse, ToolCall
@@ -106,11 +108,27 @@ class GeminiProvider:
             config_kwargs["tools"] = [types.Tool(function_declarations=declarations)]
 
         client = genai.Client(api_key=api_key)
-        resp = client.models.generate_content(
-            model=model or self.default_model,
-            contents=contents,
-            config=types.GenerateContentConfig(**config_kwargs),
-        )
+
+        # Free tier is quota-limited to a handful of requests per minute.
+        # Retry on 429 RESOURCE_EXHAUSTED, honoring the server's suggested
+        # retryDelay when present instead of guessing a backoff.
+        max_attempts = 4
+        for attempt in range(1, max_attempts + 1):
+            try:
+                resp = client.models.generate_content(
+                    model=model or self.default_model,
+                    contents=contents,
+                    config=types.GenerateContentConfig(**config_kwargs),
+                )
+                break
+            except Exception as exc:  # google.genai raises its own ClientError type
+                message = str(exc)
+                is_quota_error = "RESOURCE_EXHAUSTED" in message or "429" in message
+                if not is_quota_error or attempt == max_attempts:
+                    raise
+                match = re.search(r"retryDelay['\"]?:\s*['\"]?(\d+(?:\.\d+)?)s", message)
+                delay = float(match.group(1)) + 1.0 if match else 15.0
+                time.sleep(delay)
 
         text_parts: list[str] = []
         calls: list[ToolCall] = []

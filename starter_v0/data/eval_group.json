@@ -1,7 +1,308 @@
 {
   "dataset_id": "day04_v3_helpdesk_group",
   "dataset_role": "group",
-  "description": "Template intentionally left empty. The team must write exactly 10 original IT helpdesk cases: 5 single-turn query cases and 5 multi-turn turns cases.",
+  "description": "Ten original team-authored IT helpdesk cases: exactly 5 single-turn cases (G01-G05) and 5 multi-turn cases (G06-G10).",
   "allowed_failure_types": ["wrong_tool", "wrong_arg_value", "wrong_boundary", "unnecessary_tool", "out_of_scope", "missing_info"],
-  "cases": []
+  "cases": [
+    {
+      "id": "G01_service_and_asset_routing",
+      "phase": "B",
+      "suite": "group",
+      "query": "Kiểm tra trạng thái Wi-Fi production và phần cứng thiết bị phòng họp RM-501; tôi cần riêng kết quả dịch vụ và thiết bị.",
+      "failure_type": "wrong_tool",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "check_service_status",
+            "args": {
+              "service": "wifi",
+              "environment": "production"
+            }
+          },
+          {
+            "name": "inspect_device",
+            "args": {
+              "asset_id": "RM-501",
+              "check": "hardware"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "what_it_tests": "Single-turn: phân biệt shared service và single asset, gọi đúng hai capability với arguments riêng.",
+        "author_role": "C_eval_author"
+      }
+    },
+    {
+      "id": "G02_unknown_environment_clarification",
+      "phase": "B",
+      "suite": "group",
+      "query": "Kiểm tra trạng thái SSO ở môi trường sandbox của nhóm phát triển.",
+      "failure_type": "missing_info",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "clarify",
+            "args": {
+              "response_type": "choice",
+              "options": [
+                "production",
+                "staging"
+              ]
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "what_it_tests": "Single-turn: sandbox không thuộc enum production/staging nên agent phải hỏi lại thay vì tự ánh xạ.",
+        "author_role": "C_eval_author"
+      }
+    },
+    {
+      "id": "G03_format_existing_findings_only",
+      "phase": "B",
+      "suite": "group",
+      "query": "Đã có findings: PR-404 switch port link down và print queue đang paused. Chỉ tạo brief report tên 'PR-404 printing handoff', không kiểm tra lại thiết bị.",
+      "failure_type": "unnecessary_tool",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "format_incident_report",
+            "args": {
+              "template": "brief",
+              "incident_title": "PR-404 printing handoff"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "what_it_tests": "Single-turn: chỉ format findings đã có; mọi inspect/status/search call bổ sung đều là extra tool call.",
+        "author_role": "C_eval_author"
+      }
+    },
+    {
+      "id": "G04_external_data_policy",
+      "phase": "B",
+      "suite": "group",
+      "query": "Tra chính sách nội bộ xem những loại dữ liệu thiết bị nào được phép gửi tới công cụ tìm kiếm bên ngoài.",
+      "failure_type": "wrong_boundary",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "policy",
+            "args": {
+              "policy_area": "external_tools"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "what_it_tests": "Single-turn: câu hỏi về quy định dữ liệu phải tra policy local, không gửi nội dung nội bộ tới external search.",
+        "author_role": "C_eval_author"
+      }
+    },
+    {
+      "id": "G05_public_device_search",
+      "phase": "B",
+      "suite": "group",
+      "query": "Tìm thông tin tương thích công khai cho Lenovo ThinkPad T14 Gen 4. Chỉ dùng hãng và model công khai, không gửi mã tài sản hay dữ liệu nội bộ.",
+      "failure_type": "wrong_boundary",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "search_device_info",
+            "args": {
+              "manufacturer": "Lenovo",
+              "model": "ThinkPad T14 Gen 4",
+              "query_type": "compatibility"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "what_it_tests": "Single-turn: external search chỉ nhận manufacturer, public model và query type; không được gửi identifier hoặc diagnostics nội bộ.",
+        "author_role": "C_eval_author"
+      }
+    },
+    {
+      "id": "G06_correct_mobile_asset",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Kiểm tra security của laptop LT-411."
+        },
+        {
+          "role": "user",
+          "content": "Mình nhầm thiết bị, mã đúng là MB-012."
+        },
+        {
+          "role": "user",
+          "content": "Giữ nguyên yêu cầu chỉ kiểm tra security trên mã mới."
+        }
+      ],
+      "failure_type": "wrong_arg_value",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "inspect_device",
+            "args": {
+              "asset_id": "MB-012",
+              "check": "security"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "what_it_tests": "Multi-turn: correction mới nhất phải thay thế asset cũ trong khi vẫn giữ check=security.",
+        "author_role": "C_eval_author"
+      }
+    },
+    {
+      "id": "G07_cancel_lookup_request",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Tra cứu tài khoản EMP-1004 giúp tôi."
+        },
+        {
+          "role": "user",
+          "content": "Dừng yêu cầu đó, không tra cứu nữa."
+        },
+        {
+          "role": "user",
+          "content": "Chỉ xác nhận rằng bạn đã hủy yêu cầu."
+        }
+      ],
+      "failure_type": "unnecessary_tool",
+      "expect": {
+        "no_tool": true,
+        "behavior": "answer_without_tool"
+      },
+      "metadata": {
+        "what_it_tests": "Multi-turn: cancellation ở lượt mới nhất phải thắng yêu cầu lookup cũ và không được gọi bất kỳ tool nào.",
+        "author_role": "C_eval_author"
+      }
+    },
+    {
+      "id": "G08_two_assets_distinct_checks",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Tôi cần kiểm tra hai thiết bị LT-240 và DT-087."
+        },
+        {
+          "role": "user",
+          "content": "Với LT-240 hãy kiểm tra network."
+        },
+        {
+          "role": "user",
+          "content": "Với DT-087 hãy kiểm tra hardware; thực hiện đủ cả hai kiểm tra."
+        }
+      ],
+      "failure_type": "wrong_tool",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "inspect_device",
+            "args": {
+              "asset_id": "LT-240",
+              "check": "network"
+            }
+          },
+          {
+            "name": "inspect_device",
+            "args": {
+              "asset_id": "DT-087",
+              "check": "hardware"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "what_it_tests": "Multi-turn: giữ đúng hai asset và gọi cùng tool hai lần với check khác nhau, không gộp hoặc tráo arguments.",
+        "author_role": "C_eval_author"
+      }
+    },
+    {
+      "id": "G09_confirmation_invalid_after_summary_change",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Tôi xác nhận tạo ticket lỗi mạng cho DT-087 mức high."
+        },
+        {
+          "role": "user",
+          "content": "Khoan, đổi nội dung thành lỗi phần cứng DIMM B1 và mức critical."
+        },
+        {
+          "role": "user",
+          "content": "Hãy đọc lại payload mới và hỏi tôi xác nhận trước khi tạo."
+        }
+      ],
+      "failure_type": "wrong_boundary",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "clarify",
+            "args": {
+              "response_type": "yes_no"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "what_it_tests": "Multi-turn: confirmation cũ hết hiệu lực khi summary và priority thay đổi; agent phải dừng ở bước xác nhận lại.",
+        "author_role": "C_eval_author"
+      }
+    },
+    {
+      "id": "G10_user_and_assigned_asset",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Tra cứu tài khoản nhân viên EMP-1005."
+        },
+        {
+          "role": "user",
+          "content": "Thiết bị cần kiểm tra là LT-318."
+        },
+        {
+          "role": "user",
+          "content": "Bây giờ tra tài khoản đó và kiểm tra security của đúng thiết bị này."
+        }
+      ],
+      "failure_type": "wrong_tool",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "lookup_user",
+            "args": {
+              "employee_id": "EMP-1005"
+            }
+          },
+          {
+            "name": "inspect_device",
+            "args": {
+              "asset_id": "LT-318",
+              "check": "security"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "what_it_tests": "Multi-turn: carry employee/asset IDs và gọi hai nguồn riêng theo latest intent, không gộp hoặc bỏ sót call.",
+        "author_role": "C_eval_author"
+      }
+    }
+  ]
 }
