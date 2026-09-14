@@ -151,6 +151,24 @@ Sao chép mẫu dưới đây cho từng thành viên:
 - **Điều tôi học được từ phần việc này:**
 - **Nếu làm lại, tôi sẽ cải thiện điều gì:**
 
+### Đỗ Thanh Tùng — 2A202602845
+
+- **Vai trò/phần việc được nhận:** Test & Evaluation Designer (Thành viên 3) — thiết kế bộ eval riêng của nhóm và chạy suite `group`.
+
+- **Những gì tôi đã thay đổi trong repo chung:** Viết 10 test case original vào `eval_group.json` (5 single-turn + 5 multi-turn), chạy baseline `v0` và commit run evidence. Ngoài ra tổng hợp 4 vùng hành vi mà bộ `base` không kiểm tra và gửi cho Thành viên 1 làm input cho prompt v1–v3.
+
+- **File hoặc artifact liên quan:** `starter_v0/data/eval_group.json`; `starter_v0/runs/v0_B_group_openai_20260914T190322801149.json`
+
+- **Commit hash hoặc pull request:** `093781d` (10 test cases), `69a4534` (v0 run evidence) — branch `contrib/tungne1311`
+
+- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:** Trước khi chốt bộ đề, tôi đối chiếu từng expected answer với `company_policy/` và `helpdesk_data/`. Nhờ đó phát hiện một case tôi viết ban đầu hỏi về thời hạn phản hồi ticket mức `critical` — nội dung này không tồn tại trong corpus, và từ khóa `critical` lại nằm ở `incident-response-policy.md` chứ không phải `ticketing-policy.md`. Nếu giữ nguyên, case sẽ FAIL bất kể prompt tốt đến đâu, tức là đo nhiễu chứ không đo năng lực. Tôi viết lại thành câu hỏi về điều kiện bắt buộc trước khi tạo ticket, khớp đúng mục *Confirmation boundary*. Quyết định thứ hai: khi trao đổi với Thành viên 1 tôi chỉ gửi nguyên tắc hành vi, không gửi nội dung case hay expected tool call, để suite `group` giữ được giá trị kiểm chứng độc lập cho prompt v3.
+
+- **Khó khăn tôi gặp và cách tôi xử lý:** Khó khăn lớn nhất là ban đầu tôi hiểu sai cơ chế chấm multi-turn. Tôi viết 5 case nhiều lượt như một cuộc chat thật, nhưng khi đọc kỹ `run_eval.py` mới thấy evaluator gộp toàn bộ các lượt thành một message duy nhất và chỉ chấm lượt cuối cùng. Tôi phải viết lại cả 5 case sao cho lượt cuối tự nó đủ thông tin để xác định tool call, còn các lượt trước chỉ đóng vai trò ngữ cảnh. Một khó khăn nhỏ hơn là thư mục `runs/` nằm trong `.gitignore`, nên `git add` bỏ qua file run mà không báo lỗi; tôi tưởng đã commit xong nhưng thực tế chưa, phải dùng `git add -f` mới đưa được run evidence vào lịch sử.
+
+- **Điều tôi học được từ phần việc này:** Tôi học được rằng metric không thay thế được việc đọc `tool_results`. Case `GM07` trên bảng kết quả chỉ hiện đúng một dòng FAIL, nhưng khi mở tool result ra tôi mới thấy agent đã thực sự gọi `create_ticket` với `confirmed=false` — tức là lớp prompt đã thủng, và thứ chặn lại là tool implementation trả về `needs_confirmation`. Nếu chỉ nhìn con số 8/10 thì sẽ bỏ qua đúng chi tiết quan trọng nhất của run này. Tôi cũng học được rằng expected answer phải được đối chiếu với dữ liệu nguồn trước khi chốt, vì một case hỏi thứ không tồn tại trong corpus sẽ FAIL mãi mãi dù prompt có tốt đến đâu.
+
+- **Nếu làm lại, tôi sẽ cải thiện điều gì:** Baseline `v0` đã PASS 8/10, nghĩa là bộ đề của tôi chỉ có 2 case thực sự phân biệt được v0 với v3. Nếu làm lại, tôi sẽ chạy thử một lần trên baseline để calibrate độ khó trước khi chốt 10 case, thay vì phát hiện điều đó sau khi đã commit. Tôi cũng sẽ phân bổ case đều hơn giữa các tool — bộ đề hiện tập trung vào routing và confirmation boundary, còn `format_incident_report` thì chưa có case nào.
+
 Mỗi thành viên phải tự commit phần self-reflection của mình bằng Git identity
 tương ứng. Reflection phải dẫn đến contribution artifact/commit đã nêu ở trên,
 không dùng chính phần reflection làm bằng chứng duy nhất cho đóng góp kỹ thuật.
