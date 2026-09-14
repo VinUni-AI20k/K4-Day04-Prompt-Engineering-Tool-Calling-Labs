@@ -6,6 +6,6 @@ __pycache__/
 .env.*
 !.env.example
 /tickets/
-/runs/
-/transcripts/
+# runs/ and transcripts/ are required submission evidence; keep only invalid runs out.
+/runs/invalid/
 /analysis/

@@ -12,9 +12,12 @@ from tools._shared import ROOT, err
 TICKET_DIR = ROOT / "tickets"
 ASSET_ID_PATTERN = re.compile(r"^(?:LT|DT|MB|PR|RM)-\d+$", re.IGNORECASE)
 SENSITIVE_DATA_PATTERN = re.compile(
-    r"\b(?:password|passwd|token|api[ _-]?key|mfa|otp|recovery[ _-]?code)(?:\s*[:=]\s*|\s+(?:is|la|là)\s+)\S+",
+    r"\b(?:password|passwd|token|api[ _-]?key|mfa(?:\s+code)?|otp(?:\s+code)?|recovery[ _-]?code)"
+    # Bare "keyword value" only counts when the value has a digit, so "password expired" stays allowed.
+    r"(?:\s*[:=]\s*\S+|\s+(?:is|la|là)\s+\S+|\s+(?=\S*\d)\S+)",
     re.IGNORECASE,
 )
+SECRET_VALUE_PATTERN = re.compile(r"\b(?:sk|gsk|tvly)[-_][A-Za-z0-9_-]{6,}")
 
 
 def create_ticket(
@@ -40,7 +43,7 @@ def create_ticket(
     normalized_asset = (asset_id or "").strip().upper()
     if normalized_asset and not ASSET_ID_PATTERN.fullmatch(normalized_asset):
         return {"tool": "create_ticket", "error": "invalid_asset_id"}
-    if SENSITIVE_DATA_PATTERN.search(normalized_summary):
+    if SENSITIVE_DATA_PATTERN.search(normalized_summary) or SECRET_VALUE_PATTERN.search(normalized_summary):
         return {
             "tool": "create_ticket",
             "error": "restricted_sensitive_data",
