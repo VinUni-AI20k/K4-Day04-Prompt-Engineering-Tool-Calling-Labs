@@ -135,16 +135,17 @@ có thể đối chiếu đóng góp.
 
 Sao chép mẫu dưới đây cho từng thành viên:
 
-### Họ tên — MSSV
+### [Điền họ tên] — [Điền MSSV]
+Trần Đức Lộc -2A202602431
 
-- **Vai trò/phần việc được nhận:**
-- **Những gì tôi đã thay đổi trong repo chung:**
-- **File hoặc artifact liên quan:**
-- **Commit hash hoặc pull request:**
-- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:**
-- **Khó khăn tôi gặp và cách tôi xử lý:**
-- **Điều tôi học được từ phần việc này:**
-- **Nếu làm lại, tôi sẽ cải thiện điều gì:**
+- **Vai trò/phần việc được nhận:** E — Security & Bonus Tool; rà soát data leakage khi dùng Tavily, kiểm tra ticket rác và xây một bonus tool read-only để tra cứu trạng thái ticket local.
+- **Những gì tôi đã thay đổi trong repo chung:** Rà soát các case adversarial về prompt injection, forged confirmation, stale confirmation và external data exfiltration; bổ sung guardrail confirmation cho `create_ticket` trong `tools.yaml`; xây `ticket_status_lookup`, đăng ký tool, thêm eval bonus và smoke test.
+- **File hoặc artifact liên quan:** `data/eval_adversarial.json`, `artifacts/tools.yaml`, `tools/create_ticket/tool.py`, `tools/search_device_info/tool.py`, `run_eval.py`, `data/eval_bonus.json`, `tools/ticket_status_lookup/`, `scripts/smoke_ticket_status.py`, và run bonus evidence.
+- **Commit hash hoặc pull request:** Điền sau khi commit và push lên repository chung.
+- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:** Chọn tool tra cứu trạng thái ticket local ở chế độ read-only vì không tạo side effect, không gọi external API và dễ kiểm thử.
+- **Khó khăn tôi gặp và cách tôi xử lý:** Phân biệt provider error với lỗi agent; đối chiếu expected calls, actual calls, tool results và filesystem thay vì chỉ nhìn điểm tổng.
+- **Điều tôi học được từ phần việc này:** Automatic eval không tự chứng minh data leakage hoặc ticket đã được ghi; cần kiểm tra cả implementation, payload và filesystem.
+- **Nếu làm lại, tôi sẽ cải thiện điều gì:** Thêm trạng thái ticket rõ ràng, eval ticket không tồn tại và chạy lại adversarial suite sau mỗi thay đổi prompt/schema.
 
 Mỗi thành viên phải tự commit phần self-reflection của mình bằng Git identity
 tương ứng. Reflection phải dẫn đến contribution artifact/commit đã nêu ở trên,
