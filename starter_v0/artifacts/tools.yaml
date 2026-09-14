@@ -18,12 +18,25 @@ tools:
       required: [question]
 
   - name: search_kb
-    description: "Tìm hướng dẫn hỗ trợ kỹ thuật."
+    description: "Tìm bài hướng dẫn khắc phục sự cố trong knowledge base nội bộ (how-to, troubleshooting). KHÔNG dùng để tra chính sách công ty; chính sách thuộc tool policy."
     parameters:
       type: object
       properties:
         query: {type: string, default: "", description: "Nội dung cần tìm"}
-        category: {type: string, enum: [all, vpn, email, wifi, printing, account, security, hardware, software, meeting_room], default: "all", description: "Nhóm hướng dẫn"}
+        category:
+          type: string
+          enum: [all, vpn, email, wifi, printing, account, security, hardware, software, meeting_room]
+          default: "all"
+          description: >-
+            Phân nhóm theo DỊCH VỤ mà bài hướng dẫn nói tới, không theo từ ngữ
+            trong câu hỏi. 'vpn': kết nối VPN, certificate VPN. 'email': Outlook,
+            mail profile, mailbox, cấu hình hộp thư. 'wifi': Wi-Fi, kết nối không
+            dây. 'printing': máy in, print spooler. 'account': SSO, đăng nhập,
+            khóa/mở khóa tài khoản, MFA. 'security': mã hóa ổ đĩa, bảo mật thiết
+            bị. 'hardware': ổ cứng, pin, linh kiện. 'software': ứng dụng, driver.
+            'meeting_room': thiết bị phòng họp, âm thanh. Lưu ý 'profile' của
+            Outlook thuộc 'email', không phải 'account'. Chỉ dùng 'all' khi câu
+            hỏi không thuộc nhóm nào ở trên.
         top_k: {type: integer, default: 3, description: "Số kết quả"}
       required: [query]
 
@@ -37,11 +50,11 @@ tools:
       required: [service]
 
   - name: inspect_device
-    description: "Kiểm tra thông tin chi tiết và dữ liệu chẩn đoán snapshot của MỘT thiết bị cụ thể trong công ty theo mã tài sản asset_id (định dạng: LT-xxx, DT-xxx, MB-xxx, PR-xxx, RM-xxx). Chỉ nhận mã tài sản, KHÔNG nhận mã nhân viên. KHÔNG dùng cho dịch vụ dùng chung toàn hệ thống."
+    description: "Kiểm tra thông tin chi tiết và dữ liệu chẩn đoán snapshot của MỘT thiết bị cụ thể theo mã tài sản. Mã tài sản gồm tiền tố LT, DT, MB, PR hoặc RM kèm dấu gạch nối và các chữ số, ví dụ LT-204. Chỉ nhận mã tài sản, KHÔNG nhận mã nhân viên. KHÔNG dùng cho dịch vụ dùng chung toàn hệ thống."
     parameters:
       type: object
       properties:
-        asset_id: {type: string, description: "Mã tài sản thiết bị (ví dụ: 'LT-204', 'DT-087'). Không nhận mã nhân viên EMP-xxxx"}
+        asset_id: {type: string, description: "Mã tài sản thiết bị có thật do người dùng cung cấp, ví dụ LT-204 hoặc DT-087. Không nhận mã nhân viên. Nếu người dùng chưa nêu mã cụ thể, KHÔNG tự tạo giá trị và KHÔNG điền chuỗi mẫu; hãy hỏi lại bằng tool clarify."}
         check:
           type: string
           enum: [all, network, vpn, security, hardware, software]
@@ -50,11 +63,11 @@ tools:
       required: [asset_id]
 
   - name: lookup_user
-    description: "Tra cứu hồ sơ tài khoản nhân viên và danh sách thiết bị được cấp phát (assigned_assets) trong danh bạ nội bộ công ty theo mã nhân viên employee_id (định dạng: EMP-xxxx). Tool này ĐÃ BAO GỒM danh sách thiết bị được cấp, KHÔNG CẦN gọi thêm inspect_device nếu người dùng chỉ muốn biết nhân viên được cấp những thiết bị nào."
+    description: "Tra cứu hồ sơ tài khoản nhân viên và danh sách thiết bị được cấp phát (assigned_assets) trong danh bạ nội bộ theo mã nhân viên. Mã nhân viên gồm tiền tố EMP kèm dấu gạch nối và các chữ số, ví dụ EMP-1003. Tool này ĐÃ BAO GỒM danh sách thiết bị được cấp, KHÔNG CẦN gọi thêm inspect_device nếu người dùng chỉ muốn biết nhân viên được cấp những thiết bị nào."
     parameters:
       type: object
       properties:
-        employee_id: {type: string, description: "Mã định danh nhân viên (định dạng: EMP-xxxx, ví dụ: 'EMP-1003')"}
+        employee_id: {type: string, description: "Mã định danh nhân viên có thật do người dùng cung cấp, ví dụ EMP-1003. Tên riêng, tên phòng ban hay chức danh KHÔNG phải mã nhân viên. Nếu người dùng chưa nêu mã cụ thể, KHÔNG tự tạo giá trị và KHÔNG điền chuỗi mẫu; hãy hỏi lại bằng tool clarify."}
       required: [employee_id]
 
   - name: format_incident_report
@@ -90,12 +103,28 @@ tools:
       required: [manufacturer, model, query_type]
 
   - name: policy
-    description: "Tìm trong chính sách IT nội bộ."
+    description: "Tra quy định trong chính sách IT nội bộ của công ty (được phép hay không được phép làm gì). KHÔNG dùng để tìm hướng dẫn khắc phục sự cố; hướng dẫn thuộc tool search_kb."
     parameters:
       type: object
       properties:
         query: {type: string, default: "", description: "Nội dung cần tìm"}
-        policy_area: {type: string, enum: [all, access_control, data_privacy, external_tools, incident_response, service_operations, ticketing], default: "all", description: "Nhóm chính sách"}
+        policy_area:
+          type: string
+          enum: [all, access_control, data_privacy, external_tools, incident_response, service_operations, ticketing]
+          default: "all"
+          description: >-
+            Mỗi giá trị tương ứng một văn bản chính sách. 'access_control': xác
+            minh danh tính, reset mật khẩu, mở khóa tài khoản, quy định về việc
+            hỏi MFA/recovery code. 'data_privacy': dữ liệu nào bị cấm đưa vào
+            ticket, log, transcript hay screenshot (password, token, MFA, thông
+            tin cá nhân). 'external_tools': dữ liệu nào được phép gửi ra
+            web-search bên ngoài. 'incident_response': cách phân loại mức độ và
+            ánh xạ priority (critical/high/medium/low), quy tắc escalation.
+            'service_operations': vận hành dịch vụ dùng chung, status check,
+            thay đổi cấu hình dịch vụ, quy định về environment.
+            'ticketing': ranh giới xác nhận trước khi tạo ticket, chất lượng nội
+            dung ticket. BẮT BUỘC chọn đúng nhóm khi câu hỏi thuộc một trong các
+            chủ đề trên; chỉ dùng 'all' khi câu hỏi không rơi vào nhóm nào.
         top_k: {type: integer, default: 3, description: "Số mục"}
       required: [query]
 
