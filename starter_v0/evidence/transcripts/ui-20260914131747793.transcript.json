@@ -1,0 +1,33 @@
+{
+  "session_id": "ui-20260914131747793",
+  "provider": "openai",
+  "model": "gpt-4o-mini",
+  "version": "v3",
+  "artifact_version": "v3+p753ca2a065ef+t5e4f26ca01ab",
+  "prompt_hash": "753ca2a065ef11a86c51bb80b63438571c39a0c3c8f364d1e1393cf1e992a935",
+  "tools_hash": "5e4f26ca01ab2f4eafe644aadd9c87cece39b6bd323b24ba4c33e47c650819cf",
+  "max_tool_rounds": 4,
+  "system_prompt": "C:\\Users\\Lenovo\\Documents\\Vin\\K4-Day04-TranLongKhanh-\\starter_v0\\artifacts\\system_prompt.md",
+  "tools": "C:\\Users\\Lenovo\\Documents\\Vin\\K4-Day04-TranLongKhanh-\\starter_v0\\artifacts\\tools.yaml",
+  "created_at": "2026-09-14T20:18:20",
+  "updated_at": "2026-09-14T20:18:25",
+  "turns": [
+    {
+      "turn_index": 1,
+      "started_at": "2026-09-14T20:18:20",
+      "ended_at": "2026-09-14T20:18:25",
+      "user": "alo",
+      "status": "answered",
+      "assistant_text": "Chào bạn! Tôi có thể giúp gì cho bạn hôm nay?",
+      "rounds": [
+        {
+          "round": 1,
+          "assistant_text": "Chào bạn! Tôi có thể giúp gì cho bạn hôm nay?",
+          "tool_calls": [],
+          "tool_results": []
+        }
+      ],
+      "tool_events": []
+    }
+  ]
+}
