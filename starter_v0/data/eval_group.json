@@ -3,5 +3,111 @@
   "dataset_role": "group",
   "description": "Template intentionally left empty. The team must write exactly 10 original IT helpdesk cases: 5 single-turn query cases and 5 multi-turn turns cases.",
   "allowed_failure_types": ["wrong_tool", "wrong_arg_value", "wrong_boundary", "unnecessary_tool", "out_of_scope", "missing_info"],
-  "cases": []
+  "cases": [
+    {
+      "id": "G01_search_device_info",
+      "phase": "B",
+      "suite": "group",
+      "query": "Tìm driver cho Lenovo ThinkPad T14 Gen 4.",
+      "failure_type": "wrong_tool",
+      "expect": {"tool_calls": [{"name": "search_device_info", "args": {"manufacturer": "Lenovo", "model": "ThinkPad T14 Gen 4", "query_type": "drivers"}}]},
+      "metadata": {"skill": "search_device_info", "difficulty": "easy", "what_it_tests": "Sử dụng công cụ search_device_info để tìm thông tin thiết bị công cộng."}
+    },
+    {
+      "id": "G02_policy_search",
+      "phase": "B",
+      "suite": "group",
+      "query": "Quy định của công ty về bảo mật dữ liệu là gì?",
+      "failure_type": "wrong_tool",
+      "expect": {"tool_calls": [{"name": "policy", "args": {"query": "bảo mật dữ liệu", "policy_area": "data_privacy"}}]},
+      "metadata": {"skill": "policy_search", "difficulty": "easy", "what_it_tests": "Kiểm tra khả năng phân loại query vào policy area tương ứng."}
+    },
+    {
+      "id": "G03_ticket_missing_summary",
+      "phase": "B",
+      "suite": "group",
+      "query": "Tạo cho mình một ticket mới với nhé.",
+      "failure_type": "missing_info",
+      "expect": {"tool_calls": [{"name": "clarify", "args": {"response_type": "text"}}]},
+      "metadata": {"skill": "clarify_ticket_summary", "difficulty": "medium", "what_it_tests": "Thiếu thông tin summary nên phải hỏi lại."}
+    },
+    {
+      "id": "G04_parallel_policy_kb",
+      "phase": "B",
+      "suite": "group",
+      "query": "Cho mình hỏi quy định in ấn và hướng dẫn kết nối máy in.",
+      "failure_type": "wrong_tool",
+      "expect": {"tool_calls": [{"name": "policy", "args": {"query": "quy định in ấn", "policy_area": "service_operations"}}, {"name": "search_kb", "args": {"category": "printing"}}]},
+      "metadata": {"skill": "parallel_policy_kb", "difficulty": "hard", "what_it_tests": "Gọi đồng thời policy và search_kb."}
+    },
+    {
+      "id": "G05_unnecessary_tool_polite",
+      "phase": "B",
+      "suite": "group",
+      "query": "Cảm ơn bạn, mình sửa được lỗi rồi.",
+      "failure_type": "unnecessary_tool",
+      "expect": {"no_tool": true, "behavior": "answer_without_tool"},
+      "metadata": {"skill": "polite_closure", "difficulty": "easy", "what_it_tests": "Không gọi tool khi user chỉ cảm ơn/đóng giao tiếp."}
+    },
+    {
+      "id": "M11_carry_asset_to_ticket",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Kiểm tra phần cứng máy LT-999."},
+        {"role": "user", "content": "Máy bị hỏng ổ cứng, tạo ticket lỗi phần cứng mức high cho máy này giúp mình."}
+      ],
+      "failure_type": "wrong_boundary",
+      "expect": {"tool_calls": [{"name": "clarify", "args": {"response_type": "yes_no"}}]},
+      "metadata": {"skill": "multiturn_ticket_carry_asset", "difficulty": "medium", "what_it_tests": "Sử dụng asset ID từ lượt trước để setup ticket và hỏi xác nhận."}
+    },
+    {
+      "id": "M12_switch_to_policy",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Dịch vụ SSO đang lỗi đúng không?"},
+        {"role": "user", "content": "Nếu vậy thì theo quy định, mình có được dùng công cụ bên ngoài không?"}
+      ],
+      "failure_type": "wrong_tool",
+      "expect": {"tool_calls": [{"name": "policy", "args": {"query": "công cụ bên ngoài", "policy_area": "external_tools"}}]},
+      "metadata": {"skill": "multiturn_switch_policy", "difficulty": "hard", "what_it_tests": "Đổi ngữ cảnh sang policy search dựa trên câu hỏi mới."}
+    },
+    {
+      "id": "M13_correction_device_info",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Tìm cấu hình của Dell XPS 13."},
+        {"role": "user", "content": "À nhầm, là Lenovo ThinkPad T14 Gen 4 mới đúng."}
+      ],
+      "failure_type": "wrong_arg_value",
+      "expect": {"tool_calls": [{"name": "search_device_info", "args": {"manufacturer": "Lenovo", "model": "ThinkPad T14 Gen 4", "query_type": "specs"}}]},
+      "metadata": {"skill": "multiturn_correction_device_info", "difficulty": "medium", "what_it_tests": "Cập nhật đúng manufacturer và model sau khi đính chính."}
+    },
+    {
+      "id": "M14_clarify_then_search_kb",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Làm sao để cấu hình email?"},
+        {"role": "user", "content": "Mình dùng Outlook trên Windows."}
+      ],
+      "failure_type": "wrong_arg_value",
+      "expect": {"tool_calls": [{"name": "search_kb", "args": {"category": "email"}}]},
+      "metadata": {"skill": "multiturn_clarify_then_search", "difficulty": "medium", "what_it_tests": "Sử dụng thông tin bổ sung để phân loại chính xác."}
+    },
+    {
+      "id": "M15_cancel_ticket_and_ask_status",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Tạo ticket lỗi sập mạng."},
+        {"role": "user", "content": "Thôi khoan, kiểm tra xem mạng nội bộ (wifi) ở production có đang lỗi chung không đã."}
+      ],
+      "failure_type": "wrong_tool",
+      "expect": {"tool_calls": [{"name": "check_service_status", "args": {"service": "wifi", "environment": "production"}}]},
+      "metadata": {"skill": "multiturn_cancel_ticket_check_status", "difficulty": "hard", "what_it_tests": "Hủy hành động tạo ticket để chuyển sang check status."}
+    }
+  ]
 }
