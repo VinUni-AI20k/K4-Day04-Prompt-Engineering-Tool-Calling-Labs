@@ -1,0 +1,95 @@
+{
+  "snapshot_at": "2026-09-14T09:00:00+07:00",
+  "software_list": [
+    {
+      "name": "Slack",
+      "category": "communication",
+      "approval_status": "approved",
+      "approved_version": "4.35+",
+      "license_type": "enterprise",
+      "installation_method": "Company Portal self-service",
+      "policy_notes": "Phần mềm liên lạc nội bộ chuẩn của Northstar Labs. Được cài đặt tự do."
+    },
+    {
+      "name": "Zoom Workplace",
+      "category": "communication",
+      "approval_status": "approved",
+      "approved_version": "5.17+",
+      "license_type": "enterprise",
+      "installation_method": "Company Portal self-service",
+      "policy_notes": "Dùng tài khoản SSO công ty để đăng nhập."
+    },
+    {
+      "name": "Visual Studio Code",
+      "category": "developer_tools",
+      "approval_status": "approved",
+      "approved_version": "1.85+",
+      "license_type": "free",
+      "installation_method": "Company Portal or official website",
+      "policy_notes": "Được phép cài đặt cho kỹ sư và nhân viên kỹ thuật. Tiện ích mở rộng phải từ Microsoft Marketplace."
+    },
+    {
+      "name": "Google Chrome",
+      "category": "utilities",
+      "approval_status": "approved",
+      "approved_version": "120+",
+      "license_type": "enterprise",
+      "installation_method": "Pre-installed standard image",
+      "policy_notes": "Trình duyệt chuẩn doanh nghiệp. Tự động đồng bộ chính sách bảo mật."
+    },
+    {
+      "name": "7-Zip",
+      "category": "utilities",
+      "approval_status": "approved",
+      "approved_version": "23.01+",
+      "license_type": "free",
+      "installation_method": "Company Portal self-service",
+      "policy_notes": "Công cụ nén/giải nén chuẩn."
+    },
+    {
+      "name": "Docker Desktop",
+      "category": "developer_tools",
+      "approval_status": "requires_approval",
+      "approved_version": "4.26+",
+      "license_type": "paid_subscription",
+      "installation_method": "Ticket request to IT Helpdesk",
+      "policy_notes": "Yêu cầu giấy phép doanh nghiệp trả phí. Cần có phê duyệt từ Trưởng bộ phận trước khi cấp."
+    },
+    {
+      "name": "Wireshark",
+      "category": "security",
+      "approval_status": "requires_approval",
+      "approved_version": "4.2+",
+      "license_type": "free",
+      "installation_method": "Security Team sign-off required",
+      "policy_notes": "Công cụ phân tích gói tin mạng. Chỉ cấp cho kỹ sư mạng và an ninh mạng đã được phê duyệt."
+    },
+    {
+      "name": "AnyDesk",
+      "category": "utilities",
+      "approval_status": "requires_approval",
+      "approved_version": "7.0+",
+      "license_type": "enterprise",
+      "installation_method": "IT Helpdesk remote support only",
+      "policy_notes": "Chỉ dùng trong các ca hỗ trợ kỹ thuật có giám sát. Không bật quyền truy cập không giám sát."
+    },
+    {
+      "name": "BitTorrent / uTorrent",
+      "category": "prohibited",
+      "approval_status": "prohibited",
+      "approved_version": "none",
+      "license_type": "banned",
+      "installation_method": "blocked",
+      "policy_notes": "NGHIÊM CẤM: Vi phạm chính sách an toàn thông tin doanh nghiệp. Hệ thống endpoint sẽ tự động cô lập máy nếu phát hiện."
+    },
+    {
+      "name": "NordVPN / ExpressVPN",
+      "category": "prohibited",
+      "approval_status": "prohibited",
+      "approved_version": "none",
+      "license_type": "banned",
+      "installation_method": "blocked",
+      "policy_notes": "NGHIÊM CẤM: Chỉ được dùng VPN chính thức của công ty. Cấm sử dụng VPN cá nhân của bên thứ ba trên thiết bị công ty."
+    }
+  ]
+}

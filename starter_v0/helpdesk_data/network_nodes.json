@@ -1,0 +1,83 @@
+{
+  "snapshot_at": "2026-09-14T09:00:00+07:00",
+  "nodes": [
+    {
+      "target": "office_hanoi",
+      "node_name": "Hanoi Branch Office Gateway",
+      "ip_address": "10.10.1.1",
+      "location": "Hanoi Keangnam Landmark",
+      "ping_ms": 4.2,
+      "packet_loss_pct": 0.0,
+      "dns_status": "healthy",
+      "gateway_status": "operational",
+      "bandwidth_usage_pct": 42.5,
+      "status": "healthy",
+      "notes": "Primary fiber line active; backup 4G standby"
+    },
+    {
+      "target": "office_hcm",
+      "node_name": "Ho Chi Minh City Office Gateway",
+      "ip_address": "10.20.1.1",
+      "location": "HCMC Bitexco Tower",
+      "ping_ms": 31.8,
+      "packet_loss_pct": 0.2,
+      "dns_status": "healthy",
+      "gateway_status": "operational",
+      "bandwidth_usage_pct": 68.0,
+      "status": "healthy",
+      "notes": "Normal traffic volume"
+    },
+    {
+      "target": "office_danang",
+      "node_name": "Da Nang Tech Center Gateway",
+      "ip_address": "10.30.1.1",
+      "location": "Da Nang Software Park",
+      "ping_ms": 18.5,
+      "packet_loss_pct": 4.5,
+      "dns_status": "degraded",
+      "gateway_status": "degraded",
+      "bandwidth_usage_pct": 89.2,
+      "status": "degraded",
+      "notes": "ISP transit issue reported; intermittent packet loss"
+    },
+    {
+      "target": "gateway_vpn",
+      "node_name": "Corporate VPN Concentrator Cluster",
+      "ip_address": "10.0.50.1",
+      "location": "Primary Data Center",
+      "ping_ms": 12.1,
+      "packet_loss_pct": 1.2,
+      "dns_status": "healthy",
+      "gateway_status": "degraded",
+      "bandwidth_usage_pct": 81.0,
+      "status": "degraded",
+      "notes": "High load on radius auth backend; matching incident INC-1042"
+    },
+    {
+      "target": "dns_primary",
+      "node_name": "Core Internal DNS Resolver",
+      "ip_address": "10.0.0.53",
+      "location": "Primary Data Center",
+      "ping_ms": 1.5,
+      "packet_loss_pct": 0.0,
+      "dns_status": "healthy",
+      "gateway_status": "operational",
+      "bandwidth_usage_pct": 24.0,
+      "status": "healthy",
+      "notes": "Recursive lookup latency < 2ms"
+    },
+    {
+      "target": "server_sso",
+      "node_name": "Single Sign-On Authentication Node",
+      "ip_address": "10.0.10.20",
+      "location": "Primary Data Center",
+      "ping_ms": 2.1,
+      "packet_loss_pct": 0.0,
+      "dns_status": "healthy",
+      "gateway_status": "operational",
+      "bandwidth_usage_pct": 35.0,
+      "status": "healthy",
+      "notes": "SAML & OIDC services responding normally"
+    }
+  ]
+}

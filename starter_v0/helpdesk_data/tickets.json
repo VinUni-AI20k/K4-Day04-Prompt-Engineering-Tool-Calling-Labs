@@ -1,0 +1,53 @@
+{
+  "snapshot_at": "2026-09-14T09:00:00+07:00",
+  "tickets": [
+    {
+      "ticket_id": "INC-1042",
+      "summary": "Intermittent authentication failures for some Windows clients on VPN",
+      "priority": "high",
+      "asset_id": "LT-204",
+      "status": "in_progress",
+      "assigned_to": "Network Security Operations",
+      "requester": "EMP-1001",
+      "created_at": "2026-09-14T07:35:00+07:00",
+      "updated_at": "2026-09-14T08:50:00+07:00",
+      "resolution_note": "Kỹ thuật viên đang phân tích RADIUS server logs. Khuyến nghị tạm thời: Đồng bộ lại giờ hệ thống trước khi login."
+    },
+    {
+      "ticket_id": "INC-1045",
+      "summary": "Access points on floor 4 Bangkok are unavailable",
+      "priority": "critical",
+      "asset_id": "AP-FL4",
+      "status": "in_progress",
+      "assigned_to": "Infrastructure Team",
+      "requester": "EMP-1002",
+      "created_at": "2026-09-14T08:12:00+07:00",
+      "updated_at": "2026-09-14T08:55:00+07:00",
+      "resolution_note": "Switch PoE cấp nguồn bị sập nguồn dự phòng. Đang cử kỹ sư thay switch."
+    },
+    {
+      "ticket_id": "INC-2011",
+      "summary": "Thay thế pin và kiểm tra tản nhiệt laptop LT-240",
+      "priority": "low",
+      "asset_id": "LT-240",
+      "status": "resolved",
+      "assigned_to": "Hardware Support Desk",
+      "requester": "EMP-1002",
+      "created_at": "2026-09-10T14:20:00+07:00",
+      "updated_at": "2026-09-12T16:00:00+07:00",
+      "resolution_note": "Đã vệ sinh quạt và thay keo tản nhiệt. Pin kiểm tra sức khỏe đạt 91%."
+    },
+    {
+      "ticket_id": "INC-2022",
+      "summary": "Yêu cầu cấp bản quyền Docker Desktop cho dự án AI",
+      "priority": "medium",
+      "asset_id": "LT-318",
+      "status": "pending_approval",
+      "assigned_to": "IT Procurement Desk",
+      "requester": "EMP-1007",
+      "created_at": "2026-09-13T11:00:00+07:00",
+      "updated_at": "2026-09-13T15:30:00+07:00",
+      "resolution_note": "Đã chuyển yêu cầu lên Engineering Director để ký duyệt ngân sách."
+    }
+  ]
+}

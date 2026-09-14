@@ -1,0 +1,91 @@
+{
+  "snapshot_at": "2026-09-14T09:00:00+07:00",
+  "rooms": [
+    {
+      "room_id": "MR-101",
+      "name": "Hanoi Executive Boardroom",
+      "location": "Hanoi Landmark Floor 10",
+      "capacity": 16,
+      "equipment": [
+        "85-inch 4K Samsung Commercial Display",
+        "Cisco Webex Room Kit Pro Dual Camera",
+        "Shure Microflex Ceiling Mic Array",
+        "Crestron 10-inch Touch Panel Controller",
+        "Barco ClickShare Wireless Presentation CX-50",
+        "Dual HDMI / USB-C Table Pods"
+      ],
+      "av_status": "operational",
+      "network_status": "connected_1gbps_lan",
+      "display_input": "HDMI 1 (ClickShare Active)",
+      "known_issues": []
+    },
+    {
+      "room_id": "MR-102",
+      "name": "Hanoi Brainstorm Hub",
+      "location": "Hanoi Landmark Floor 10",
+      "capacity": 8,
+      "equipment": [
+        "65-inch 4K LG TV",
+        "Logitech Rally Bar Mini",
+        "Logitech Tap IP Touch Controller",
+        "HDMI Retractor Cable"
+      ],
+      "av_status": "operational",
+      "network_status": "connected_wifi_5ghz",
+      "display_input": "HDMI 1 (Auto-switch)",
+      "known_issues": []
+    },
+    {
+      "room_id": "MR-201",
+      "name": "Danang Innovation Room",
+      "location": "Da Nang Software Park Floor 2",
+      "capacity": 10,
+      "equipment": [
+        "Samsung Flip Pro 75-inch Interactive Whiteboard",
+        "Poly Studio X50 Video Bar",
+        "Poly TC8 Touch Interface",
+        "Tabletop Extension Microphones"
+      ],
+      "av_status": "operational",
+      "network_status": "connected_1gbps_lan",
+      "display_input": "Wireless Casting (AirPlay / Miracast)",
+      "known_issues": []
+    },
+    {
+      "room_id": "MR-301",
+      "name": "Saigon Focus Room",
+      "location": "HCMC Bitexco Floor 3",
+      "capacity": 4,
+      "equipment": [
+        "50-inch 4K Sony Bravia",
+        "Logitech MeetUp All-in-One ConferenceCam",
+        "Tabletop HDMI Passthrough"
+      ],
+      "av_status": "degraded",
+      "network_status": "connected_wifi_5ghz",
+      "display_input": "HDMI 1",
+      "known_issues": [
+        "Cáp HDMI số 2 bị chập chờn, hình ảnh bị nhấp nháy",
+        "Cần thay pin cho remote TV Sony"
+      ]
+    },
+    {
+      "room_id": "MR-401",
+      "name": "Townhall Auditorium",
+      "location": "HCMC Bitexco Floor 4",
+      "capacity": 60,
+      "equipment": [
+        "Dual 10000-lumen Panasonic Laser Projectors",
+        "Motorized Tensioned Projector Screens",
+        "Yamaha Digital Audio Mixing Console",
+        "4x Shure Wireless Handheld & Lavalier Mics",
+        "PTZ Optics 30X NDI Broadcast Cameras",
+        "Dedicated AV Operator Control Booth"
+      ],
+      "av_status": "operational",
+      "network_status": "connected_10gbps_fiber",
+      "display_input": "Master Matrix Switcher (SDI/HDMI)",
+      "known_issues": []
+    }
+  ]
+}
