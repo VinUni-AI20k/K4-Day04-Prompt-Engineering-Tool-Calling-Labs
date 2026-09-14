@@ -86,14 +86,14 @@ tools:
       required: [manufacturer, model, query_type]
 
   - name: policy
-    description: "Tìm trong chính sách IT nội bộ."
+    description: "Tìm trong chính sách IT nội bộ. Bắt buộc truyền policy_area phù hợp với lĩnh vực quy định (access_control, data_privacy, external_tools, incident_response, service_operations, ticketing, hoặc all)."
     parameters:
       type: object
       properties:
         query: {type: string, default: "", description: "Nội dung cần tìm"}
         policy_area: {type: string, enum: [all, access_control, data_privacy, external_tools, incident_response, service_operations, ticketing], default: "all", description: "Nhóm chính sách"}
         top_k: {type: integer, default: 3, description: "Số mục"}
-      required: [query]
+      required: [query, policy_area]
 
   - name: create_ticket
     description: "Tạo một ticket hỗ trợ."
