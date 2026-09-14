@@ -5,13 +5,20 @@
   "allowed_failure_types": ["wrong_tool", "wrong_arg_value", "wrong_boundary", "unnecessary_tool", "out_of_scope", "missing_info"],
   "cases": [
     {
-      "id": "G01_meeting_room_hardware",
+      "id": "G01_service_and_asset_routing",
       "phase": "B",
       "suite": "group",
-      "query": "Kiểm tra phần cứng của thiết bị phòng họp RM-501, chỉ xem hardware snapshot.",
+      "query": "Kiểm tra trạng thái Wi-Fi production và phần cứng thiết bị phòng họp RM-501; tôi cần riêng kết quả dịch vụ và thiết bị.",
       "failure_type": "wrong_tool",
       "expect": {
         "tool_calls": [
+          {
+            "name": "check_service_status",
+            "args": {
+              "service": "wifi",
+              "environment": "production"
+            }
+          },
           {
             "name": "inspect_device",
             "args": {
@@ -22,7 +29,7 @@
         ]
       },
       "metadata": {
-        "what_it_tests": "Single-turn: asset phòng họp cụ thể phải dùng inspect_device với check=hardware, không dùng shared service status.",
+        "what_it_tests": "Single-turn: phân biệt shared service và single asset, gọi đúng hai capability với arguments riêng.",
         "author_role": "C_eval_author"
       }
     },
@@ -52,31 +59,24 @@
       }
     },
     {
-      "id": "G03_compare_wifi_environments",
+      "id": "G03_format_existing_findings_only",
       "phase": "B",
       "suite": "group",
-      "query": "Kiểm tra và so sánh Wi-Fi ở cả production lẫn staging; cần kết quả của đủ hai môi trường.",
-      "failure_type": "wrong_tool",
+      "query": "Đã có findings: PR-404 switch port link down và print queue đang paused. Chỉ tạo brief report tên 'PR-404 printing handoff', không kiểm tra lại thiết bị.",
+      "failure_type": "unnecessary_tool",
       "expect": {
         "tool_calls": [
           {
-            "name": "check_service_status",
+            "name": "format_incident_report",
             "args": {
-              "service": "wifi",
-              "environment": "production"
-            }
-          },
-          {
-            "name": "check_service_status",
-            "args": {
-              "service": "wifi",
-              "environment": "staging"
+              "template": "brief",
+              "incident_title": "PR-404 printing handoff"
             }
           }
         ]
       },
       "metadata": {
-        "what_it_tests": "Single-turn: cùng một tool phải được gọi hai lần với arguments khác nhau và không được bỏ sót môi trường.",
+        "what_it_tests": "Single-turn: chỉ format findings đã có; mọi inspect/status/search call bổ sung đều là extra tool call.",
         "author_role": "C_eval_author"
       }
     },
@@ -102,24 +102,25 @@
       }
     },
     {
-      "id": "G05_format_existing_findings_only",
+      "id": "G05_public_device_search",
       "phase": "B",
       "suite": "group",
-      "query": "Đã có findings: PR-404 switch port link down và print queue đang paused. Chỉ tạo brief report tên 'PR-404 printing handoff', không kiểm tra lại thiết bị.",
-      "failure_type": "unnecessary_tool",
+      "query": "Tìm thông tin tương thích công khai cho Lenovo ThinkPad T14 Gen 4. Chỉ dùng hãng và model công khai, không gửi mã tài sản hay dữ liệu nội bộ.",
+      "failure_type": "wrong_boundary",
       "expect": {
         "tool_calls": [
           {
-            "name": "format_incident_report",
+            "name": "search_device_info",
             "args": {
-              "template": "brief",
-              "incident_title": "PR-404 printing handoff"
+              "manufacturer": "Lenovo",
+              "model": "ThinkPad T14 Gen 4",
+              "query_type": "compatibility"
             }
           }
         ]
       },
       "metadata": {
-        "what_it_tests": "Single-turn: chỉ format findings đã có; mọi inspect/status/search call bổ sung đều là extra tool call.",
+        "what_it_tests": "Single-turn: external search chỉ nhận manufacturer, public model và query type; không được gửi identifier hoặc diagnostics nội bộ.",
         "author_role": "C_eval_author"
       }
     },
@@ -187,37 +188,44 @@
       }
     },
     {
-      "id": "G08_switch_from_kb_to_status",
+      "id": "G08_two_assets_distinct_checks",
       "phase": "B",
       "suite": "group",
       "turns": [
         {
           "role": "user",
-          "content": "Tìm hướng dẫn xử lý lỗi email trên Windows."
+          "content": "Tôi cần kiểm tra hai thiết bị LT-240 và DT-087."
         },
         {
           "role": "user",
-          "content": "Thôi không cần hướng dẫn nữa, tôi muốn biết trạng thái email."
+          "content": "Với LT-240 hãy kiểm tra network."
         },
         {
           "role": "user",
-          "content": "Chỉ kiểm tra email staging."
+          "content": "Với DT-087 hãy kiểm tra hardware; thực hiện đủ cả hai kiểm tra."
         }
       ],
       "failure_type": "wrong_tool",
       "expect": {
         "tool_calls": [
           {
-            "name": "check_service_status",
+            "name": "inspect_device",
             "args": {
-              "service": "email",
-              "environment": "staging"
+              "asset_id": "LT-240",
+              "check": "network"
+            }
+          },
+          {
+            "name": "inspect_device",
+            "args": {
+              "asset_id": "DT-087",
+              "check": "hardware"
             }
           }
         ]
       },
       "metadata": {
-        "what_it_tests": "Multi-turn: intent mới chuyển từ KB sang service status; không được gọi search_kb từ lượt cũ.",
+        "what_it_tests": "Multi-turn: giữ đúng hai asset và gọi cùng tool hai lần với check khác nhau, không gộp hoặc tráo arguments.",
         "author_role": "C_eval_author"
       }
     },
