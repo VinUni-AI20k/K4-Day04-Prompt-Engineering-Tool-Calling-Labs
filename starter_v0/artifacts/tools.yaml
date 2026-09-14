@@ -1,7 +1,9 @@
 # v1 — confirmation and clarification boundaries (clarify, create_ticket,
 # check_service_status.environment, policy scope, report finding fields) plus
 # identifier conventions for inspect_device/lookup_user.
-# Unchanged from v0: search_kb, search_device_info.
+# v2 — retrieval arguments: policy_area meanings, keyword-style queries for
+# policy (English docs) and search_kb.
+# Unchanged from v0: search_device_info.
 #
 # If a tool is renamed, keep the name synchronized across:
 #   this file -> tools/__init__.py -> data/eval_base.json
@@ -29,7 +31,7 @@ tools:
     parameters:
       type: object
       properties:
-        query: {type: string, default: "", description: "Nội dung cần tìm"}
+        query: {type: string, default: "", description: "Từ khóa chủ đề, ưu tiên thuật ngữ kỹ thuật, tên sản phẩm, hệ điều hành hoặc mã lỗi (vd 'driver', 'certificate', 'spooler'), vì tìm kiếm khớp theo từ khóa."}
         category: {type: string, enum: [all, vpn, email, wifi, printing, account, security, hardware, software, meeting_room], default: "all", description: "Nhóm hướng dẫn"}
         top_k: {type: integer, default: 3, description: "Số kết quả"}
       required: [query]
@@ -98,9 +100,9 @@ tools:
     parameters:
       type: object
       properties:
-        query: {type: string, default: "", description: "Nội dung cần tìm"}
-        policy_area: {type: string, enum: [all, access_control, data_privacy, external_tools, incident_response, service_operations, ticketing], default: "all", description: "Nhóm chính sách"}
-        top_k: {type: integer, default: 3, description: "Số mục"}
+        query: {type: string, default: "", description: "Từ khóa tiếng Anh ngắn gọn (tài liệu chính sách viết bằng tiếng Anh và được tìm theo từ khóa trùng khớp), vd 'restricted data logging', 'escalation owner'."}
+        policy_area: {type: string, enum: [all, access_control, data_privacy, external_tools, incident_response, service_operations, ticketing], default: "all", description: "access_control: xác minh danh tính, reset/mở khóa tài khoản, MFA, cấp quyền. data_privacy: dữ liệu nhạy cảm, credential trong log, transcript hoặc ticket. external_tools: dữ liệu được phép gửi ra dịch vụ bên ngoài. incident_response: chọn priority/severity cho sự cố, sự cố diện rộng, escalation. service_operations: vận hành dịch vụ dùng chung, restart, thay đổi cấu hình. ticketing: quy trình xác nhận và chất lượng nội dung ticket (không dùng để chọn priority). Dùng all khi câu hỏi không thuộc nhóm nào."}
+        top_k: {type: integer, default: 3, description: "Số mục trả về, 1-5."}
       required: [query]
 
   - name: create_ticket
