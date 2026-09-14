@@ -11,8 +11,8 @@
 |:---:|---|:---:|---|---|
 | 1 | **Tạ Việt Cường** | 02560 | `ratrichero` | **Prompt Architect / Team Lead** |
 | 2 | **Chung Văn Duy** | 02854 | `[github_username_duy]` | **Tool & Schema Engineer** |
-| 3 | **Dương Đạt Khang** | 02624 | `[github_username_khang]` | **Eval & Red-Team Specialist** |
-| 4 | **Trần Trọng  Chinh** | 02720 | `Chinhdz108` | **UI & Report Coordinator** |
+| 3 | **Dương Đạt Khang** | 02624 | `khangduong2k4het-netizen` | **Eval & Red-Team Specialist** |
+| 4 | **Trần Trọng Chinh** | 02720 | `chinhzz108` | **UI & Report Coordinator** |
 
 ---
 

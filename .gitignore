@@ -16,8 +16,8 @@ INSTRUCTOR-GUIDE.md
 starter/
 starter_v0/tests/
 
-# Local action/scratch output
 /starter_v0/tickets/*.json
+/starter_v0/analysis/
 
 # OS / editor
 .DS_Store

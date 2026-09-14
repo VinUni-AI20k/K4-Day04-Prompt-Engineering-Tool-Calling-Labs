@@ -3,17 +3,17 @@
 tools:
   # ---------------- Core tools ----------------
   - name: clarify
-    description: "Gửi câu hỏi làm rõ (text), xin xác nhận tạo/rà lại thông tin ticket (yes_no), hoặc chọn môi trường (choice). Dùng response_type='yes_no' khi cần xác nhận tạo ticket hoặc khi người dùng yêu cầu rà lại payload/kiểm tra lại thông tin ticket."
+    description: "BẮT BUỘC gọi khi cần hỏi thêm thông tin bị thiếu (như asset_id, employee_id với response_type='text'), làm rõ lựa chọn (response_type='choice' cùng danh sách options), hoặc XIN XÁC NHẬN từ người dùng trước khi tạo ticket / rà soát payload ticket (response_type='yes_no'). Tuyệt đối không gửi câu hỏi làm rõ hay câu hỏi xác nhận dưới dạng văn bản thường."
     parameters:
       type: object
       properties:
-        question: {type: string, default: "", description: "Câu hỏi cần hỏi người dùng"}
+        question: {type: string, default: "", description: "Nội dung câu hỏi hoặc thông tin chi tiết cần người dùng xác nhận"}
         response_type: {type: string, enum: [text, yes_no, choice], default: "text", description: "Dùng 'text' khi thiếu mã asset/employee; 'yes_no' khi cần xác nhận tạo hoặc rà lại thông tin ticket; 'choice' khi cần chọn phương án môi trường"}
         options: {type: array, default: [], items: {type: string}, description: "Danh sách lựa chọn khi response_type là choice, ví dụ ['production', 'staging']"}
       required: [question]
 
   - name: search_kb
-    description: "Tìm hướng dẫn hỗ trợ kỹ thuật, tài liệu cấu hình phần mềm/email (ví dụ hướng dẫn cấu hình Outlook)."
+    description: "Tìm hướng dẫn hỗ trợ kỹ thuật, tài liệu cấu hình phần mềm/email (ví dụ hướng dẫn cấu hình Outlook). Luôn chỉ định category phù hợp (vpn, email, wifi, printing, account, security, hardware, software, meeting_room) khi chủ đề đã rõ."
     parameters:
       type: object
       properties:
@@ -23,12 +23,12 @@ tools:
       required: [query]
 
   - name: check_service_status
-    description: "Kiểm tra trạng thái của một dịch vụ dùng chung (VPN, email, SSO, Wi-Fi, printing)."
+    description: "Kiểm tra trạng thái của một dịch vụ dùng chung (VPN, email, SSO, Wi-Fi, printing). Khi cần so sánh nhiều môi trường, gọi tool này song song cho từng môi trường."
     parameters:
       type: object
       properties:
-        service: {type: string, enum: [vpn, email, sso, wifi, printing], description: "Tên dịch vụ"}
-        environment: {type: string, enum: [production, staging], default: "production", description: "Môi trường"}
+        service: {type: string, enum: [vpn, email, sso, wifi, printing], description: "Tên dịch vụ dùng chung"}
+        environment: {type: string, enum: [production, staging], default: "production", description: "Môi trường triển khai: 'production' hoặc 'staging'"}
       required: [service]
 
   - name: inspect_device

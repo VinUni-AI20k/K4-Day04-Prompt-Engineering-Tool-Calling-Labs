@@ -5,12 +5,13 @@ from providers.gemini_provider import GeminiProvider
 
 
 def make_provider(name: str):
-    if name == "openai":
+    norm = name.lower().replace("-", "_")
+    if norm in ["openai", "openai_compatible", "compatible"]:
         return OpenAIProvider()
-    if name == "openrouter":
+    if norm == "openrouter":
         return OpenRouterProvider()
-    if name == "anthropic":
+    if norm == "anthropic":
         return AnthropicProvider()
-    if name == "gemini":
+    if norm == "gemini":
         return GeminiProvider()
     raise ValueError(f"Unknown provider: {name}")
