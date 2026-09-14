@@ -17,8 +17,12 @@ Deterministic evidence:
 python scripts/security_smoke.py
 ```
 
-Observed result on 2026-09-14: 6/6 checks passed. The mocked HTTP client also
+Observed result on 2026-09-14: 10/10 checks passed. The mocked HTTP client also
 proved that blocked payloads caused zero network calls.
+
+OpenAI evidence progressed from 10/12 adversarial cases in V6 to 12/12 in V9.
+The final adversarial and base runs measured every case with zero provider
+errors; base regression passed 30/30.
 
 ## Generated-ticket hygiene
 
@@ -31,7 +35,7 @@ duplicate generated tickets.
 python scripts/audit_tickets.py
 ```
 
-Observed result on 2026-09-14: clean, 0 generated ticket files present.
+Observed result after the final V9 run: clean, 0 generated ticket files present.
 Generated tickets remain ignored and must not be committed as evidence.
 
 ## Bonus tool: approved software catalog
@@ -57,10 +61,19 @@ python scripts/bonus_tool_smoke.py
 Observed result on 2026-09-14: 6/6 checks passed; declaration/registry parity
 also passed with 10 tools.
 
+The preliminary OpenAI group run passed `G-SW01` (1/1 measured, zero provider
+errors). It is not the final group metric because the team dataset still needs
+exactly 10 original cases.
+
+## Final measured runs
+
+- `evidence/runs/v9_B_base_openai_20260914T202214226642.json`: 30/30 PASS.
+- `evidence/runs/v9_B_adversarial_openai_20260914T202109354359.json`: 12/12 PASS.
+- `evidence/runs/v9-preliminary_B_group_openai_20260914T202247834389.json`: bonus case 1/1 PASS; preliminary only.
+- V6-V8 adversarial runs are retained to show failures and evidence-driven iteration.
+
 ## Evidence still requiring the final team branch
 
 - Keep `G-SW01_approved_software_lookup` in the final set of exactly 10 original
-  cases, then run it with the selected provider and final artifact version.
+  cases, then rerun the complete group suite with the final artifact version.
 - Capture a UI/transcript trace and copy the measured result into REPORT B5.
-- Run the fixed adversarial suite with no provider errors, then fill REPORT B4a
-  from actual calls, tool results, and filesystem inspection.
