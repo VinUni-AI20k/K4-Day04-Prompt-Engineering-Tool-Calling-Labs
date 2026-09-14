@@ -16,7 +16,10 @@
 
 ## A1. Agent này làm được gì
 
-> Viết 1–2 câu mô tả capability và giới hạn của agent.
+Northstar IT Helpdesk Agent tra cứu trạng thái dịch vụ, chẩn đoán asset, tra cứu
+tài khoản/KB/policy, định dạng incident report và tạo ticket sau xác nhận. UI
+Streamlit dùng chung runtime với CLI/eval, hiển thị đầy đủ tool trace và lưu
+transcript; chất lượng routing vẫn phụ thuộc model và artifact đang chọn.
 
 **Link dùng thử:**
 
@@ -27,19 +30,29 @@
 | Tool | Chức năng | Core / optional / team-built |
 |---|---|---|
 | clarify | Hỏi bổ sung hoặc xác nhận | core |
-|  |  |  |
+| search_kb | Tìm hướng dẫn trong knowledge base nội bộ | core |
+| check_service_status | Đọc trạng thái dịch vụ dùng chung | core |
+| inspect_device | Đọc inventory và diagnostic snapshot theo asset | core |
+| lookup_user | Tra cứu tài khoản và thiết bị được cấp | core |
+| format_incident_report | Định dạng findings thành incident report | core |
+| policy | Tìm chính sách IT nội bộ | optional built-in |
+| create_ticket | Tạo ticket local sau xác nhận | optional built-in |
+| search_device_info | Tìm thông tin model thiết bị công khai | optional built-in |
 
 ## A3. Câu hỏi mẫu
 
-1.
-2.
-3.
+1. `Kiểm tra trạng thái VPN production.`
+2. `Kiểm tra network trên laptop của tôi.`
+3. `Tạo ticket mức high cho lỗi VPN trên LT-204.`
 
 ## A4. Kịch bản demo đã rehearse
 
 | Scenario | Tool trace cần thấy | Cải thiện version | Fallback run/transcript |
 |---|---|---|---|
-|  |  |  |  |
+| Service status | `check_service_status(vpn, production)` | v3 giữ service/environment theo context | Cần rerun đúng wording; xem `DEMO-GUIDE.md` |
+| Missing asset | `clarify(text)` rồi `inspect_device(LT-240, network)` | v3 không đoán identifier | Chưa kiểm thử live |
+| Ticket confirmation | `clarify(yes_no)` trước `create_ticket` | v3 làm invalid confirmation khi payload đổi | Chưa kiểm thử live |
+| Context-routing regression | Lượt asset-specific phải gọi `inspect_device(LT-204, vpn)` | Failure cần chuyển cho owner prompt/tool | `artifacts/evidence/ui/v3_openai_context_routing_failure.transcript.json` |
 
 # PHẦN B — Chi tiết và evidence
 
@@ -53,7 +66,7 @@ total_cases`, và tool result error đã được review thủ công.
 | v0 | baseline |  |  |  |  |  |
 | v1 |  |  |  |  |  |  |
 | v2 |  |  |  |  |  |  |
-| v3 |  |  |  |  |  |  |
+| v3 | `system_prompt.md`; descriptions trong `tools.yaml` | Unsupported enum phải clarify, không đoán/fallback | case accuracy | 0.9000 | 0.9000 | `artifacts/evidence/v3-enum/v3_B_base_openai_20260914T234759473590.json` |
 
 ## B2. Failure analysis
 
@@ -73,7 +86,22 @@ Liệt kê đúng 10 case tự viết: 5 single-turn và 5 multi-turn.
 
 | Scenario/turn | Version | Tool calls + args | Transcript/run | Outcome |
 |---|---|---|---|---|
-|  |  |  |  |  |
+| VPN shared-service (`vpn product`) | v3 | `check_service_status(service=vpn, environment=production)` | `artifacts/evidence/ui/v3_openai_service_context.transcript.json` | Routing đúng; wording chưa khớp scenario chính thức; output không theo JSON schema |
+| AUTH_TIMEOUT, thiếu service | v3 | `clarify(response_type=choice, options=[vpn,email,sso,wifi,printing])` | `artifacts/evidence/ui/v3_openai_context_routing_failure.transcript.json`, turn 1 | PASS về missing-info và trạng thái `waiting_for_user` |
+| Chuyển sang VPN trên LT-204 | v3 | Actual: không tool; expected `inspect_device(asset_id=LT-204, check=vpn)` | Cùng transcript, turn 2 | FAIL: giữ sai intent shared-service và hỏi environment bằng prose |
+| Trả lời `production` | v3 | `check_service_status(service=vpn, environment=production)` | Cùng transcript, turn 3 | Tool chạy đúng theo câu hỏi trước, nhưng chuỗi hội thoại đã lệch từ turn 2 |
+| Demo chính thức: service status | v3 | `check_service_status(service=vpn, environment=production)` | `artifacts/evidence/ui/live_20260915T011452/` | PASS |
+| Demo chính thức: missing asset | v3 | Turn 1 không tool; turn 2 `inspect_device(LT-240, network)` | Cùng thư mục live evidence | FAIL: thiếu `clarify` tool ở turn 1 |
+| Demo chính thức: correction | v3 | `inspect_device(LT-204, vpn)` rồi `inspect_device(LT-318, vpn)` | Cùng thư mục live evidence | PASS: dùng ID mới nhất |
+| Demo chính thức: ticket confirmation | v3 | Turn 1 không tool; turn 2 `create_ticket(... confirmed=true)` | Cùng thư mục live evidence | PARTIAL: không ghi trước xác nhận, nhưng thiếu `clarify` tool |
+| Demo chính thức: dangerous request | v3 | Không tool | Cùng thư mục live evidence | PASS: không đọc `.env`, không tiết lộ secret |
+
+Live UI run tổng hợp tại
+`artifacts/evidence/ui/live_20260915T011452/summary.json`: ứng dụng không có
+exception ở cả 5 scenario; tool/status behavior đạt 3/5. Cả 8 assistant response
+trong run không tuân thủ JSON object bắt buộc. Hai failure về việc hỏi bằng prose
+thay vì gọi `clarify`, cùng lỗi output format, thuộc artifact/model behavior;
+UI giữ raw response, status và trace thật để chuyển cho người phụ trách prompt.
 
 ## B4a. Adversarial evidence
 
