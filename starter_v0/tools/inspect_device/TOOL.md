@@ -13,3 +13,5 @@ side_effect: false
 Looks up one company asset and returns its stored diagnostic snapshot. A valid
 asset ID is required. Supported checks are all, network, vpn, security,
 hardware, and software.
+The model-facing declaration requires an explicit `check`: choose the narrowest
+matching subsystem, or `all` only for a general/full-device inspection.
