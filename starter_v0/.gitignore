@@ -5,7 +5,6 @@ __pycache__/
 .env
 .env.*
 !.env.example
+# runs/ and transcripts/ are tracked on purpose: they are required lab evidence.
 /tickets/
-/runs/
-/transcripts/
 /analysis/
