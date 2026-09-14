@@ -179,7 +179,7 @@ Sao chép mẫu dưới đây cho từng thành viên:
       `starter_v0/tools/create_ticket/tool.py`,
       `starter_v0/tools/search_device_info/tool.py`,
       `starter_v0/data/eval_adversarial.json`.
-- **Commit hash hoặc pull request:** Điền sau khi commit branch `contrib/VuDuyDiepAI`.
+- **Commit hash hoặc pull request:** `d1c29df` (security report), `05808f5` (provider model); branch `contrib/VuDuyDiepAI`.
 - **Một quyết định kỹ thuật tôi đã đưa ra và lý do:** Đánh giá `confirmed is True`
       thay vì truthiness để chặn chuỗi hoặc số giả mạo xác nhận; chặn identifier trước
       khi external search để dữ liệu nội bộ không rời khỏi hệ thống.
