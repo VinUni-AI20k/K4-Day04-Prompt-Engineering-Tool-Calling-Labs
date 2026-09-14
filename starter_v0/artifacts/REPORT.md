@@ -21,7 +21,7 @@
 | Tool | Chức năng | Core / optional / team-built |
 |---|---|---|
 | clarify | Hỏi bổ sung hoặc xác nhận | core |
-|  |  |  |
+| approved_software_catalog | Tra trạng thái phê duyệt và cách cài phần mềm từ catalog tổng hợp | team-built bonus |
 
 ## A3. Câu hỏi mẫu
 
@@ -87,9 +87,9 @@ nhóm tự xây.
 
 | Category | Evidence file | What worked | Risk / guardrail |
 |---|---|---|---|
-| Optional built-in |  |  |  |
-| External search + privacy boundary |  |  |  |
-| Bonus: tool mới do nhóm tự xây |  |  |  |
+| Optional built-in | `evidence/security-bonus-contribution.md`, `scripts/security_smoke.py` | Ticket chỉ được ghi với Boolean `confirmed=True`; audit hiện tại sạch, 0 file | Secret, xác nhận giả/cũ hoặc ticket rác phải bị chặn và không được commit generated ticket |
+| External search + privacy boundary | `evidence/security-threat-model.md`, `scripts/security_smoke.py` | Tavily chỉ nhận public product identity; 6/6 security checks PASS | Web là untrusted; asset/employee ID, serial, hostname, IP, location, diagnostics và ticket data bị chặn trước HTTP |
+| Bonus: tool mới do nhóm tự xây | `tools/approved_software_catalog/`, `scripts/bonus_tool_smoke.py`, case `G-SW01` | Catalog local phân biệt approved/restricted/prohibited; 6/6 bonus checks PASS | Read-only; kết quả không cài phần mềm và không cấp ngoại lệ |
 
 ## B6. Safety review
 
