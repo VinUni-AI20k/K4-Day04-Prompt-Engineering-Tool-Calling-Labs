@@ -1,25 +1,26 @@
-import os
-import sys
 import json
 import re
+import sys
 from datetime import datetime
 from pathlib import Path
 from typing import Any
+
 import streamlit as st
 
-# Đường dẫn thư mục gốc
-ROOT = Path(__file__).resolve().parent.parent if (Path(__file__).resolve().parent.parent / "chat.py").exists() else Path(__file__).resolve().parent
+# Thư mục gốc
+ROOT = Path(__file__).resolve().parent
 ARTIFACTS_DIR = ROOT / "artifacts"
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-# Tái sử dụng trực tiếp từ chat.py và các module của repo
+# Tái sử dụng từ chat.py và các module liên quan
 from chat import (
+    execute_tool_call,
+    now_iso,
     run_model_tool_loop,
+    safe_slug,
     trim_history,
     write_transcript,
-    safe_slug,
-    now_iso,
 )
 from env_loader import load_lab_env
 from providers import make_provider
@@ -32,23 +33,22 @@ load_lab_env(ROOT)
 st.set_page_config(
     page_title="Streamlit Live Chat - IT Helpdesk",
     page_icon="🤖",
-    layout="wide"
+    layout="wide",
 )
 
 # ----------------- SIDEBAR -----------------
 st.sidebar.title("⚙️ Cấu hình Agent")
 
 provider_choices = ["groq", "openrouter", "openai", "anthropic", "gemini", "9router"]
-default_provider_index = 0  # mặc định groq theo yêu cầu
-selected_provider_name = st.sidebar.selectbox("Provider", provider_choices, index=default_provider_index)
+selected_provider_name = st.sidebar.selectbox("Provider", provider_choices, index=0)
 
-# Khởi tạo provider để lấy default_model
+active_provider = None
+default_model_name = "qwen/qwen3.8-27b"
 try:
     active_provider = make_provider(selected_provider_name)
-    default_model_name = getattr(active_provider, "default_model", "qwen/qwen3.8-27b")
-except Exception as e:
-    active_provider = None
-    default_model_name = "qwen/qwen3.8-27b"
+    default_model_name = getattr(active_provider, "default_model", default_model_name)
+except Exception:
+    pass
 
 custom_model = st.sidebar.text_input("Model", value=default_model_name)
 version_label = st.sidebar.text_input("Version Label", value="v3")
@@ -61,6 +61,7 @@ tools_path = ARTIFACTS_DIR / "tools.yaml"
 
 st.sidebar.markdown("---")
 st.sidebar.subheader("📦 Artifacts Meta")
+meta_dict = {}
 try:
     artifact_version_info = build_artifact_version(version_label, system_prompt_path, tools_path)
     meta_dict = artifact_version_dict(artifact_version_info)
@@ -69,7 +70,6 @@ try:
     st.sidebar.text(f"Tools Hash:   {meta_dict.get('tools_hash', 'N/A')[:12]}...")
 except Exception as e:
     st.sidebar.warning(f"Lỗi đọc artifact: {e}")
-    meta_dict = {}
 
 if st.sidebar.button("🧹 New conversation", use_container_width=True):
     st.session_state.history = []
@@ -80,11 +80,10 @@ if st.sidebar.button("🧹 New conversation", use_container_width=True):
 
 # ----------------- SESSION STATE -----------------
 if "history" not in st.session_state:
-    st.session_state.history = []  # Lưu các turn [ {"role": "user"/"assistant", "content": "..."} ]
+    st.session_state.history = []
 if "turns_display" not in st.session_state:
-    st.session_state.turns_display = []  # Lưu dữ liệu hiển thị giao diện UI
+    st.session_state.turns_display = []
 
-# Khởi tạo đối tượng transcript đúng chuẩn format chat.py
 if "current_transcript" not in st.session_state or st.session_state.current_transcript is None:
     timestamp = datetime.now().strftime("%Y%m%dT%H%M%S%f")
     t_id = "_".join([safe_slug(version_label), safe_slug(selected_provider_name), timestamp])
@@ -135,18 +134,14 @@ for turn in st.session_state.turns_display:
         st.write(turn["user"])
 
     with st.chat_message("assistant"):
-        # Status Badge
         st_val = turn.get("status", "answered")
         if st_val == "answered":
             st.success(f"Status: `{st_val}`")
-        elif st_val == "waiting_for_user":
-            st.warning(f"Status: `{st_val}`")
-        elif st_val == "max_tool_rounds":
+        elif st_val in ("waiting_for_user", "max_tool_rounds"):
             st.warning(f"Status: `{st_val}`")
         elif st_val == "provider_error":
             st.error(f"Status: `{st_val}`")
 
-        # Chi tiết từng Round và Tool calls/results
         rounds = turn.get("rounds", [])
         for r in rounds:
             r_idx = r.get("round", 1)
@@ -157,9 +152,8 @@ for turn in st.session_state.turns_display:
                 t_name = call.get("name")
                 t_args = call.get("args")
 
-                # Tìm kết quả tương ứng trong round
                 matching_res = next((res for res in tool_results if res.get("tool") == t_name), None)
-                
+
                 with st.expander(f"🛠️ Round {r_idx}: `{t_name}`", expanded=False):
                     st.markdown("**Arguments:**")
                     st.json(t_args)
@@ -170,7 +164,6 @@ for turn in st.session_state.turns_display:
                             st.error(f"Lỗi Tool: {res_val['error']} - {res_val.get('message', '')}")
                         st.json(res_val)
 
-        # Hiển thị nội dung tin nhắn của Assistant
         render_assistant_reply(turn.get("assistant_text", ""))
 
 if st.session_state.transcript_path:
@@ -180,23 +173,12 @@ if st.session_state.transcript_path:
 user_text = st.chat_input("Nhập tin nhắn...")
 
 if user_text:
-    # 1. Hiển thị prompt user ngay lập tức
     with st.chat_message("user"):
         st.write(user_text)
 
-    # 2. Chuẩn bị tools và prompt
     system_prompt = system_prompt_path.read_text(encoding="utf-8")
     tool_declarations = load_tool_declarations(tools_path)
     openai_tools = to_openai_tools(tool_declarations)
-    
-    provider_inst = make_provider(selected_provider_name)
-    
-    # 3. Chuẩn bị messages theo trim_history
-    messages = [
-        {"role": "system", "content": system_prompt},
-        *trim_history(st.session_state.history, int(history_window)),
-        {"role": "user", "content": user_text},
-    ]
 
     turn_index = len(st.session_state.turns_display) + 1
     turn_record: dict[str, Any] = {
@@ -212,7 +194,13 @@ if user_text:
     with st.chat_message("assistant"):
         with st.spinner("Đang xử lý..."):
             try:
-                # Gọi ĐÚNG signature keyword-only của chat.py
+                provider_inst = make_provider(selected_provider_name)
+                messages = [
+                    {"role": "system", "content": system_prompt},
+                    *trim_history(st.session_state.history, int(history_window)),
+                    {"role": "user", "content": user_text},
+                ]
+
                 result = run_model_tool_loop(
                     provider=provider_inst,
                     messages=messages,
@@ -222,15 +210,13 @@ if user_text:
                 )
                 turn_record.update(result)
                 assistant_text = result.get("assistant_text", "")
-                
-                # Cập nhật lịch sử
+
                 st.session_state.history.append({"role": "user", "content": user_text})
                 st.session_state.history.append({"role": "assistant", "content": assistant_text})
-                
+
             except Exception as exc:
                 err_str = f"{type(exc).__name__}: {str(exc)}"
-                # Không hiển thị/log API key
-                if "api_key" in err_str.lower() or "authorization" in err_str.lower():
+                if "api_key" in err_str.lower() or "authorization" in err_str.lower() or "bearer" in err_str.lower():
                     err_str = f"{type(exc).__name__}: [REDACTED_API_KEY_ERROR]"
 
                 turn_record.update({
@@ -242,13 +228,11 @@ if user_text:
 
             turn_record["ended_at"] = now_iso()
 
-            # 4. Ghi transcript dùng write_transcript chuẩn của chat.py
             try:
                 st.session_state.current_transcript["turns"].append(turn_record)
                 write_transcript(st.session_state.transcript_path, st.session_state.current_transcript)
             except Exception as write_err:
                 st.error(f"Lỗi ghi transcript: {write_err}")
 
-            # 5. Lưu record vào danh sách hiển thị và refresh lại giao diện
             st.session_state.turns_display.append(turn_record)
             st.rerun()
