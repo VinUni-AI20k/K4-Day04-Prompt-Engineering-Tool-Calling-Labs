@@ -39,11 +39,27 @@ def load_tool_declarations(path: Path) -> list[dict[str, Any]]:
 
 
 def to_openai_tools(declarations: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    return [{
-        "type": "function",
-        "function": {
-            "name": item["name"],
-            "description": item.get("description", ""),
-            "parameters": item.get("parameters", {"type": "object", "properties": {}}),
-        },
-    } for item in declarations]
+    openai_tools = []
+    for item in declarations:
+        desc_parts = [item.get("description", "")]
+        
+        if "when_to_use" in item:
+            desc_parts.append("\nWHEN TO USE:\n- " + "\n- ".join(item["when_to_use"]))
+        if "when_NOT_to_use" in item:
+            desc_parts.append("\nWHEN NOT TO USE:\n- " + "\n- ".join(item["when_NOT_to_use"]))
+        if "boundaries" in item:
+            desc_parts.append("\nBOUNDARIES:")
+            for k, v in item["boundaries"].items():
+                desc_parts.append(f"- {k}: {v}")
+                
+        full_desc = "\n".join(desc_parts).strip()
+        
+        openai_tools.append({
+            "type": "function",
+            "function": {
+                "name": item["name"],
+                "description": full_desc,
+                "parameters": item.get("parameters", {"type": "object", "properties": {}}),
+            },
+        })
+    return openai_tools
