@@ -50,12 +50,12 @@ http://localhost:8501
 
 ## C2. Bản nháp self-reflection
 
-### Dang Huu Cuong - 2A202602572
+### Thân Tiến Đạt - 2A202603023
 
 - **Vai trò/phần việc được nhận:** D - UI & Report Lead.
 - **Những gì tôi đã thay đổi trong repo chung:** Xây dựng Streamlit UI để demo agent, hiển thị câu trả lời, tool calls, arguments, tool results, status, artifact version và transcript path. Tôi cũng thêm dependency Streamlit vào requirements.
 - **File hoặc artifact liên quan:** `starter_v0/app.py`, `starter_v0/requirements.txt`, `starter_v0/transcripts/ui_20260914T182119000929.transcript.json`.
-- **Commit hash hoặc pull request:** TODO: điền sau khi commit.
+- **Commit hash hoặc pull request:** PR từ nhánh `tiendat`; commit UI ban đầu `1dc0e48`.
 - **Một quyết định kỹ thuật tôi đã đưa ra và lý do:** Tôi tái sử dụng `run_model_tool_loop` từ `chat.py` để UI, CLI và eval evidence dùng chung cùng một behavior của agent.
 - **Khó khăn tôi gặp và cách tôi xử lý:** Report cần evidence dễ kiểm tra, nên tôi hiển thị từng tool round bằng expander và dùng JSON viewer cho tool calls/results.
 - **Điều tôi học được từ phần việc này:** UI của agent cần ưu tiên khả năng audit: người review phải thấy rõ tool nào được gọi, arguments nào được truyền và result nào hỗ trợ câu trả lời.
