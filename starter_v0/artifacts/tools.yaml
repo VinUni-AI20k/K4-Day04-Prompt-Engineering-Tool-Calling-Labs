@@ -8,7 +8,7 @@
 tools:
   # ---------------- Core tools ----------------
   - name: clarify
-    description: "Gửi một câu hỏi cho người dùng."
+    description: "Gửi câu hỏi để làm rõ yêu cầu người dùng."
     parameters:
       type: object
       properties:
@@ -25,7 +25,7 @@ tools:
         query: {type: string, default: "", description: "Nội dung cần tìm"}
         category: {type: string, enum: [all, vpn, email, wifi, printing, account, security, hardware, software, meeting_room], default: "all", description: "Nhóm hướng dẫn"}
         top_k: {type: integer, default: 3, description: "Số kết quả"}
-      required: [query]
+      required: []
 
   - name: check_service_status
     description: "Kiểm tra trạng thái một dịch vụ."
@@ -43,7 +43,7 @@ tools:
       properties:
         asset_id: {type: string, description: "Mã tài sản"}
         check: {type: string, enum: [all, network, vpn, security, hardware, software], default: "all", description: "Nhóm kiểm tra"}
-      required: [asset_id]
+      required: [asset_id, check]
 
   - name: lookup_user
     description: "Tra cứu người dùng trong danh bạ hỗ trợ."
