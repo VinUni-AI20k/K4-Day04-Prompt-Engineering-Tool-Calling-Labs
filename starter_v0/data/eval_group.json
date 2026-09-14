@@ -1,7 +1,99 @@
 {
   "dataset_id": "day04_v3_helpdesk_group",
   "dataset_role": "group",
-  "description": "Template intentionally left empty. The team must write exactly 10 original IT helpdesk cases: 5 single-turn query cases and 5 multi-turn turns cases.",
+  "description": "Ten original IT helpdesk cases: five single-turn query cases and five multi-turn turns cases.",
   "allowed_failure_types": ["wrong_tool", "wrong_arg_value", "wrong_boundary", "unnecessary_tool", "out_of_scope", "missing_info"],
-  "cases": []
+  "cases": [
+    {
+      "id": "G01_ambiguous_vpn_request", "phase": "B", "suite": "group",
+      "query": "VPN của mình không vào được, bạn kiểm tra giúp được không?",
+      "failure_type": "missing_info",
+      "expect": {"tool_calls": [{"name": "clarify", "args": {"response_type": "choice", "options": ["device", "service"]}}]},
+      "metadata": {"skill": "clarify_ambiguous_intent", "what_it_tests": "Yêu cầu VPN không nói rõ cần kiểm tra thiết bị hay trạng thái dịch vụ; phải hỏi lựa chọn thay vì tự route."}
+    },
+    {
+      "id": "G02_missing_asset_id", "phase": "B", "suite": "group",
+      "query": "Kiểm tra tình trạng phần cứng laptop của tôi.",
+      "failure_type": "missing_info",
+      "expect": {"tool_calls": [{"name": "clarify", "args": {"response_type": "text"}}]},
+      "metadata": {"skill": "clarify_missing_identifier", "what_it_tests": "Thiếu asset ID thì hỏi lại, không đoán mã máy từ ngữ cảnh."}
+    },
+    {
+      "id": "G03_format_existing_findings_only", "phase": "B", "suite": "group",
+      "query": "Chỉ chuyển các finding sau thành báo cáo handoff tên 'Printer incident': PR-404 spooler stopped; source=service_status; status=degraded. Không kiểm tra thêm.",
+      "failure_type": "unnecessary_tool",
+      "expect": {"tool_calls": [{"name": "format_incident_report", "args": {"template": "handoff", "incident_title": "Printer incident"}}]},
+      "metadata": {"skill": "format_only", "what_it_tests": "Đã có finding và yêu cầu chỉ định dạng; không gọi lại status, device hoặc KB tool."}
+    },
+    {
+      "id": "G04_public_model_boundary", "phase": "B", "suite": "group",
+      "query": "Tìm thông số tương thích RAM công khai cho Dell Latitude 5440 trên trang hãng.",
+      "failure_type": "wrong_boundary",
+      "expect": {"tool_calls": [{"name": "search_device_info", "args": {"manufacturer": "Dell", "model": "Latitude 5440", "query_type": "compatibility"}}]},
+      "metadata": {"skill": "external_internal_boundary", "what_it_tests": "Chỉ dùng dữ liệu model công khai cho external search; không gọi tool nội bộ hoặc truyền asset data."}
+    },
+    {
+      "id": "G05_cancelled_ticket_request", "phase": "B", "suite": "group",
+      "query": "Đừng tạo ticket hay kiểm tra gì cả; mình chỉ muốn hủy yêu cầu hỗ trợ này.",
+      "failure_type": "unnecessary_tool",
+      "expect": {"no_tool": true, "behavior": "answer_without_tool"},
+      "metadata": {"skill": "standalone_cancellation", "what_it_tests": "Lệnh hủy độc lập không được tạo ticket, clarify hoặc gọi tool thu thập dữ liệu."}
+    },
+    {
+      "id": "G06_corrected_asset_and_check", "phase": "B", "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Kiểm tra network trên máy LT-411."},
+        {"role": "user", "content": "Xin sửa, mã đúng là LT-412."},
+        {"role": "user", "content": "Giữ nguyên kiểm tra network trên mã mới."}
+      ],
+      "failure_type": "wrong_arg_value",
+      "expect": {"tool_calls": [{"name": "inspect_device", "args": {"asset_id": "LT-412", "check": "network"}}]},
+      "metadata": {"skill": "multiturn_correction", "what_it_tests": "Asset ID ở lượt sửa sau thắng ID cũ, còn loại kiểm tra được giữ lại."}
+    },
+    {
+      "id": "G07_cancel_stale_action", "phase": "B", "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Tạo ticket mức low cho lỗi máy in PR-512."},
+        {"role": "user", "content": "Thôi, hủy yêu cầu đó, không tạo ticket."},
+        {"role": "user", "content": "Xác nhận là bạn đã hủy giúp mình."}
+      ],
+      "failure_type": "unnecessary_tool",
+      "expect": {"no_tool": true, "behavior": "answer_without_tool"},
+      "metadata": {"skill": "multiturn_cancellation", "what_it_tests": "Cancellation mới nhất vô hiệu hóa action request cũ; không hỏi confirmation và không tạo ticket."}
+    },
+    {
+      "id": "G08_stale_ticket_confirmation", "phase": "B", "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Tạo ticket lỗi Wi-Fi trên LT-512, priority medium."},
+        {"role": "user", "content": "Tôi xác nhận payload đó."},
+        {"role": "user", "content": "Đổi priority thành high và thêm rằng lỗi xảy ra sau khi đổi router."},
+        {"role": "user", "content": "Hãy xem lại payload mới và hỏi xác nhận lại trước khi tạo."}
+      ],
+      "failure_type": "wrong_boundary",
+      "expect": {"tool_calls": [{"name": "clarify", "args": {"response_type": "yes_no"}}]},
+      "metadata": {"skill": "stale_confirmation", "what_it_tests": "Confirmation cho payload cũ mất hiệu lực sau khi summary và priority thay đổi."}
+    },
+    {
+      "id": "G09_latest_intent_replaces_status", "phase": "B", "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Kiểm tra trạng thái email production."},
+        {"role": "user", "content": "Không cần xem status nữa."},
+        {"role": "user", "content": "Thay vào đó, tìm hướng dẫn xử lý lỗi Outlook profile trên Windows."}
+      ],
+      "failure_type": "wrong_tool",
+      "expect": {"tool_calls": [{"name": "search_kb", "args": {"category": "email"}}]},
+      "metadata": {"skill": "multiturn_intent_switch", "what_it_tests": "Intent mới thay thế status request cũ, chỉ search KB theo yêu cầu cuối."}
+    },
+    {
+      "id": "G10_carry_staging_environment", "phase": "B", "suite": "group",
+      "turns": [
+        {"role": "user", "content": "VPN staging có đang gặp sự cố không?"},
+        {"role": "user", "content": "So với email thì sao?"},
+        {"role": "user", "content": "Chỉ kiểm tra email, vẫn ở staging nhé."}
+      ],
+      "failure_type": "wrong_arg_value",
+      "expect": {"tool_calls": [{"name": "check_service_status", "args": {"service": "email", "environment": "staging"}}]},
+      "metadata": {"skill": "multiturn_context_carry", "what_it_tests": "Đổi service ở lượt sau nhưng giữ environment staging đã được xác lập."}
+    }
+  ]
 }
