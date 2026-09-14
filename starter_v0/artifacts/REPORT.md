@@ -4,36 +4,46 @@
 
 - Team:
 - Members:
-- Provider/model:
+- Provider/model: OpenAI / gpt-4o-mini
 
 # PHẦN A — Giới thiệu agent
 
 ## A1. Agent này làm được gì
 
-> Viết 1–2 câu mô tả capability và giới hạn của agent.
+Northstar Helpdesk Agent là trợ lý IT service desk dùng dữ liệu giả lập để hỗ trợ kiểm tra trạng thái dịch vụ, chẩn đoán thiết bị, tra cứu nhân viên, tìm hướng dẫn KB/chính sách, format incident report và tạo ticket sau khi có xác nhận rõ ràng. Agent chỉ xử lý các yêu cầu trong phạm vi IT helpdesk, không tự đoán asset ID/employee ID, không yêu cầu hoặc lưu secret, và không gửi dữ liệu nội bộ ra công cụ external search.
 
 **Link dùng thử:**
 
-> URL:
+> URL: Demo local: http://localhost:8501 sau khi chạy `streamlit run app.py` trong thư mục `starter_v0`.
 
 ## A2. Tool agent có
 
 | Tool | Chức năng | Core / optional / team-built |
 |---|---|---|
 | clarify | Hỏi bổ sung hoặc xác nhận | core |
-|  |  |  |
+| search_kb | Tìm hướng dẫn trong IT knowledge base local | core |
+| check_service_status | Kiểm tra trạng thái dịch vụ dùng chung như VPN, email, SSO, Wi-Fi, printing | core |
+| inspect_device | Đọc inventory và diagnostic snapshot của một asset cụ thể | core |
+| lookup_user | Tra cứu directory record theo employee ID | core |
+| format_incident_report | Format các findings đã có thành incident report | core |
+| policy | Tìm trong chính sách IT nội bộ | optional built-in |
+| create_ticket | Tạo ticket local sau khi có xác nhận rõ ràng | optional built-in |
+| search_device_info | Tìm thông tin công khai về manufacturer/model trên web | optional built-in |
 
 ## A3. Câu hỏi mẫu
 
-1.
-2.
-3.
+1. Dịch vụ VPN production hiện có đang gặp sự cố không?
+2. Kiểm tra riêng kết nối VPN trên LT-204.
+3. VPN trên LT-204 lỗi; kiểm tra cả trạng thái VPN production và máy đó.
+4. Tạo ticket mức high cho lỗi VPN trên LT-204 giúp mình.
+5. Kiểm tra Wi-Fi trên laptop của mình giúp nhé.
 
 ## A4. Kịch bản demo đã rehearse
 
 | Scenario | Tool trace cần thấy | Cải thiện version | Fallback run/transcript |
 |---|---|---|---|
-|  |  |  |  |
+| Kiểm tra trạng thái VPN production bằng Streamlit UI | check_service_status(service=vpn, environment=production) | Evidence UI baseline v0 | transcripts/ui_20260914T182119000929.transcript.json |
+| Kiểm tra diagnostic VPN của LT-204 bằng CLI chat | inspect_device(asset_id=LT-204, check=vpn) | Evidence CLI baseline v0 | transcripts/v0_openai_20260914T182247374274.transcript.json |
 
 # PHẦN B — Chi tiết và evidence
 
@@ -67,7 +77,8 @@ Liệt kê đúng 10 case tự viết: 5 single-turn và 5 multi-turn.
 
 | Scenario/turn | Version | Tool calls + args | Transcript/run | Outcome |
 |---|---|---|---|---|
-|  |  |  |  |  |
+| UI turn 1: Kiểm tra trạng thái VPN production | v0 | check_service_status(service=vpn, environment=production) | transcripts/ui_20260914T182119000929.transcript.json | Agent route đúng sang tool kiểm tra trạng thái dịch vụ dùng chung, trả về VPN degraded và dẫn incident INC-1042. |
+| CLI chat: Kiểm tra VPN trên LT-204 | v0 | inspect_device(asset_id=LT-204, check=vpn) | transcripts/v0_openai_20260914T182247374274.transcript.json | Agent route đúng sang tool inspect thiết bị với asset LT-204 và phạm vi diagnostic là VPN. |
 
 ## B4a. Adversarial evidence
 
