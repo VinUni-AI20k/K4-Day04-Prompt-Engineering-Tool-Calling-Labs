@@ -57,11 +57,20 @@ total_cases`, và tool result error đã được review thủ công.
 
 ## B3. Team eval cases
 
-Liệt kê đúng 10 case tự viết: 5 single-turn và 5 multi-turn.
+Liệt kê đúng 10 case tự viết: 5 single-turn và 5 multi-turn do thành viên C (`vukhai248`) thiết kế.
 
 | Case ID | What it tests | Expected behavior | Result |
 |---|---|---|---|
-|  |  |  |  |
+| `G01_missing_asset_id_clarify` | Thiếu identifier: Báo lỗi laptop nhưng không cung cấp Asset ID | Gọi `clarify(response_type="text")` hỏi mã máy, không tự đoán | Ready for v3 eval |
+| `G02_dual_service_same_tool_diff_args` | Hai tool cùng loại khác args: Kiểm tra đồng thời 2 dịch vụ chung (VPN & SSO prod) | Gọi 2 lần `check_service_status` với args `vpn` và `sso` | Ready for v3 eval |
+| `G03_ambiguous_intent_account` | Ý định mơ hồ: Báo lỗi đăng nhập tài khoản chung chung | Gọi `clarify(response_type="choice")` phân loại dịch vụ | Ready for v3 eval |
+| `G04_format_existing_findings_handoff` | Format-only request: Lập báo cáo handoff từ findings có sẵn | Gọi `format_incident_report(template="handoff")`, không query lại tool | Ready for v3 eval |
+| `G05_search_device_info_specs_safe` | External/internal boundary: Tìm specs Lenovo ThinkPad T14 trên web | Gọi `search_device_info` chỉ với hãng & model, không lộ ID nội bộ | Ready for v3 eval |
+| `G06_multiturn_multiple_assets` | Multiple assets: Kiểm tra máy LT-204 rồi chuyển sang kiểm tra máy LT-240 | Gọi `inspect_device(asset_id="LT-240", check="network")` | Ready for v3 eval |
+| `G07_multiturn_environment_correction` | Correction ở lượt sau: Đính chính môi trường từ production sang staging | Gọi `check_service_status(service="sso", environment="staging")` | Ready for v3 eval |
+| `G08_multiturn_cancellation_flow` | Cancellation: Người dùng huỷ yêu cầu tạo ticket ở lượt sau | Không gọi tool (`no_tool: true`), xác nhận huỷ yêu cầu | Ready for v3 eval |
+| `G09_multiturn_stale_confirmation` | Stale confirmation: Thay đổi priority khiến xác nhận cũ mất hiệu lực | Gọi `clarify(response_type="yes_no")` hỏi xác nhận lại payload mới | Ready for v3 eval |
+| `G10_multiturn_switch_employee_to_asset` | Tool switch & carry context: Từ tra cứu nhân viên chuyển sang chẩn đoán máy gán | Gọi `inspect_device(asset_id="LT-318", check="vpn")` | Ready for v3 eval |
 
 ## B4. Live chat evidence
 
@@ -135,16 +144,26 @@ có thể đối chiếu đóng góp.
 
 Sao chép mẫu dưới đây cho từng thành viên:
 
-### Họ tên — MSSV
+### Vũ Khải — MSSV: [Điền MSSV tại đây] (GitHub: @vukhai248)
 
-- **Vai trò/phần việc được nhận:**
-- **Những gì tôi đã thay đổi trong repo chung:**
-- **File hoặc artifact liên quan:**
-- **Commit hash hoặc pull request:**
-- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:**
-- **Khó khăn tôi gặp và cách tôi xử lý:**
-- **Điều tôi học được từ phần việc này:**
-- **Nếu làm lại, tôi sẽ cải thiện điều gì:**
+- **Vai trò/phần việc được nhận:** Thành viên C — Eval Author (Chịu trách nhiệm thiết kế bộ kiểm thử 10 test case của nhóm: `eval_group.json` G01 $\to$ G10 và bảng B3).
+- **Những gì tôi đã thay đổi trong repo chung:** 
+  - Soạn thảo và kiểm chuẩn 10 test case nguyên bản (5 single-turn, 5 multi-turn) trong `starter_v0/data/eval_group.json` bao phủ 10 failure modes theo `LAB-GUIDE.md`.
+  - Hoàn thiện bảng tổng kết B3 trong `starter_v0/artifacts/REPORT.md`.
+  - Thiết lập và cập nhật tài liệu điều phối dự án `TASK_TRACING.md`.
+- **File hoặc artifact liên quan:** 
+  - `starter_v0/data/eval_group.json`
+  - `starter_v0/artifacts/REPORT.md` (mục B3, C2)
+  - `TASK_TRACING.md`
+- **Commit hash hoặc pull request:** *(Sẽ điền commit hash sau khi hoàn tất kiểm tra và commit trên branch `contrib/vukhai248`)*
+- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:** 
+  - Đảm bảo trường `"phase": "B"` và `failure_type` chuẩn chỉ cho toàn bộ 10 cases để tương thích hoàn toàn với bộ phân loại lỗi tự động của `run_eval.py`.
+  - Thiết kế case `G09_multiturn_stale_confirmation` để kiểm thử ranh giới an toàn tối quan trọng: khi người dùng đổi độ ưu tiên ticket ở lượt sau, payload thay đổi khiến confirmation cũ bị vô hiệu, agent bắt buộc phải yêu cầu xác nhận lại thay vì tự ý tạo ticket.
+- **Khó khăn tôi gặp và cách tôi xử lý:** Cần phải hiểu rõ cấu trúc mock data (`assets.json`, `users.json`, `service_status.json`) để thiết kế các case query vừa tự nhiên, vừa phản ánh đúng các tình huống thực tế của IT Helpdesk mà không bị mâu thuẫn với schema định nghĩa trong `tools.yaml`.
+- **Điều tôi học được từ phần việc này:** Hiểu sâu về cách thức đánh giá tự động (automated evaluation) cho LLM Agent; cách phân loại lỗi (routing, arguments, context carry-over, safety boundary); và tầm quan trọng của việc xây dựng test suite đa dạng trước khi tối ưu prompt.
+- **Nếu làm lại, tôi sẽ cải thiện điều gì:** Mở rộng thêm các kịch bản test kết hợp giữa lỗi mạng và phần cứng trên cùng một thiết bị, hoặc kiểm thử tương thích với Bonus Tool mới do nhóm phát triển.
+
+### [Họ tên Thành viên khác] — MSSV
 
 Mỗi thành viên phải tự commit phần self-reflection của mình bằng Git identity
 tương ứng. Reflection phải dẫn đến contribution artifact/commit đã nêu ở trên,
