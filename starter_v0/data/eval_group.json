@@ -1,7 +1,96 @@
 {
   "dataset_id": "day04_v3_helpdesk_group",
   "dataset_role": "group",
-  "description": "Template intentionally left empty. The team must write exactly 10 original IT helpdesk cases: 5 single-turn query cases and 5 multi-turn turns cases.",
+  "description": "Team-authored evaluation: 5 single-turn and 5 multi-turn IT helpdesk cases covering routing, missing information, correction, context carry-over, cancellation, and tool switching.",
   "allowed_failure_types": ["wrong_tool", "wrong_arg_value", "wrong_boundary", "unnecessary_tool", "out_of_scope", "missing_info"],
-  "cases": []
+  "cases": [
+    {
+      "id": "G01_shared_email_status", "phase": "B", "suite": "group",
+      "query": "Kiểm tra trạng thái email production giúp tôi.",
+      "failure_type": "wrong_tool",
+      "expect": {"tool_calls": [{"name": "check_service_status", "args": {"service": "email", "environment": "production"}}]},
+      "metadata": {"skill": "shared_service_routing", "difficulty": "easy", "what_it_tests": "Shared service phải dùng status tool với environment rõ ràng."}
+    },
+    {
+      "id": "G02_asset_network_check", "phase": "B", "suite": "group",
+      "query": "Kiểm tra network trên máy LT-318.",
+      "failure_type": "wrong_arg_value",
+      "expect": {"tool_calls": [{"name": "inspect_device", "args": {"asset_id": "LT-318", "check": "network"}}]},
+      "metadata": {"skill": "asset_diagnostic", "difficulty": "easy", "what_it_tests": "Asset cụ thể phải giữ đúng asset ID và diagnostic group."}
+    },
+    {
+      "id": "G03_vpn_kb_search", "phase": "B", "suite": "group",
+      "query": "Tìm hướng dẫn xử lý VPN certificate trên macOS.",
+      "failure_type": "wrong_tool",
+      "expect": {"tool_calls": [{"name": "search_kb", "args": {"category": "vpn"}}]},
+      "metadata": {"skill": "knowledge_routing", "difficulty": "medium", "what_it_tests": "Troubleshooting procedure phải dùng local knowledge base."}
+    },
+    {
+      "id": "G04_missing_employee_id", "phase": "B", "suite": "group",
+      "query": "Tra cứu tài khoản của tôi trong danh bạ hỗ trợ.",
+      "failure_type": "missing_info",
+      "expect": {"tool_calls": [{"name": "clarify", "args": {"response_type": "text"}}]},
+      "metadata": {"skill": "missing_identifier", "difficulty": "medium", "what_it_tests": "Không được đoán employee ID khi người dùng chưa cung cấp."}
+    },
+    {
+      "id": "G05_outside_domain", "phase": "B", "suite": "group",
+      "query": "Viết giúp tôi một game bằng Python.",
+      "failure_type": "out_of_scope",
+      "expect": {"no_tool": true, "behavior": "refuse"},
+      "metadata": {"skill": "scope_boundary", "difficulty": "easy", "what_it_tests": "Yêu cầu ngoài service desk không được gọi tool."}
+    },
+    {
+      "id": "G06_carry_staging_environment", "phase": "B", "suite": "group",
+      "turns": [
+        {"role": "user", "content": "VPN staging có hoạt động không?"},
+        {"role": "user", "content": "Kiểm tra thêm email nhé, vẫn staging."}
+      ],
+      "failure_type": "wrong_arg_value",
+      "expect": {"tool_calls": [{"name": "check_service_status", "args": {"service": "email", "environment": "staging"}}]},
+      "metadata": {"skill": "multiturn_context_carry", "difficulty": "medium", "what_it_tests": "Giữ environment từ context khi service thay đổi."}
+    },
+    {
+      "id": "G07_latest_asset_correction", "phase": "B", "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Kiểm tra security cho máy LT-204."},
+        {"role": "user", "content": "Sửa lại, asset đúng là LT-240."}
+      ],
+      "failure_type": "wrong_arg_value",
+      "expect": {"tool_calls": [{"name": "inspect_device", "args": {"asset_id": "LT-240", "check": "security"}}]},
+      "metadata": {"skill": "multiturn_correction", "difficulty": "medium", "what_it_tests": "Thông tin asset mới nhất thắng thông tin cũ."}
+    },
+    {
+      "id": "G08_cancel_ticket_request", "phase": "B", "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Tạo ticket lỗi VPN cho LT-204."},
+        {"role": "user", "content": "Thôi, hủy yêu cầu tạo ticket."}
+      ],
+      "failure_type": "unnecessary_tool",
+      "expect": {"no_tool": true, "behavior": "cancel"},
+      "metadata": {"skill": "multiturn_cancellation", "difficulty": "medium", "what_it_tests": "Cancellation mới nhất phải ngăn write action."}
+    },
+    {
+      "id": "G09_switch_status_to_kb", "phase": "B", "suite": "group",
+      "turns": [
+        {"role": "user", "content": "VPN production có đang gặp sự cố không?"},
+        {"role": "user", "content": "Không cần status nữa, tìm hướng dẫn Wi-Fi Windows."}
+      ],
+      "failure_type": "wrong_tool",
+      "expect": {"tool_calls": [{"name": "search_kb", "args": {"category": "wifi"}}]},
+      "metadata": {"skill": "multiturn_intent_switch", "difficulty": "medium", "what_it_tests": "Intent mới thay thế yêu cầu status cũ."}
+    },
+    {
+      "id": "G10_parallel_triage", "phase": "B", "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Tôi đang gặp vấn đề với VPN."},
+        {"role": "user", "content": "Kiểm tra VPN production và chẩn đoán VPN trên LT-318."}
+      ],
+      "failure_type": "wrong_tool",
+      "expect": {"tool_calls": [
+        {"name": "check_service_status", "args": {"service": "vpn", "environment": "production"}},
+        {"name": "inspect_device", "args": {"asset_id": "LT-318", "check": "vpn"}}
+      ]},
+      "metadata": {"skill": "parallel_triage", "difficulty": "hard", "what_it_tests": "Shared service và asset diagnostic cần được gọi song song với args riêng."}
+    }
+  ]
 }

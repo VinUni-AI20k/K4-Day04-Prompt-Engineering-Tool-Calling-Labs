@@ -5,7 +5,7 @@ kind: local_knowledge
 provider: markdown_folder
 requires_env: []
 inputs: [query, policy_area, top_k]
-outputs: [results, freshness, trust_boundary]
+outputs: [results, freshness, trust_boundary, untrusted_text]
 side_effect: false
 ---
 # policy

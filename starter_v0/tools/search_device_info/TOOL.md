@@ -5,7 +5,7 @@ kind: live_api
 provider: Tavily Search API
 requires_env: [TAVILY_API_KEY]
 inputs: [manufacturer, model, query_type, max_results]
-outputs: [items, query, official_domains, external_data_notice]
+outputs: [items, query, official_domains, external_data_notice, trust_boundary]
 side_effect: false
 ---
 # search_device_info
