@@ -37,13 +37,13 @@ tools:
       required: [service, environment]
 
   - name: inspect_device
-    description: "Chẩn đoán một asset cụ thể có ID user đã cung cấp. Laptop cần LT-<digits>; hỗ trợ DT và PR khi được nêu rõ. Không dùng EMP ID hoặc tự kiểm tra khi chỉ hỏi danh sách thiết bị được cấp. Thiếu ID thì clarify. Luôn truyền check theo vấn đề đang hỏi."
+    description: "Chẩn đoán một asset cụ thể có ID user đã cung cấp. Laptop cần LT-<digits>; hỗ trợ DT và PR khi được nêu rõ. Không dùng EMP ID hoặc tự kiểm tra khi chỉ hỏi danh sách thiết bị được cấp. Thiếu ID thì clarify."
     parameters:
       type: object
       properties:
         asset_id: {type: string, pattern: '^(LT|DT|PR)-[0-9]+$', description: "Mã asset user cung cấp; tuyệt đối không phải EMP ID"}
-        check: {type: string, enum: [all, network, vpn, security, hardware, software], description: "Wi-Fi/kết nối=network; VPN hoặc certificate VPN=vpn; bảo mật=security; linh kiện=hardware; ứng dụng=software; tổng thể=all"}
-      required: [asset_id, check]
+        check: {type: string, enum: [all, network, vpn, security, hardware, software], default: "all", description: "Nhóm kiểm tra"}
+      required: [asset_id]
 
   - name: lookup_user
     description: "Tra tài khoản và danh sách thiết bị được cấp bằng employee ID. Chỉ cần tool này khi hỏi thiết bị được cấp theo nhân viên, không gọi inspect_device nếu không yêu cầu diagnostic. Thiếu employee ID thì clarify."

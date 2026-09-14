@@ -1,7 +1,8 @@
 # Day 04 Lab v3 Report — IT Helpdesk Agent
 
-> V1 đã có evidence: xem [V1-REVIEW.md](V1-REVIEW.md). Base: 30/30;
-> adversarial của bản cuối: 10/12, còn A04/A10. Các phần v2/v3 bên dưới
+> V1 đã có evidence: xem [V1-REVIEW.md](V1-REVIEW.md). Bản đã đo đạt base 30/30,
+> adversarial 10/12, còn A04/A10. Sau đó đã hoàn lại Case 6 cho bạn B;
+> schema hiện tại chưa chạy lại model eval. Các phần v2/v3 bên dưới
 > vẫn là template, chưa được thực hiện trong thay đổi này.
 
 ## Team

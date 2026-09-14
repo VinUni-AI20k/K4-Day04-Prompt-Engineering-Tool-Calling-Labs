@@ -1,5 +1,13 @@
 # V1 — routing, missing information and confirmation
 
+> Scope correction after evaluation: Case 6 (changes to inspect_device.check in
+> tools.yaml) also belongs to contributor B. Its check declaration and required
+> list have been restored to baseline in the active schema. Case 7's query
+> requirement remains unchanged. The results and snapshots below describe the
+> previously evaluated artifact, not the active schema after this correction.
+> The corrected schema has passed local contract checks but has not been
+> re-evaluated against the model.
+
 Scope: fix the nine failures observed in the existing v0 base run. Runtime,
 fixed eval datasets and other contributors' branches remain unchanged.
 Per user clarification, removing `search_kb.query` from `required` belongs to
