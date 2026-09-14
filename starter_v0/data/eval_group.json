@@ -3,5 +3,222 @@
   "dataset_role": "group",
   "description": "Template intentionally left empty. The team must write exactly 10 original IT helpdesk cases: 5 single-turn query cases and 5 multi-turn turns cases.",
   "allowed_failure_types": ["wrong_tool", "wrong_arg_value", "wrong_boundary", "unnecessary_tool", "out_of_scope", "missing_info"],
-  "cases": []
+  "cases": [
+    {
+      "id": "G01_missing_asset_clarify",
+      "phase": "B",
+      "suite": "group",
+      "query": "Kiểm tra kết nối Wi-Fi trên máy tính của tôi.",
+      "failure_type": "missing_info",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "clarify",
+            "args": {"response_type": "text"}
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "missing_asset_identifier",
+        "difficulty": "medium",
+        "what_it_tests": "Thiếu asset ID phải hỏi lại, không được tự đoán thiết bị."
+      }
+    },
+    {
+      "id": "G02_ambiguous_policy_or_status",
+      "phase": "B",
+      "suite": "group",
+      "query": "VPN của công ty có vấn đề gì theo chính sách không?",
+      "failure_type": "missing_info",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "clarify",
+            "args": {"response_type": "choice"}
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "ambiguous_policy_status",
+        "difficulty": "hard",
+        "what_it_tests": "Phải hỏi người dùng muốn kiểm tra trạng thái VPN hay tìm chính sách VPN."
+      }
+    },
+    {
+      "id": "G03_out_of_scope_refuse",
+      "phase": "B",
+      "suite": "group",
+      "query": "Hãy lập cho tôi kế hoạch tập gym trong 12 tuần.",
+      "failure_type": "out_of_scope",
+      "expect": {
+        "no_tool": true,
+        "behavior": "refuse"
+      },
+      "metadata": {
+        "skill": "out_of_scope",
+        "difficulty": "easy",
+        "what_it_tests": "Yêu cầu ngoài phạm vi IT helpdesk phải bị từ chối và không gọi tool."
+      }
+    },
+    {
+      "id": "G04_missing_employee_clarify",
+      "phase": "B",
+      "suite": "group",
+      "query": "Cho tôi biết các thiết bị được cấp cho nhân viên mới bên Finance.",
+      "failure_type": "missing_info",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "clarify",
+            "args": {"response_type": "text"}
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "missing_employee_identifier",
+        "difficulty": "medium",
+        "what_it_tests": "Tên nhóm và mô tả nhân viên không thay thế được employee ID."
+      }
+    },
+    {
+      "id": "G05_missing_model_clarify",
+      "phase": "B",
+      "suite": "group",
+      "query": "Tìm driver chính thức cho laptop Lenovo của tôi.",
+      "failure_type": "missing_info",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "clarify",
+            "args": {"response_type": "text"}
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "missing_public_model",
+        "difficulty": "medium",
+        "what_it_tests": "External search cần model công khai, không được tự đoán model."
+      }
+    },
+    {
+      "id": "G06_add_asset_after_clarification",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Kiểm tra phần mềm trên máy tính của tôi."},
+        {"role": "user", "content": "Mã asset là DT-087."},
+        {"role": "user", "content": "Chỉ kiểm tra software trên đúng máy đó."}
+      ],
+      "failure_type": "missing_info",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "inspect_device",
+            "args": {"asset_id": "DT-087", "check": "software"}
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "multiturn_add_asset",
+        "difficulty": "hard",
+        "what_it_tests": "Ghi nhớ asset ID được bổ sung và sử dụng đúng check ở lượt cuối."
+      }
+    },
+    {
+      "id": "G07_correction_turn2",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Tìm policy về quyền truy cập tài khoản."},
+        {"role": "user", "content": "Xin lỗi, tôi muốn policy về bảo mật dữ liệu."},
+        {"role": "user", "content": "Chỉ trả lời dựa trên data privacy policy."}
+      ],
+      "failure_type": "wrong_arg_value",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "policy",
+            "args": {"policy_area": "data_privacy"}
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "multiturn_policy_correction",
+        "difficulty": "hard",
+        "what_it_tests": "Thông tin được sửa ở lượt sau phải thay thế policy area ban đầu."
+      }
+    },
+    {
+      "id": "G08_cancel_pending_action",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Tạo ticket mức medium cho lỗi máy in PR-404."},
+        {"role": "user", "content": "Thôi, tôi không muốn tạo ticket nữa."},
+        {"role": "user", "content": "Chỉ xác nhận rằng yêu cầu đã được hủy."}
+      ],
+      "failure_type": "unnecessary_tool",
+      "expect": {
+        "no_tool": true,
+        "behavior": "answer_without_tool"
+      },
+      "metadata": {
+        "skill": "multiturn_cancellation",
+        "difficulty": "hard",
+        "what_it_tests": "Yêu cầu hủy mới nhất phải ngăn cả clarify và create_ticket."
+      }
+    },
+    {
+      "id": "G09_inspect_then_format",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Kiểm tra network của asset LT-318."},
+        {"role": "user", "content": "Sau khi có kết quả, hãy chuẩn bị báo cáo."},
+        {"role": "user", "content": "Hãy kiểm tra network của LT-318, sau đó dùng findings vừa lấy được để format thành technical report tên 'LT-318 network review'."}
+      ],
+      "failure_type": "wrong_tool",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "inspect_device",
+            "args": {"asset_id": "LT-318", "check": "network"}
+          },
+          {
+            "name": "format_incident_report",
+            "args": {"template": "technical", "incident_title": "LT-318 network review"}
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "multiturn_inspect_format",
+        "difficulty": "hard",
+        "what_it_tests": "Thu thập evidence trước, sau đó dùng findings để format report."
+      }
+    },
+    {
+      "id": "G10_add_employee_then_lookup",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Tra cứu tài khoản của nhân viên trong nhóm Engineering."},
+        {"role": "user", "content": "Employee ID là EMP-1008."},
+        {"role": "user", "content": "Chỉ cho biết directory record của người đó."}
+      ],
+      "failure_type": "missing_info",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "lookup_user",
+            "args": {"employee_id": "EMP-1008"}
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "multiturn_add_employee_id",
+        "difficulty": "hard",
+        "what_it_tests": "Sau khi được bổ sung employee ID, agent phải lookup đúng người dùng."
+      }
+    }
+  ]
 }
