@@ -42,7 +42,7 @@ tools:
       type: object
       properties:
         asset_id: {type: string, description: "Mã tài sản"}
-        check: {type: string, enum: [all, network, vpn, security, hardware, software], default: "all", description: "Only a supported check. If the user explicitly chooses any other value, do not call this tool: call clarify choice with all six enum options in schema order. Never pass an invalid value, map it to a similar check or replace it with all."}
+        check: {type: string, enum: [all, network, vpn, security, hardware, software], default: "all", description: "Nhóm kiểm tra"}
       required: [asset_id, check]
 
   - name: lookup_user
@@ -50,7 +50,7 @@ tools:
     parameters:
       type: object
       properties:
-        employee_id: {type: string, description: "Employee ID actually supplied by the user in relevant conversation context. Never invent an EMP ID or substitute a department/person. If missing, call clarify response_type=text to request it instead of calling lookup_user."}
+        employee_id: {type: string, description: "Mã nhân viên"}
       required: [employee_id]
 
   - name: format_incident_report

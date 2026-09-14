@@ -26,7 +26,12 @@ arguments; hỏi lại khi demo/QA mơ hồ thuộc v3.
 - Case 2 và 9 (M09): xét lượt cuối và ngữ cảnh thuộc v3.
 - Case 3: thiếu thông tin gọi clarify thuộc v3.
 - Case 4: xác nhận action để nhóm context/clarify và an toàn, không sửa ở v1.
-- Case 5 và 8 (H19): hỏi rõ service/environment mơ hồ thuộc v3.
+- Case 5: hỏi rõ service/environment thiếu hoặc mơ hồ thuộc v3. Trạng thái
+  thực tế là kết quả tool, không phải thông tin người dùng cần biết trước.
+- Case 8 (H19): rule chung v3 cho mọi lựa chọn ngoài enum. Nếu schema chỉ có
+  a/b/c nhưng người dùng chọn d, gọi clarify choice với tập hợp hợp lệ; không
+  đoán lựa chọn gần nhất hoặc lấy lại giá trị cũ trước correction. Giữ nguyên
+  các enum của v2; chỉ làm rõ hành vi hỏi lại qua prompt/description.
 - Case 6: check trong tools.yaml thuộc v2, bạn B phụ trách.
 - Case 7 (H17): bỏ query khỏi required do bạn B phụ trách; không sửa ở đây.
 
@@ -43,6 +48,9 @@ V3 bổ sung prompt về context, clarify và template; làm rõ description c�
 clarify, status, create_ticket và format_incident_report. Schema v3 yêu cầu
 response_type để câu hỏi có kiểu rõ ràng; bỏ default production và yêu cầu
 environment để tránh dùng mặc định thay cho việc hỏi lại. Giữ nguyên tất cả
-enums và nguyên trạng các declaration inspect_device/search_kb từ v2.
+enums và phần cấu trúc parameters của inspect_device/search_kb từ v2.
+Đợt bổ sung Case 8 làm rõ description của inspect_device/check, nhưng không
+đổi enum, default hay required của bạn B.
 
 Điểm và giới hạn của v3 được ghi riêng trong [V3-REVIEW.md](V3-REVIEW.md).
+Đợt đối chiếu Case 1–5/8/9 mới nhất: [V3-ENUM-REVIEW.md](V3-ENUM-REVIEW.md).

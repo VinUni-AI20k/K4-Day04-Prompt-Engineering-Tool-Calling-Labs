@@ -1,5 +1,9 @@
 # V3 — Context & Clarify
 
+> Báo cáo này ghi kết quả tại commit 24bc3e7. Đợt bổ sung rule chung cho enum
+> ngoài lựa chọn được ghi trong [V3-ENUM-REVIEW.md](V3-ENUM-REVIEW.md);
+> không dùng điểm dưới đây thay cho kết quả của artifact mới.
+
 V3 được phát triển trên nhánh `phuc`, từ v2 đã merge vào `main` tại `08da03c`.
 Giữ nguyên declaration của `inspect_device` và `search_kb`, gồm hai thay đổi
 của bạn B: required `check` và bỏ required `query`. Không sửa runtime hoặc
