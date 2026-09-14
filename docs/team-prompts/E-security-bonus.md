@@ -66,7 +66,7 @@ Bonus chỉ được tính khi có **đủ**:
   - `fix(tools): block <...> in <tool>` (nếu có)
   - `feat(tools): add <bonus_tool> with mock data and smoke test`
   - `docs(security): security review findings`
-- Push `contrib/DuyBach2003`, mở PR vào `main`, mô tả findings + test output.
+- Push `DoanDuyBach_2A202602515`, mở PR vào `main`, mô tả findings + test output.
 
 ### 5. Góp nội dung REPORT (gửi D tổng hợp)
 - B5 (optional/bonus evidence), B6 (safety review — trả lời 4 câu hỏi bằng evidence), dòng security trong B7.
@@ -79,8 +79,8 @@ Bonus chỉ được tính khi có **đủ**:
 - Nếu một fix cần đổi behavior mà eval đang dựa vào, dừng lại và hỏi tôi.
 
 ## Definition of done
-- [ ] Test security deterministic pass; mọi lỗ hổng tìm được có fix + test hoặc được ghi rõ là giới hạn.
-- [ ] `docs/security-review.md` có findings truy ngược tới run/case/file.
+- [x] Test security deterministic pass; mọi lỗ hổng tìm được có fix + test hoặc được ghi rõ là giới hạn.
+- [x] `docs/security-review.md` có findings truy ngược tới run/case/file.
 - [ ] (Bonus) tool mới đủ checklist ở mục 3.
-- [ ] `tickets/` sạch; không có secret trong repo.
-- [ ] PR mở vào `main` với commit của `DuyBach2003`.
+- [x] `tickets/` sạch; không có secret trong repo.
+- [x] PR mở vào `main` với commit của `DuyBach2003`.
