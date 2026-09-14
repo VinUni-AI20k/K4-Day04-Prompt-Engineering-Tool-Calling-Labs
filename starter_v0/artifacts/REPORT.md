@@ -249,25 +249,28 @@ có thể đối chiếu đóng góp.
 
 Sao chép mẫu dưới đây cho từng thành viên:
 
-### Lương Khánh Toàn — 2A202602836
+### Lương Quang Huy — 2A202602982
 
-- **Vai trò/phần việc được nhận:** C (Eval & Red-Team Engineer).
+- **Vai trò/phần việc được nhận:** B (Tool & Schema Engineer) — Quản lý `tools.yaml`, chuẩn hóa enums/arguments, đồng bộ tool name, cấu hình và bảo vệ ranh giới Tavily Search API.
 - **Những gì tôi đã thay đổi trong repo chung:**
-  + Thiết kế và hiện thực hóa đầy đủ 10 test cases (`G01` → `G10`) trong `starter_v0/data/eval_group.json`, gồm 5 single-turn và 5 multi-turn, bao phủ toàn diện các ranh giới: ambiguous intent, missing identifier, specific argument extraction, format-only request, external data boundary protection, multi-turn correction, cancellation, multiple assets, stale confirmation và clarification follow-up.
-  + Kiểm thử và đánh giá 12 kịch bản tấn công đối kháng trong `starter_v0/data/eval_adversarial.json`.
-  + Trực tiếp phân tích 3 ca tấn công trọng điểm (`A03`, `A05`, `A06`) cho mục B4a, trả lời 4 câu hỏi kiểm định an toàn tại mục B6, và thực hiện kiểm toán thủ công rò rỉ dữ liệu cùng hệ thống file trong `tickets/`.
+  - Tái cấu trúc và tối ưu hóa toàn bộ file `artifacts/tools.yaml` qua các phiên bản v1, v2, v3.
+  - Phân định ranh giới rõ ràng giữa dịch vụ dùng chung toàn công ty (`check_service_status`) và thiết bị cá nhân (`inspect_device`).
+  - Thiết lập điều kiện kích hoạt `clarify` khi thiếu định danh (`asset_id`, `employee_id`) hoặc môi trường mơ hồ.
+  - Khóa chặt ranh giới action tool: ngăn chặn việc gọi thừa `create_ticket(confirmed=False)` khi chưa có sự xác nhận của người dùng.
+  - Chuẩn hóa enums cho `search_kb` (`category`) và chính sách IT `policy` (`policy_area`).
+  - Thiết lập ranh giới an toàn cho Tavily Search API (`search_device_info`), ngăn chặn việc rò rỉ mã nội bộ (LT-xxx, EMP-xxx) ra web.
+  - Ghi nhận nhật ký các mốc thực nghiệm vào `artifacts/version_log.csv`.
 - **File hoặc artifact liên quan:**
-  + `starter_v0/data/eval_group.json`
-  + `starter_v0/artifacts/REPORT.md` (Mục B3, B4a, B6, C2)
-- **Commit hash hoặc pull request:** Commit `831af8e`, `aed8602`, `8c795d9` (Branch `contrib/LuongToan12`, PR: `https://github.com/tuanfptu/K4-Day04-2A202602982-HaManhTuan/pull/new/contrib/LuongToan12`)
-- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:** Tôi quyết định thiết kế các ca kiểm thử mang tính thử thách phân nhánh rõ rệt (như case `G05` cố tình nhồi IP nội bộ và vị trí phòng ban để kiểm tra khả năng lọc sạch dữ liệu trước khi search web; case `G09` bẫy xác nhận cũ khi người dùng thay đổi thiết bị mục tiêu) thay vì chỉ viết các case đơn giản. Điều này giúp cả nhóm đo lường chính xác ranh giới an toàn thực tế của Agent.
-- **Khó khăn tôi gặp và cách tôi xử lý:** Đảm bảo toàn bộ cấu trúc arguments, cú pháp multi-turn và các trường `failure_type` phải khớp tuyệt đối với engine kiểm thử tự động của `run_eval.py`. Tôi đã chạy script thẩm định dữ liệu (validation script) độc lập trước khi commit để đảm bảo không gây lỗi khi chạy eval tự động.
-- **Điều tôi học được từ phần việc này:** Hiểu rõ bản chất của phương pháp "Evidence-Driven Development" và "Prompt as Code". Đánh giá một Agent không thể dựa vào cảm tính mà phải đo lường định lượng qua Routing Accuracy, Argument Accuracy và khả năng bảo vệ ranh giới dữ liệu khi bị tấn công đối kháng.
-- **Nếu làm lại, tôi sẽ cải thiện điều gì:** Nếu có thêm thời gian, tôi sẽ xây dựng thêm các kịch bản hội thoại multi-turn dài từ 4–5 turns với các luồng rẽ nhánh phức tạp hơn để kiểm tra hiện tượng trôi ngữ cảnh (context drift) của mô hình.
+  - `starter_v0/artifacts/tools.yaml`
+  - `starter_v0/artifacts/version_log.csv`
+  - Các file run evidence: `runs/v0_B_base_openrouter_20260914T183347208745.json`, `runs/v1_B_base_openrouter_20260914T183603989734.json`, `runs/v2_B_base_openrouter_20260914T183916968133.json`, `runs/v3_B_base_openrouter_20260914T184022079006.json`, `runs/v3_B_extension_openrouter_20260914T184424771485.json`, `runs/v3_B_adversarial_openrouter_20260914T184555321591.json`.
+- **Commit hash hoặc pull request:** Branch `B-LuongQuangHuy` (các commit tối ưu `tools.yaml` và `version_log.csv`).
+- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:** Ràng buộc chặt chẽ description của `create_ticket` để cấm gọi tool kể cả khi `confirmed=False` trong giai đoạn xin xác nhận. Điều này giúp loại bỏ hoàn toàn lỗi thừa tool (`extra_tool_call`), nâng độ chính xác của các ca xác nhận nhiều lượt (multi-turn) lên 100%.
+- **Khó khăn tôi gặp và cách tôi xử lý:** Ban đầu gặp lỗi rate limit (429) do quota thấp khi chạy dồn dập nhiều requests trên Gemini Free Tier; tôi đã giải quyết bằng cách chuyển đổi provider sang OpenRouter (`openai/gpt-4o-mini`), giúp quá trình eval chạy ổn định 100% và đạt `provider_error_cases == 0`.
+- **Điều tôi học được từ phần việc này:** Hiểu sâu sắc rằng Tool Description và JSON Schema đóng vai trò là một phần quan trọng của Prompt đối với LLM. Một schema được định nghĩa chặt chẽ với enums rõ ràng và mô tả ranh giới sắc nét có thể giải quyết dứt điểm các bài toán định tuyến phức tạp mà không cần phải viết prompt quá dài dòng.
+- **Nếu làm lại, tôi sẽ cải thiện điều gì:** Tôi sẽ xây dựng thêm một tool bonus mới (ví dụ: tra cứu kho phần mềm được cấp phép `approved_software_catalog`) với đầy đủ schema và ranh giới bảo mật để nhóm nhận thêm điểm bonus.
 
----
-<!-- Mẫu sao chép cho các thành viên tiếp theo -->
-### Họ tên — MSSV
+### Họ tên — MSSV (Dành cho thành viên tiếp theo)
 
 - **Vai trò/phần việc được nhận:**
 - **Những gì tôi đã thay đổi trong repo chung:**
@@ -277,6 +280,7 @@ Sao chép mẫu dưới đây cho từng thành viên:
 - **Khó khăn tôi gặp và cách tôi xử lý:**
 - **Điều tôi học được từ phần việc này:**
 - **Nếu làm lại, tôi sẽ cải thiện điều gì:**
+
 
 Mỗi thành viên phải tự commit phần self-reflection của mình bằng Git identity
 tương ứng. Reflection phải dẫn đến contribution artifact/commit đã nêu ở trên,
@@ -296,4 +300,4 @@ không dùng chính phần reflection làm bằng chứng duy nhất cho đóng 
 
 **URL repository chung dùng để nộp:**
 
-> Chờ nhóm cung cấp URL cuối.
+> URL:
