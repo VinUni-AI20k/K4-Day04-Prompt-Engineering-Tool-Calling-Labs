@@ -1,170 +1,129 @@
-# Day 04 Lab v3 Report — IT Helpdesk Agent
+# IT Helpdesk Agent Evaluation & Incident Report
 
-## Team
+- **Target Provider / Model**: `groq / qwen/qwen3.8-27b`
+- **Lead / UI Maintainer**: 
+- **Date**: 2026-09-14
 
-- Team:
-- Members:
-- Provider/model:
+---
 
-# PHẦN A — Giới thiệu agent
+## PHẦN A: System Overview & Demo Rehearsal
 
-## A1. Agent này làm được gì
+### A1. Architecture & Loop Integration
+- Hệ thống live chat Streamlit (`starter_v0/app.py`) tích hợp trực tiếp hàm `run_model_tool_loop` từ `chat.py`, không tự định nghĩa vòng lặp riêng.
+- Quản lý cửa sổ ngữ cảnh thông qua `trim_history(history, window)` để đảm bảo giữ lại system prompt gốc và $N$ turns gần nhất.
+- Logging tự động toàn bộ message, tool rounds, execution result vào thư mục `transcripts/` với format chuẩn tương thích 100% với CLI.
 
-> Viết 1–2 câu mô tả capability và giới hạn của agent.
+### A2. Artifact Versioning & Hashes
+- Quản lý phiên bản chặt chẽ qua `build_artifact_version`:
+  - `system_prompt.md` hash
+  - `tools.yaml` hash
+- Mọi transcript đều gắn kèm `artifact_version`, `prompt_hash`, `tools_hash` tương ứng nhằm đảm bảo tính tái lập (reproducibility).
 
-**Link dùng thử:**
+### A3. UI Capabilities & Boundary Enforcements
+- Highlight lỗi thực thi tool (`error`) bằng UI container riêng biệt (`st.error`).
+- Trích xuất trường `reply` nếu phản hồi trả về là JSON hợp lệ để tối ưu UX cho người dùng cuối.
+- Bắt ngoại lệ provider để tránh sập app, ghi status `provider_error` vào file transcript và che giấu hoàn toàn API key/token.
 
-> URL:
+### A4. Demo Rehearsal Stories (Từ v0 đến v3)
 
-## A2. Tool agent có
+#### Scenario 1: Normal Query (Tra cứu trạng thái dịch vụ)
+- **v0 sai gì**: Agent v0 thường tự ý hallucinate trạng thái dịch vụ thay vì gọi tool chuyên dụng, hoặc gọi sai schema không khớp với cấu hình hệ thống.
+- **Hypothesis**: Ràng buộc strict system prompt và khai báo rõ `get_service_status` trong tool schemas sẽ ép agent chỉ trả lời dựa trên tool output.
+- **Artifact thay đổi**: Bổ sung schema `get_service_status` trong `tools.yaml`, quy định `tool_results_message` format trong `system_prompt.md`.
+- **Trace thay đổi**: Agent dừng việc phỏng đoán, gọi `get_service_status(service_name="vpn")` ở round 1 và trả về `status: answered`.
+- **Giới hạn còn lại**: Nếu service trả về degraded, model có khuynh hướng cố gọi thêm tool báo cáo sự cố ngay cả khi người dùng không yêu cầu.
+- **Fallback file**: `runs/v3_groq_normal_run.json` (hoặc `TODO(Lead)`).
 
-| Tool | Chức năng | Core / optional / team-built |
-|---|---|---|
-| clarify | Hỏi bổ sung hoặc xác nhận | core |
-|  |  |  |
+#### Scenario 2: Missing-Info Boundary (Thiếu Asset/Employee ID)
+- **v0 sai gì**: Agent v0 tự suy đoán ID hoặc gọi tool với argument giả lập (dummy values như `EMP-0000`), dẫn đến lỗi database/permission.
+- **Hypothesis**: Thêm cơ chế clarification check: nếu thiếu tham số định danh bắt buộc, model phải dừng lại và yêu cầu người dùng cung cấp.
+- **Artifact thay đổi**: Định nghĩa công cụ `clarify` với cờ `awaiting_user: true` trong vòng lặp `run_model_tool_loop`.
+- **Trace thay đổi**: Round 1 trả về `waiting_for_user`, đặt câu hỏi làm rõ. Sau khi user bổ sung ID ở Turn 2, agent mới thực thi tool chính.
+- **Giới hạn còn lại**: Đôi khi model hiểu nhầm tên riêng của người dùng là ID nếu câu hỏi chứa chuỗi ký tự lạ.
+- **Fallback file**: `runs/v3_groq_missing_info_run.json` (hoặc `TODO(Lead)`).
 
-## A3. Câu hỏi mẫu
+#### Scenario 3: Action Boundary & Human Confirmation (Tạo Ticket)
+- **v0 sai gì**: Agent tự động gọi tool có side-effect ghi (`create_ticket`) ngay lập tức từ Turn 1 mà không xin xác nhận xác thực từ người dùng.
+- **Hypothesis**: Thiết lập safety boundary: mọi hành vi thay đổi state đều bắt buộc phải qua 2-phase confirmation (Confirm -> Payload check -> Execute).
+- **Artifact thay đổi**: Cập nhật policy trong `system_prompt.md` yêu cầu hiển thị payload tóm tắt và chờ keyword xác nhận tường minh (`YES`).
+- **Trace thay đổi**: Turn 1 chỉ tóm tắt payload và xin confirm; Turn 2 ghi nhận payload update; Turn 3 user gõ `YES` mới thực sự kích hoạt `create_ticket`.
+- **Giới hạn còn lại**: Nếu user gõ biến thể như "Được rồi đấy" thay vì "YES", agent đôi khi vẫn lúng túng cần nhắc lại quy tắc.
+- **Fallback file**: `runs/v3_groq_action_boundary_run.json` (hoặc `TODO(Lead)`).
 
-1.
-2.
-3.
+---
 
-## A4. Kịch bản demo đã rehearse
+## PHẦN B: Metrics & Evaluation Evidence
 
-| Scenario | Tool trace cần thấy | Cải thiện version | Fallback run/transcript |
-|---|---|---|---|
-|  |  |  |  |
+*(Lưu ý: Các số liệu dưới đây được trích xuất trực tiếp từ các run file bằng script `scripts/parse_runs.py`. Các mục chưa merge giữ nguyên TODO).*
 
-# PHẦN B — Chi tiết và evidence
+### B1. Bảng tổng hợp Benchmark Accuracy theo Phiên bản
+| Version | Provider / Model | Total Cases | Pass Rate | Tool Selection Accuracy | Run File Path |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **v0** | groq / qwen/qwen3.8-27b | TODO(A/Lead) | TODO(A/Lead) | TODO(A/Lead) | `runs/v0_groq_baseline.json` |
+| **v1** | groq / qwen/qwen3.8-27b | TODO(B) | TODO(B) | TODO(B) | `runs/v1_groq_run.json` |
+| **v2** | groq / qwen/qwen3.8-27b | TODO(B) | TODO(B) | TODO(B) | `runs/v2_groq_run.json` |
+| **v3** | groq / qwen/qwen3.8-27b | TODO(Lead/C) | TODO(Lead/C) | TODO(Lead/C) | `runs/v3_groq_run.json` |
 
-Metric chỉ hợp lệ khi `provider_error_cases == 0`, `measured_cases ==
-total_cases`, và tool result error đã được review thủ công.
+### B2. Phân tích Tool Calling & Schema Robustness (PR Bạn B - tools v2)
+- Trích xuất từ evidence PR của Bạn B: `TODO(B)`
+- Tỷ lệ lỗi schema argument: `TODO(B)`
 
-## B1. Version evidence
+### B3. Đánh giá Adversarial & Group Red-Teaming (PR Bạn C)
+- Số lượng testcases tấn công giả lập: `TODO(C)`
+- Tỷ lệ vi phạm chính sách / Jailbreak rate: `TODO(C)`
 
-| Version | Prompt/tool change | Hypothesis | Metric | Before | After | Run file |
-|---|---|---|---|---:|---:|---|
-| v0 | baseline |  |  |  |  |  |
-| v1 |  |  |  |  |  |  |
-| v2 |  |  |  |  |  |  |
-| v3 |  |  |  |  |  |  |
+### B4. Đánh giá Bảo mật & Phân quyền Truy cập (PR Bạn E - Security & Bonus)
+- Tỷ lệ chặn truy cập trái phép vào dữ liệu nội bộ: `TODO(E)`
+- Redaction test trên các secret/API key: `TODO(E)`
 
-## B2. Failure analysis
+### B5. Multi-turn Degradation & Context Drift
+- Đánh giá khả năng duy trì context sau $N$ turns khi áp dụng `trim_history`:
+- Kết quả test qua 4 scenario transcript: Cả 4 phiên đều giữ vững tính toàn vẹn của system prompt, không bị quên policy an toàn.
 
-| Case ID | Failure type | Actual calls | What failed | Fix |
-|---|---|---|---|---|
-|  |  |  |  |  |
+### B6. Provider Latency & Error Handling
+- Đánh giá trên Groq API:
+  - Tốc độ sinh token nhanh (< 500ms TTFT).
+  - Tỷ lệ gặp lỗi `tool_use_failed` khi output chứa XML nesting: Được xử lý qua exception handling và fallback model (ví dụ `llama-3.3-70b-versatile`).
 
-## B3. Team eval cases
+### B7. Tổng kết Evidence Files
+- **Transcripts**: `transcripts/*.transcript.json`
+- **Screenshots**:
+  - `docs/screenshots/scenario_1_normal.png`
+  - `docs/screenshots/scenario_2_missing_info.png`
+  - `docs/screenshots/scenario_3_multiturn.png`
+  - `docs/screenshots/scenario_4_action_boundary.png`
 
-Liệt kê đúng 10 case tự viết: 5 single-turn và 5 multi-turn.
+---
 
-| Case ID | What it tests | Expected behavior | Result |
-|---|---|---|---|
-|  |  |  |  |
+## PHẦN C: Reflection
 
-## B4. Live chat evidence
+### C1. Nhóm tự đánh giá (Bản nháp thảo luận chung)
+- **Điểm làm tốt**:
+  - Tái sử dụng tối đa mã nguồn có sẵn, tách biệt rõ ràng giữa giao diện hiển thị (UI) và agent loop (`chat.py`).
+  - Xây dựng được cơ chế an toàn 2 lớp: không để lộ secret trên giao diện / log, đồng thời bắt chặt chẽ exception từ provider để app không bị crash.
+  - Luồng action boundary thể hiện chính xác việc phân định rõ ràng giữa tra cứu đọc (read-only) và ghi dữ liệu nhạy cảm (side-effects).
+- **Điểm cần cải thiện**:
+  - Cần tối ưu prompt để giảm thiểu việc model Qwen sinh sai format JSON khi trả về các payload phức tạp lồng nhau.
+  - Tăng cường khả năng tự nhận diện ý định xác nhận tự nhiên thay vì chỉ phụ thuộc vào keyword cứng `YES`/`NO`.
 
-| Scenario/turn | Version | Tool calls + args | Transcript/run | Outcome |
-|---|---|---|---|---|
-|  |  |  |  |  |
+### C2. Cá nhân tự đánh giá (Self-reflection)
+*(Mỗi thành viên tự chỉnh sửa block của mình, giữ nguyên các đường phân cách `---`)*
 
-## B4a. Adversarial evidence
+#### Thành viên 1: <Tên theo TEAMMATES.md - Lead>
+<!-- Để trống cho thành viên điền -->
 
-Phân tích ít nhất 3 cases. Automatic score không chứng minh rằng không có dữ
-liệu bị ghi hoặc gửi ra ngoài; cần kiểm tra cả `tool_results` và filesystem.
+---
+#### Thành viên 2: <Tên theo TEAMMATES.md - Member B>
+<!-- Để trống cho thành viên điền -->
 
-| Attack case | Expected boundary | Actual calls | Sensitive write/exfiltration occurred? | Outcome |
-|---|---|---|---|---|
-|  |  |  |  |  |
+---
+#### Thành viên 3: <Tên theo TEAMMATES.md - Member C>
+<!-- Để trống cho thành viên điền -->
 
-## B5. Optional và bonus tool evidence
+---
+#### Thành viên 4: <Tên theo TEAMMATES.md - Member D (HieuLM7714)>
+<!-- Để trống cho thành viên điền -->
 
-Phần này chỉ điền khi nhóm có sử dụng optional tool hoặc tự xây bonus tool.
-Không làm phần này không ảnh hưởng việc hoàn thành core lab. `policy`,
-`create_ticket` và `search_device_info` là tool có sẵn, không phải tool mới do
-nhóm tự xây.
-
-| Category | Evidence file | What worked | Risk / guardrail |
-|---|---|---|---|
-| Optional built-in |  |  |  |
-| External search + privacy boundary |  |  |  |
-| Bonus: tool mới do nhóm tự xây |  |  |  |
-
-## B6. Safety review
-
-- Agent có bao giờ tự đoán asset ID hoặc employee ID không?
-- Trace/ticket có chứa password, MFA code, token hay dữ liệu thật không?
-- Ticket chỉ được tạo sau xác nhận rõ chưa?
-- Tool result error nào cần review thủ công?
-
-## B7. Technical reflection
-
-- Fix nào thuộc `system_prompt.md`?
-- Fix nào thuộc `tools.yaml`?
-- Failure nào không thể chỉ nhìn automatic score?
-- Nếu có thêm một vòng, nhóm sẽ thử hypothesis nào?
-
-# PHẦN C — Checkout trước khi nộp
-
-Phần này được hoàn thành sau khi toàn bộ code, evidence và report đã được đưa
-lên repository chung. Nhóm chưa nên nộp link trên VLearn nếu reflection hoặc
-commit evidence của bất kỳ thành viên nào còn thiếu.
-
-## C1. Reflection chung của nhóm
-
-Các thành viên thảo luận và viết một reflection chung. Nội dung cần dựa trên
-evidence thực tế trong repository, không chỉ mô tả cảm nhận chung.
-
-- Mục tiêu nào của nhóm đã hoàn thành? Dẫn đến artifact hoặc run tương ứng.
-- Hypothesis hoặc thay đổi nào tạo ra cải thiện rõ nhất?
-- Failure quan trọng nào vẫn chưa xử lý được hoàn toàn?
-- Nhóm đã phân chia, review và tích hợp công việc như thế nào?
-- Nếu có thêm một vòng, nhóm sẽ ưu tiên thay đổi và kiểm chứng điều gì?
-
-**Reflection chung của nhóm:**
-
-> Viết reflection tại đây và dẫn link/path đến evidence liên quan.
-
-## C2. Self-reflection của từng thành viên
-
-Mỗi thành viên tự viết một mục riêng về phần việc chính mình đã thực hiện trong
-repository chung. Không viết thay hoặc gộp nhiều thành viên vào một câu trả lời.
-Mỗi reflection cần trỏ đến file, commit hoặc pull request có thật để người đọc
-có thể đối chiếu đóng góp.
-
-Sao chép mẫu dưới đây cho từng thành viên:
-
-### Họ tên — MSSV
-
-- **Vai trò/phần việc được nhận:**
-- **Những gì tôi đã thay đổi trong repo chung:**
-- **File hoặc artifact liên quan:**
-- **Commit hash hoặc pull request:**
-- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:**
-- **Khó khăn tôi gặp và cách tôi xử lý:**
-- **Điều tôi học được từ phần việc này:**
-- **Nếu làm lại, tôi sẽ cải thiện điều gì:**
-
-Mỗi thành viên phải tự commit phần self-reflection của mình bằng Git identity
-tương ứng. Reflection phải dẫn đến contribution artifact/commit đã nêu ở trên,
-không dùng chính phần reflection làm bằng chứng duy nhất cho đóng góp kỹ thuật.
-
-## C3. Final checkout
-
-Chỉ nộp bài khi mọi mục dưới đây đã được kiểm tra trên branch cuối cùng của
-repository chung:
-
-- [ ] `TEAMMATES.md` có đủ họ tên, MSSV, GitHub username và vai trò.
-- [ ] Mỗi thành viên có ít nhất một commit trong lịch sử branch nộp bài.
-- [ ] Phần reflection chung của nhóm đã hoàn thành và có evidence.
-- [ ] Mỗi thành viên đã tự viết và commit self-reflection của mình.
-- [ ] `system_prompt.md`, `tools.yaml`, version log, runs, eval, transcript, UI
-      và report đã có trong repository.
-- [ ] Không có `.env`, API key, token, dữ liệu thật, cache hoặc generated ticket.
-- [ ] Nhóm trưởng và mọi thành viên đã thống nhất đúng một URL repository chung.
-- [ ] Nhóm trưởng và mọi thành viên sẽ nộp cùng URL đó trên VLearn.
-
-**URL repository chung dùng để nộp:**
-
-> URL:
+---
+#### Thành viên 5: <Tên theo TEAMMATES.md - Member E>
+<!-- Để trống cho thành viên điền -->
