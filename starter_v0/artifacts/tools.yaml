@@ -150,3 +150,41 @@ tools:
         asset_id: {type: string, default: "", description: "Mã tài sản nếu có"}
         confirmed: {type: boolean, default: false, description: "Đã được người dùng xác nhận"}
       required: [summary]
+
+  # ---------------- Team-built bonus tool ----------------
+  - name: approved_software_catalog
+    description: >-
+      Tra cứu danh mục phần mềm được Northstar Labs phê duyệt, đang pilot hoặc
+      bị chặn. Dùng khi người dùng hỏi một phần mềm/capability có được IT cho
+      phép hay phiên bản nào hỗ trợ hệ điều hành cụ thể. Đây là lookup local,
+      read-only; kết quả không cài phần mềm và không cho phép thay đổi. KHÔNG
+      truyền asset ID, employee ID hoặc credential vào query. Không dùng
+      search_kb cho câu hỏi về trạng thái phê duyệt phần mềm.
+    parameters:
+      type: object
+      properties:
+        query:
+          type: string
+          description: "Tên phần mềm hoặc capability cần tra, không chứa identifier nội bộ hay credential."
+        category:
+          type: string
+          enum: [all, browser, developer, driver, productivity, remote_access, security, vpn]
+          default: all
+          description: "Nhóm phần mềm; chọn nhóm cụ thể khi user đã nêu rõ."
+        operating_system:
+          type: string
+          enum: [all, windows, macos, linux, ios, android]
+          default: all
+          description: "Hệ điều hành cần kiểm tra compatibility; dùng all khi user không nêu."
+        approval_status:
+          type: string
+          enum: [all, approved, pilot, blocked]
+          default: all
+          description: "Trạng thái cần lọc; dùng all khi user hỏi chung phần mềm có được phép hay không."
+        top_k:
+          type: integer
+          default: 5
+          minimum: 1
+          maximum: 10
+          description: "Số kết quả, từ 1 đến 10."
+      required: [query]

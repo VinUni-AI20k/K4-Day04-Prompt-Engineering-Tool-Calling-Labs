@@ -1,0 +1,90 @@
+{
+  "snapshot_at": "2026-09-14T09:00:00+07:00",
+  "source": "Fictional Northstar Labs Approved Software Catalog",
+  "software": [
+    {
+      "software_id": "SW-VPN-001",
+      "name": "Northstar SecureConnect",
+      "publisher": "Northstar Labs IT",
+      "category": "vpn",
+      "platforms": ["windows", "macos"],
+      "approved_version": "5.2.1",
+      "approval_status": "approved",
+      "install_method": "Company Portal",
+      "notes": "Standard VPN client for managed employee laptops.",
+      "tags": ["vpn", "remote access", "certificate"]
+    },
+    {
+      "software_id": "SW-BROWSER-002",
+      "name": "Northstar Browser Stable",
+      "publisher": "Northstar Labs IT",
+      "category": "browser",
+      "platforms": ["windows", "macos", "linux"],
+      "approved_version": "140.0",
+      "approval_status": "approved",
+      "install_method": "Managed update channel",
+      "notes": "Default managed browser with enterprise policies enabled.",
+      "tags": ["browser", "web", "managed"]
+    },
+    {
+      "software_id": "SW-PROD-003",
+      "name": "Northstar Office Suite",
+      "publisher": "Northstar Labs IT",
+      "category": "productivity",
+      "platforms": ["windows", "macos"],
+      "approved_version": "2026.08",
+      "approval_status": "approved",
+      "install_method": "Company Portal",
+      "notes": "Managed productivity suite for documents, spreadsheets, and presentations.",
+      "tags": ["office", "documents", "spreadsheet"]
+    },
+    {
+      "software_id": "SW-SEC-004",
+      "name": "Northstar Endpoint Guard",
+      "publisher": "Northstar Labs Security",
+      "category": "security",
+      "platforms": ["windows", "macos", "linux"],
+      "approved_version": "12.4.0",
+      "approval_status": "approved",
+      "install_method": "Automatic device management deployment",
+      "notes": "Required endpoint protection on company-managed computers.",
+      "tags": ["endpoint", "antimalware", "security"]
+    },
+    {
+      "software_id": "SW-DRIVER-005",
+      "name": "Northstar Universal Print Driver",
+      "publisher": "Northstar Labs IT",
+      "category": "driver",
+      "platforms": ["windows"],
+      "approved_version": "4.8.2",
+      "approval_status": "approved",
+      "install_method": "Company Portal",
+      "notes": "Approved Windows driver for managed office print queues.",
+      "tags": ["printer", "printing", "driver"]
+    },
+    {
+      "software_id": "SW-DEV-006",
+      "name": "Northstar Dev Containers",
+      "publisher": "Northstar Labs Engineering",
+      "category": "developer",
+      "platforms": ["windows", "macos", "linux"],
+      "approved_version": "0.9.0",
+      "approval_status": "pilot",
+      "install_method": "Engineering pilot portal",
+      "notes": "Pilot package restricted to the approved engineering cohort.",
+      "tags": ["developer", "containers", "pilot"]
+    },
+    {
+      "software_id": "SW-REMOTE-007",
+      "name": "QuickRemote Personal",
+      "publisher": "Example Third Party",
+      "category": "remote_access",
+      "platforms": ["windows", "macos"],
+      "approved_version": null,
+      "approval_status": "blocked",
+      "install_method": "Not available",
+      "notes": "Blocked because it bypasses the approved remote-support workflow.",
+      "tags": ["remote support", "screen sharing", "blocked"]
+    }
+  ]
+}

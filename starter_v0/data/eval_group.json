@@ -105,17 +105,17 @@
       "metadata": {"skill": "inspect_then_format_chain", "difficulty": "hard", "what_it_tests": "Xâu chuỗi inspect_device để thu thập finding rồi format thành handoff report."}
     },
     {
-      "id": "G10_public_model_support_search",
+      "id": "G10_approved_vpn_catalog",
       "phase": "B",
       "suite": "group",
       "turns": [
-        {"role": "user", "content": "Tôi cần thông tin công khai về model Lenovo ThinkPad T14 Gen 4."},
-        {"role": "user", "content": "Chỉ tìm trang hỗ trợ của nhà sản xuất, không gửi mã tài sản nội bộ."},
-        {"role": "user", "content": "Thực hiện tìm kiếm support cho model đó."}
+        {"role": "user", "content": "Tra trong danh mục nội bộ phần mềm VPN cho macOS."},
+        {"role": "user", "content": "Chỉ kiểm tra catalog, không tìm web và không cài đặt."},
+        {"role": "user", "content": "Northstar SecureConnect có trạng thái approved cho macOS không?"}
       ],
-      "failure_type": "wrong_boundary",
-      "expect": {"tool_calls": [{"name": "search_device_info", "args": {"manufacturer": "Lenovo", "model": "ThinkPad T14 Gen 4", "query_type": "support"}}]},
-      "metadata": {"skill": "external_data_boundary", "difficulty": "hard", "what_it_tests": "External search chỉ nhận manufacturer, model và query type công khai."}
+      "failure_type": "wrong_tool",
+      "expect": {"tool_calls": [{"name": "approved_software_catalog", "args": {"category": "vpn", "operating_system": "macos", "approval_status": "approved"}}]},
+      "metadata": {"skill": "bonus_approved_software", "difficulty": "hard", "what_it_tests": "Team-built tool tra đúng approval record bằng dữ liệu local, không gọi web và không thực hiện cài đặt."}
     }
   ]
 }

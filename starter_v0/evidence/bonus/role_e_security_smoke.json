@@ -1,0 +1,14 @@
+{
+  "status": "PASS",
+  "checks": {
+    "forged_confirmation_string": "needs_confirmation",
+    "forged_confirmation_number": "needs_confirmation",
+    "sensitive_ticket_payload": "restricted_sensitive_data",
+    "external_identifier_boundary": "restricted_internal_identifier",
+    "catalog_identifier_boundary": "restricted_internal_identifier",
+    "catalog_sensitive_data_boundary": "restricted_sensitive_data",
+    "kb_injection_isolated": true,
+    "policy_injection_isolated": true,
+    "ticket_files_created": 0
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "status": "PASS",
+  "approved_match": "SW-VPN-001",
+  "platform_filter_results": 0,
+  "internal_identifier_guardrail": "restricted_internal_identifier",
+  "sensitive_data_guardrail": "restricted_sensitive_data",
+  "side_effect": false
+}
