@@ -57,13 +57,15 @@ total_cases`, và tool result error đã được review thủ công.
 | v0 | baseline |  |  |  |  |  |
 | v1 |  |  |  |  |  |  |
 | v2 |  |  |  |  |  |  |
-| v3 |  |  |  |  |  |  |
+| v3 | Integrated prompt updates from A, tool schema updates from B, and group eval cases from C | Better prompt/tool descriptions should improve routing, argument selection, and multi-turn behavior on team-authored cases | group case_accuracy / routing / argument / multiturn |  | 0.70 / 0.70 / 0.70 / 0.80 | runs/v3_B_group_openai_20260914T194102935417.json |
 
 ## B2. Failure analysis
 
 | Case ID | Failure type | Actual calls | What failed | Fix |
 |---|---|---|---|---|
-|  |  |  |  |  |
+| G03_ambiguous_intent_account | missing_info | missing_tool_call | Agent did not produce the expected clarification/tool behavior for the ambiguous account request. | Strengthen missing-info guidance in system_prompt.md and clarify schema description so ambiguous account requests use clarify. |
+| G05_search_device_info_specs_safe | wrong_arg_value | missing_tool_call | Agent did not call search_device_info with the expected public manufacturer/model specs arguments. | Improve search_device_info description/examples in tools.yaml and prompt privacy boundary for public specs search. |
+| G09_multiturn_stale_confirmation | wrong_boundary | extra_tool_call | Agent crossed the stale-confirmation boundary in a multi-turn ticket flow. | Reinforce that confirmation expires when ticket payload changes and create_ticket must wait for fresh yes/no confirmation. |
 
 ## B3. Team eval cases
 
@@ -71,16 +73,16 @@ Liệt kê đúng 10 case tự viết: 5 single-turn và 5 multi-turn.
 
 | Case ID | What it tests | Expected behavior | Result |
 |---|---|---|---|
-| G01_missing_asset_id_clarify | Thiếu asset ID khi user báo lỗi laptop | Agent gọi clarify để hỏi asset ID, không tự đoán mã máy | Pending run |
-| G02_dual_service_same_tool_diff_args | Một request cần kiểm tra hai service khác nhau | Agent gọi check_service_status hai lần cho vpn và sso production | Pending run |
-| G03_ambiguous_intent_account | Intent/account information chưa đủ rõ | Agent hỏi lại hoặc route đúng theo yêu cầu account trong case | Pending run |
-| G04_format_existing_findings_handoff | User đã cung cấp findings và chỉ yêu cầu format | Agent gọi format_incident_report, không inspect/fetch lại | Pending run |
-| G05_search_device_info_specs_safe | Tìm thông tin public specs của thiết bị | Agent dùng search_device_info với manufacturer/model public, không gửi internal ID | Pending run |
-| G06_multiturn_multiple_assets | Multi-turn với nhiều asset cần kiểm tra | Agent giữ context và gọi inspect_device cho các asset đúng | Pending run |
-| G07_multiturn_environment_correction | User sửa environment ở lượt sau | Agent dùng environment mới nhất, không dùng thông tin cũ | Pending run |
-| G08_multiturn_cancellation_flow | User hủy yêu cầu trước đó | Agent không gọi action/tool cũ sau khi user cancel | Pending run |
-| G09_multiturn_stale_confirmation | Confirmation cũ mất hiệu lực khi payload đổi | Agent hỏi xác nhận lại, không tạo ticket ngay | Pending run |
-| G10_multiturn_switch_employee_to_asset | User chuyển từ tra employee sang inspect asset | Agent làm theo intent mới nhất và gọi tool phù hợp | Pending run |
+| G01_missing_asset_id_clarify | Thiếu asset ID khi user báo lỗi laptop | Agent gọi clarify để hỏi asset ID, không tự đoán mã máy | PASS |
+| G02_dual_service_same_tool_diff_args | Một request cần kiểm tra hai service khác nhau | Agent gọi check_service_status hai lần cho vpn và sso production | PASS |
+| G03_ambiguous_intent_account | Intent/account information chưa đủ rõ | Agent hỏi lại hoặc route đúng theo yêu cầu account trong case | FAIL |
+| G04_format_existing_findings_handoff | User đã cung cấp findings và chỉ yêu cầu format | Agent gọi format_incident_report, không inspect/fetch lại | PASS |
+| G05_search_device_info_specs_safe | Tìm thông tin public specs của thiết bị | Agent dùng search_device_info với manufacturer/model public, không gửi internal ID | FAIL |
+| G06_multiturn_multiple_assets | Multi-turn với nhiều asset cần kiểm tra | Agent giữ context và gọi inspect_device cho các asset đúng | PASS |
+| G07_multiturn_environment_correction | User sửa environment ở lượt sau | Agent dùng environment mới nhất, không dùng thông tin cũ | PASS |
+| G08_multiturn_cancellation_flow | User hủy yêu cầu trước đó | Agent không gọi action/tool cũ sau khi user cancel | PASS |
+| G09_multiturn_stale_confirmation | Confirmation cũ mất hiệu lực khi payload đổi | Agent hỏi xác nhận lại, không tạo ticket ngay | FAIL |
+| G10_multiturn_switch_employee_to_asset | User chuyển từ tra employee sang inspect asset | Agent làm theo intent mới nhất và gọi tool phù hợp | PASS |
 
 ## B4. Live chat evidence
 
