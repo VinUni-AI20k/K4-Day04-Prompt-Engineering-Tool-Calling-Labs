@@ -194,7 +194,7 @@ của các thành viên khác.
   exploratory trong transcripts sẽ được thay bằng evidence được Git track ở lần
   chạy cuối.
 - **Commit hash hoặc pull request:** `83b7655` — `feat(ui): add Streamlit
-  helpdesk chat`, branch `D-QuocCuongDang`, Git author
+  helpdesk chat`, branch `contrib/quoccuongdang`, Git author
   `D-DangQuocCuong`.
 - **Một quyết định kỹ thuật tôi đã đưa ra và lý do:** Tôi tái sử dụng
   run_model_tool_loop() và tách giao diện thành hai tab. Cách này giữ hành vi
