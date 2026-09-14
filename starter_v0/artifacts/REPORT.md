@@ -1,5 +1,9 @@
 # Day 04 Lab v3 Report — IT Helpdesk Agent
 
+> V1 đã có evidence: xem [V1-REVIEW.md](V1-REVIEW.md). Base: 30/30;
+> adversarial của bản cuối: 10/12, còn A04/A10. Các phần v2/v3 bên dưới
+> vẫn là template, chưa được thực hiện trong thay đổi này.
+
 ## Team
 
 - Team:
