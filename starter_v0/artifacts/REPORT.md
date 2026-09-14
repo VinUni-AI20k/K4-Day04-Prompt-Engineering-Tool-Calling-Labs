@@ -135,16 +135,16 @@ có thể đối chiếu đóng góp.
 
 Sao chép mẫu dưới đây cho từng thành viên:
 
-### Họ tên — MSSV
+### Ngô Gia Quốc — 2A202602757
 
-- **Vai trò/phần việc được nhận:**
-- **Những gì tôi đã thay đổi trong repo chung:**
-- **File hoặc artifact liên quan:**
-- **Commit hash hoặc pull request:**
-- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:**
-- **Khó khăn tôi gặp và cách tôi xử lý:**
-- **Điều tôi học được từ phần việc này:**
-- **Nếu làm lại, tôi sẽ cải thiện điều gì:**
+- **Vai trò/phần việc được nhận:** Phụ trách Tool Declarations: audit capability, tên tool, description, schema và argument convention của các tool; đối chiếu declaration với `TOOL.md`, implementation, registry và eval; cải thiện `tools.yaml` theo evidence từ baseline.
+- **Những gì tôi đã thay đổi trong repo chung:** Tôi cập nhật model-facing descriptions trong `tools.yaml` mà không đổi tên tool, registry, enum, required fields, implementation hoặc fixed eval. Ở v1, tôi làm rõ ranh giới giữa status service/device/KB, yêu cầu identifier rõ ràng, mapping diagnostic domain sang `inspect_device.check`, boundary của lookup user, formatter-only, write confirmation và external-data boundary. Thay đổi này cải thiện base eval từ 21/30 lên 27/30 cases pass. Sau khi phân tích v1, tôi thực hiện patch v2 để phân biệt `search_kb.category=email` cho Outlook/profile với `account` cho login/MFA/account lock, đồng thời nhấn mạnh confirmation của payload ticket đầy đủ phải dùng `clarify(response_type=yes_no)` thay vì `text`.
+- **File hoặc artifact liên quan:** `artifacts/tools.yaml`; evidence baseline `runs/v0_B_base_openai_20260914T182709526456.json`; evidence v1 `runs/v1_B_base_openai_20260914T185746682098.json`; ghi chú audit/handoff `../../agent.md`.
+- **Commit hash hoặc pull request:** Chưa có tại thời điểm viết report. Tôi cần tự tạo commit bằng Git identity của mình sau khi chốt và verify v2; commit đó sẽ được cập nhật vào đây.
+- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:** Tôi giữ nguyên tên tool, enum, required fields, registry và fixed eval; chỉ cải thiện tool declaration theo từng hypothesis nhỏ. Lý do là tool name/schema là một phần interface model và evaluator dùng để đối chiếu, nên đổi đồng thời nhiều thành phần sẽ khó truy nguyên nguyên nhân metric thay đổi và có thể gây regression. Tôi cũng không sửa implementation vì smoke tests xác nhận validation của tool hoạt động đúng; failure ban đầu chủ yếu do model chọn tool/argument/boundary sai.
+- **Khó khăn tôi gặp và cách tôi xử lý:** Ban đầu smoke test báo `ModuleNotFoundError: No module named 'yaml'` vì terminal chưa dùng environment đã cài PyYAML. Tôi kích hoạt đúng `.venv` và xác nhận lại bằng các smoke tests. Khi đọc v1, tôi phát hiện một regression H03 (`Outlook profile` bị route sang category `account`), H12 đã an toàn hơn nhưng dùng `clarify(text)` thay vì `yes_no`, và H19 vẫn tự suy diễn environment demo/QA. Tôi xử lý H03/H12 ở declaration và bàn giao H19 cho phần system prompt vì đây là rule enum ambiguity toàn cục.
+- **Điều tôi học được từ phần việc này:** Tool name, description và JSON schema đều là một phần của prompt. Implementation chạy đúng không đảm bảo model chọn đúng tool. Evidence theo từng case và trace/tool result quan trọng hơn metric tổng; ví dụ v1 vừa cho thấy 7 lỗi baseline được cải thiện, vừa phát hiện H03 regression và H19 là vấn đề cần xử lý ở system prompt.
+- **Nếu làm lại, tôi sẽ cải thiện điều gì:** Tôi sẽ chuẩn bị mapping capability-to-tool và deterministic declaration/registry validation ngay từ đầu, chạy một nhóm smoke security checks sớm hơn, rồi tách experiment rõ hơn: một version chỉ sửa declaration, version kế tiếp chỉ sửa system prompt. Tôi cũng sẽ chạy extension/adversarial ngay sau khi prompt global được tích hợp để xác minh ticket confirmation, injection boundary và external-data boundary cùng nhau.
 
 Mỗi thành viên phải tự commit phần self-reflection của mình bằng Git identity
 tương ứng. Reflection phải dẫn đến contribution artifact/commit đã nêu ở trên,
