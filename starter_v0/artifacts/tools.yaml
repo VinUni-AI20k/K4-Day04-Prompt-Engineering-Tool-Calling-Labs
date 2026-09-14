@@ -1,67 +1,59 @@
-# starter_v0 — intentionally incomplete first-draft declarations.
-# Students improve routing guidance, argument conventions, missing-information
-# handling, and confirmation boundaries through v1/v2/v3.
-#
-# If a tool is renamed, keep the name synchronized across:
-#   this file -> tools/__init__.py -> data/eval_base.json
-#   -> data/eval_helpdesk_extension.json -> report/demo text
 tools:
   # ---------------- Core tools ----------------
   - name: clarify
-    description: "Gửi một câu hỏi cho người dùng."
+    description: "Gửi một câu hỏi cho người dùng để lấy thêm thông tin hoặc xin xác nhận trước hành động."
     parameters:
       type: object
       properties:
-        question: {type: string, default: "", description: "Câu hỏi"}
-        response_type: {type: string, enum: [text, yes_no, choice], default: "text", description: "Kiểu trả lời"}
-        options: {type: array, default: [], items: {type: string}, description: "Các lựa chọn"}
+        question: {type: string, description: "Câu hỏi cần hỏi người dùng"}
+        response_type: {type: string, enum: [text, yes_no, choice], default: "text", description: "Kiểu trả lời mong đợi. yes_no dùng cho xin xác nhận."}
+        options: {type: array, default: [], items: {type: string}, description: "Các lựa chọn (chỉ dùng nếu response_type là choice)"}
       required: [question]
 
   - name: search_kb
-    description: "Tìm hướng dẫn hỗ trợ kỹ thuật."
+    description: "Tìm hướng dẫn hỗ trợ kỹ thuật trong Knowledge Base (KB)."
     parameters:
       type: object
       properties:
-        query: {type: string, default: "", description: "Nội dung cần tìm"}
+        query: {type: string, description: "Nội dung cần tìm"}
         category: {type: string, enum: [all, vpn, email, wifi, printing, account, security, hardware, software, meeting_room], default: "all", description: "Nhóm hướng dẫn"}
         top_k: {type: integer, default: 3, description: "Số kết quả"}
       required: [query]
 
   - name: check_service_status
-    description: "Kiểm tra trạng thái một dịch vụ."
+    description: "Kiểm tra trạng thái một dịch vụ dùng chung."
     parameters:
       type: object
       properties:
         service: {type: string, enum: [vpn, email, sso, wifi, printing], description: "Tên dịch vụ"}
-        environment: {type: string, enum: [production, staging], default: "production", description: "Môi trường"}
-      required: [service]
+        environment: {type: string, enum: [production, staging], description: "Môi trường (bắt buộc phải rõ ràng). Nếu người dùng nói tên môi trường không chuẩn (vd demo), phải dùng clarify choice để hỏi."}
+      required: [service, environment]
 
   - name: inspect_device
-    description: "Kiểm tra thông tin và chẩn đoán thiết bị."
+    description: "Kiểm tra thông tin và chẩn đoán một thiết bị (asset) cụ thể."
     parameters:
       type: object
       properties:
-        asset_id: {type: string, description: "Mã tài sản"}
+        asset_id: {type: string, description: "Mã tài sản (bắt buộc). Không được tự đoán. Phải dùng clarify text nếu thiếu."}
         check: {type: string, enum: [all, network, vpn, security, hardware, software], default: "all", description: "Nhóm kiểm tra"}
       required: [asset_id]
 
   - name: lookup_user
-    description: "Tra cứu người dùng trong danh bạ hỗ trợ."
+    description: "Tra cứu người dùng trong danh bạ hỗ trợ để lấy danh sách thiết bị cấp phát."
     parameters:
       type: object
       properties:
-        employee_id: {type: string, description: "Mã nhân viên"}
+        employee_id: {type: string, description: "Mã nhân viên (bắt buộc). Không đoán bừa. Phải dùng clarify text nếu tên mơ hồ."}
       required: [employee_id]
 
   - name: format_incident_report
-    description: "Trình bày các kết quả đã có thành báo cáo."
+    description: "Trình bày các kết quả đã có thành báo cáo. Tuyệt đối không kiểm tra lại nếu dữ liệu đã có."
     parameters:
       type: object
       properties:
         findings:
           type: array
-          default: []
-          description: "Các kết quả đã thu thập"
+          description: "Các kết quả đã thu thập (dùng thông tin đã cung cấp, không gọi thêm tool khác để tìm)"
           items:
             type: object
             properties:
@@ -69,13 +61,13 @@ tools:
               detail: {type: string}
               source: {type: string}
               status: {type: string}
-        template: {type: string, enum: [brief, technical, handoff], default: "brief", description: "Mẫu báo cáo"}
-        incident_title: {type: string, default: "IT incident", description: "Tiêu đề"}
-      required: [findings, template]
+        template: {type: string, enum: [brief, technical, handoff], description: "Mẫu báo cáo"}
+        incident_title: {type: string, description: "Tiêu đề báo cáo"}
+      required: [findings, template, incident_title]
 
   # ---------------- Optional/advanced tools ----------------
   - name: search_device_info
-    description: "Tìm thông tin công khai về một model thiết bị trên web. Chỉ truyền hãng, model và loại thông tin; không truyền asset ID, employee ID hoặc dữ liệu nội bộ."
+    description: "Tìm thông tin công khai về một model thiết bị trên web. CẢNH BÁO: CHỈ truyền hãng, model và loại query. TUYỆT ĐỐI KHÔNG truyền Asset ID, Employee ID, Location hay dữ liệu nội bộ."
     parameters:
       type: object
       properties:
@@ -86,22 +78,22 @@ tools:
       required: [manufacturer, model, query_type]
 
   - name: policy
-    description: "Tìm trong chính sách IT nội bộ."
+    description: "Tìm trong chính sách IT nội bộ (policy)."
     parameters:
       type: object
       properties:
-        query: {type: string, default: "", description: "Nội dung cần tìm"}
+        query: {type: string, description: "Nội dung cần tìm"}
         policy_area: {type: string, enum: [all, access_control, data_privacy, external_tools, incident_response, service_operations, ticketing], default: "all", description: "Nhóm chính sách"}
         top_k: {type: integer, default: 3, description: "Số mục"}
       required: [query]
 
   - name: create_ticket
-    description: "Tạo một ticket hỗ trợ."
+    description: "Tạo một ticket hỗ trợ. CẢNH BÁO: Đây là write action. Phải dùng clarify yes_no để xác nhận trước khi chạy."
     parameters:
       type: object
       properties:
-        summary: {type: string, default: "", description: "Tóm tắt sự cố"}
+        summary: {type: string, description: "Tóm tắt sự cố. Tuyệt đối không được chứa mật khẩu hoặc bí mật."}
         priority: {type: string, enum: [low, medium, high, critical], default: "medium", description: "Mức ưu tiên"}
         asset_id: {type: string, default: "", description: "Mã tài sản nếu có"}
-        confirmed: {type: boolean, default: false, description: "Đã được người dùng xác nhận"}
-      required: [summary]
+        confirmed: {type: boolean, description: "Chỉ đặt True nếu người dùng ĐÃ XÁC NHẬN CHÍNH XÁC payload hiện tại bằng tin nhắn Yes/Đồng ý ở lượt gần nhất."}
+      required: [summary, confirmed]

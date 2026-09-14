@@ -135,16 +135,49 @@ có thể đối chiếu đóng góp.
 
 Sao chép mẫu dưới đây cho từng thành viên:
 
-### Họ tên — MSSV
+### Thành viên A (Prompt Architect) — [MSSV]
 
-- **Vai trò/phần việc được nhận:**
-- **Những gì tôi đã thay đổi trong repo chung:**
-- **File hoặc artifact liên quan:**
-- **Commit hash hoặc pull request:**
-- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:**
-- **Khó khăn tôi gặp và cách tôi xử lý:**
-- **Điều tôi học được từ phần việc này:**
-- **Nếu làm lại, tôi sẽ cải thiện điều gì:**
+- **Vai trò/phần việc được nhận:** Quản lý system_prompt.md, format JSON, context carry-over & version hash.
+- **Những gì tôi đã thay đổi trong repo chung:** [Điền thay đổi]
+- **File hoặc artifact liên quan:** `artifacts/system_prompt.md`
+- **Commit hash hoặc pull request:** [Điền hash]
+- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:** [Điền quyết định]
+- **Khó khăn tôi gặp và cách tôi xử lý:** [Điền khó khăn]
+- **Điều tôi học được từ phần việc này:** [Điền bài học]
+- **Nếu làm lại, tôi sẽ cải thiện điều gì:** [Điền ý tưởng cải thiện]
+
+### Thành viên B (Tool & Schema Engineer) — [MSSV]
+
+- **Vai trò/phần việc được nhận:** Quản lý tools.yaml, chuẩn hóa enums/arguments, đồng bộ tool name.
+- **Những gì tôi đã thay đổi trong repo chung:** [Điền thay đổi]
+- **File hoặc artifact liên quan:** `artifacts/tools.yaml`
+- **Commit hash hoặc pull request:** [Điền hash]
+- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:** [Điền quyết định]
+- **Khó khăn tôi gặp và cách tôi xử lý:** [Điền khó khăn]
+- **Điều tôi học được từ phần việc này:** [Điền bài học]
+- **Nếu làm lại, tôi sẽ cải thiện điều gì:** [Điền ý tưởng cải thiện]
+
+### Thành viên C (Eval & Red-Team) — [MSSV]
+
+- **Vai trò/phần việc được nhận:** Tác giả 10 cases eval_group.json, kiểm thử 12 adversarial attacks.
+- **Những gì tôi đã thay đổi trong repo chung:** [Điền thay đổi]
+- **File hoặc artifact liên quan:** `data/eval_group.json`
+- **Commit hash hoặc pull request:** [Điền hash]
+- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:** [Điền quyết định]
+- **Khó khăn tôi gặp và cách tôi xử lý:** [Điền khó khăn]
+- **Điều tôi học được từ phần việc này:** [Điền bài học]
+- **Nếu làm lại, tôi sẽ cải thiện điều gì:** [Điền ý tưởng cải thiện]
+
+### Thành viên D (UI & Report Coordinator) — [Điền MSSV của bạn]
+
+- **Vai trò/phần việc được nhận:** Dựng Live Chat Streamlit, test kịch bản demo, tổng hợp REPORT.md.
+- **Những gì tôi đã thay đổi trong repo chung:** Xây dựng giao diện Streamlit `app.py`, cấu hình thư viện UI, và thiết kế lại cấu trúc báo cáo.
+- **File hoặc artifact liên quan:** `app.py`, `requirements.txt`, `artifacts/REPORT.md`
+- **Commit hash hoặc pull request:** [Điền hash sau khi push code]
+- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:** Tái sử dụng `run_model_tool_loop` từ `chat.py` kết hợp với `st.session_state` của Streamlit để giữ đúng flow gọi tool gốc của agent thay vì viết lại từ đầu. Sử dụng `st.expander` cho các tool events để giao diện nhìn gọn gàng nhưng vẫn kiểm chứng (audit) được tham số args.
+- **Khó khăn tôi gặp và cách tôi xử lý:** Quản lý lịch sử hội thoại (history window) trong Streamlit để không bị đầy context. Xử lý bằng cách duy trì hai luồng list riêng biệt: `history` cho agent context và `display_messages` cho render giao diện.
+- **Điều tôi học được từ phần việc này:** Hiểu rõ cách thức hoạt động của tool-loop backend (nhận request -> gọi models -> map functions -> lấy kết quả) và cách ghép nối nó vào một framework UI reactive.
+- **Nếu làm lại, tôi sẽ cải thiện điều gì:** [Ghi ý kiến của bạn, ví dụ: Thêm nút tải/export lịch sử chat ra file Markdown]
 
 Mỗi thành viên phải tự commit phần self-reflection của mình bằng Git identity
 tương ứng. Reflection phải dẫn đến contribution artifact/commit đã nêu ở trên,
