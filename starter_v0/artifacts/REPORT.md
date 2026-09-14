@@ -220,7 +220,7 @@ Failure quan trọng còn lại là G03, G05 và G09 trong group eval, tương �
 - **Điều tôi học được từ phần việc này:** TODO.
 - **Nếu làm lại, tôi sẽ cải thiện điều gì:** TODO.
 
-### Dang Huu Cuong - 2A202602572
+### THÂN TIẾN ĐẠT - 2A202603023
 
 - **Vai trò/phần việc được nhận:** D - UI & Report Lead.
 - **Những gì tôi đã thay đổi trong repo chung:** Xây dựng Streamlit UI để demo agent, hiển thị câu trả lời, tool calls, arguments, tool results, status, artifact version và transcript path. Tôi cũng cập nhật report bằng group eval evidence, UI evidence và bonus tool evidence hiện có.
