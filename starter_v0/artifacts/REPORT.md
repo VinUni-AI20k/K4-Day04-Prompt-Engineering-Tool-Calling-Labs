@@ -3,7 +3,7 @@
 ## Team
 
 - Team: _TODO tên nhóm_ (repo: https://github.com/vuhuyng04/K4-Day04-2A202602662)
-- Members: xem `TEAMMATES.md` — Nguyễn Vũ Huy (vuhuyng04, nhóm trưởng), thiendao, _TODO thành viên 3_, _TODO thành viên 4_
+- Members: xem `TEAMMATES.md` — Nguyễn Vũ Huy (vuhuyng04, nhóm trưởng), thiendao, _TODO thành viên 3_, Nguyễn Nguyên Phong (Heargreaves)
 - Provider/model: openai / gpt-4o-mini (temperature 0)
 
 > Phân công điền report: **Huy** — B1, B2, B7, C1, C3. **Thành viên 2 (thiendao)** — B3.
@@ -13,30 +13,42 @@
 
 ## A1. Agent này làm được gì
 
-> _Owner: thành viên 4._ Viết 1–2 câu mô tả capability và giới hạn của agent.
+Agent hỗ trợ IT nội bộ bằng các tool đã khai báo: tra cứu knowledge base, trạng thái dịch vụ, inventory/directory, policy và tạo báo cáo/ticket có xác nhận. Agent chỉ trả lời dựa trên kết quả tool/fixture; không xử lý bí mật, không đoán mã nội bộ và không thực hiện external search hoặc ghi ticket khi chưa thỏa boundary tương ứng.
 
 **Link dùng thử:**
 
-> URL: _TODO (UI local: `streamlit run ui.py` hoặc tương đương)_
+> UI local: từ `starter_v0/` chạy `streamlit run ui.py` (cần cài `requirements.txt` và cấu hình API key cho provider được chọn).
 
 ## A2. Tool agent có
 
 | Tool | Chức năng | Core / optional / team-built |
 |---|---|---|
 | clarify | Hỏi bổ sung hoặc xác nhận | core |
-|  |  |  |
+| search_kb | Tìm hướng dẫn trong knowledge base nội bộ | core |
+| check_service_status | Kiểm tra trạng thái dịch vụ dùng chung | core |
+| inspect_device | Xem inventory và chẩn đoán của một asset ID | core |
+| lookup_user | Tra directory theo employee ID và asset được cấp | core |
+| format_incident_report | Định dạng evidence đã có thành báo cáo Markdown | core |
+| policy | Tra chính sách IT nội bộ | optional built-in |
+| create_ticket | Tạo ticket sau xác nhận `yes_no` cho payload cuối | optional built-in (write action) |
+| search_device_info | Tìm thông tin model công khai qua dịch vụ ngoài | optional built-in (external) |
 
 ## A3. Câu hỏi mẫu
 
-1.
-2.
-3.
+1. `VPN production có đang lỗi không? Đồng thời kiểm tra VPN của LT-204.`
+2. `Cho mình biết trạng thái tài khoản và thiết bị được cấp của EMP-1007.`
+3. `Tạo ticket ưu tiên high cho LT-318: VPN không kết nối được.` Sau câu hỏi xác nhận của agent, trả lời `Có` để demo write action có kiểm soát.
 
 ## A4. Kịch bản demo đã rehearse
 
 | Scenario | Tool trace cần thấy | Cải thiện version | Fallback run/transcript |
 |---|---|---|---|
-|  |  |  |  |
+| Normal: VPN production + LT-204 | `check_service_status(vpn, production)` + `inspect_device(LT-204, vpn)` | v2 chọn `check` theo triệu chứng | Chạy UI, transcript sẽ được ghi vào `transcripts/ui_v3_*.transcript.json` |
+| Missing information: “laptop của tôi không vào VPN được” | chỉ `clarify(response_type=text)`; không gọi inventory với placeholder | v1/v2 không đoán ID | Cùng transcript UI, turn tiếp theo nhập mã asset chính xác |
+| Multi-turn correction: hỏi staging rồi đổi sang production | lượt cuối gọi `check_service_status(..., production)` | v1 ưu tiên giá trị mới nhất | Cùng transcript UI, kiểm tra `rounds` và `tool_events` của cả hai turn |
+| Ticket confirmation: yêu cầu ticket → `Có` | lượt 1 `clarify(yes_no)` với payload; lượt 2 mới `create_ticket(confirmed=true)` | v1/v3 ràng buộc xác nhận payload cuối | Cùng transcript UI; không commit file sinh trong `tickets/` |
+
+_Trạng thái rehearsal: các kịch bản đã được chuẩn bị trong UI. Máy thực hiện phần UI hiện chưa có `.env`/API key provider, nên không tạo transcript hoặc ghi kết quả live giả; cần chạy bốn scenario trên sau khi cấu hình key._
 
 # PHẦN B — Chi tiết và evidence
 
@@ -88,7 +100,7 @@ _Owner: thành viên 4 (UI + transcript)._
 
 | Scenario/turn | Version | Tool calls + args | Transcript/run | Outcome |
 |---|---|---|---|---|
-|  |  |  |  |  |
+| Chưa chạy live — thiếu provider key trên máy UI | v3 (`p13855201a683`, `t3a094ea16a06`) | Chưa gọi tool | Chưa có; UI sẽ tạo `transcripts/ui_v3_<provider>_<timestamp>.transcript.json` | Không ghi evidence giả. Cần rehearsal 4 scenario ở A4 sau khi cấu hình `.env`. |
 
 ## B4a. Adversarial evidence
 
@@ -201,6 +213,17 @@ Sao chép mẫu dưới đây cho từng thành viên:
 Mỗi thành viên phải tự commit phần self-reflection của mình bằng Git identity
 tương ứng. Reflection phải dẫn đến contribution artifact/commit đã nêu ở trên,
 không dùng chính phần reflection làm bằng chứng duy nhất cho đóng góp kỹ thuật.
+
+### Nguyễn Nguyên Phong — 2A202602691
+
+- **Vai trò/phần việc được nhận:** UI chat + live evidence.
+- **Những gì tôi đã thay đổi trong repo chung:** Xây UI Streamlit cho agent, thêm dependency Streamlit, đồng thời cập nhật A1–A4/B4 để mô tả capability, tool, kịch bản demo và cách lưu evidence một cách trung thực.
+- **File hoặc artifact liên quan:** `starter_v0/ui.py`, `starter_v0/requirements.txt`, `starter_v0/artifacts/REPORT.md`.
+- **Commit hash hoặc pull request:** `c0acb22900438282989694b61747953ff58acc0d` — `feat(ui): add auditable Streamlit helpdesk chat`.
+- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:** UI gọi trực tiếp `run_model_tool_loop` từ `chat.py` thay vì tạo agent loop khác. Vì vậy CLI và UI có cùng quy tắc dừng khi `clarify`, cách thực thi tool và cấu trúc `rounds`/`tool_events` trong transcript.
+- **Khó khăn tôi gặp và cách tôi xử lý:** Máy hiện không có `.env` hay API key provider, đồng thời chưa cài Streamlit. Tôi đã kiểm tra cú pháp bằng `py_compile`/`compileall`, xác nhận hash artifact, và ghi rõ phần live evidence còn cần chạy thay vì tạo transcript giả.
+- **Điều tôi học được từ phần việc này:** UI cho agent có tool cần ưu tiên trace kiểm toán (args, result/error, round và hash artifact) hơn giao diện đơn thuần để người review tái hiện được hành vi.
+- **Nếu làm lại, tôi sẽ cải thiện điều gì:** Chạy rehearsal với provider thật, thêm screenshot cho từng scenario và kiểm tra riêng guardrail confirmation trước khi demo ticket.
 
 ## C3. Final checkout
 
