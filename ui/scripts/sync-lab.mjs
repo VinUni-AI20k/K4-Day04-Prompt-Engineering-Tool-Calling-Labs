@@ -27,12 +27,18 @@ const candidates = [
 const source = candidates.find((p) => existsSync(path.join(p, "chat.py")));
 
 if (!source) {
-  // A missing source is fatal: a silent skip would deploy a function that
-  // imports nothing and fails at request time instead of at build time.
+  // Deploying `ui/` on its own uploads the vendored .lab/ and leaves
+  // starter_v0 behind, so an existing copy is the expected state, not an error.
+  if (existsSync(path.join(dest, "chat.py"))) {
+    console.log("[sync-lab] starter_v0 not reachable; using the .lab/ copy already present.");
+    process.exit(0);
+  }
+  // With neither a source nor a copy, failing here beats deploying a function
+  // that imports nothing and only breaks on the first request.
   console.error(
-    "[sync-lab] FATAL: could not find starter_v0/chat.py. Looked in:\n  " +
+    "[sync-lab] FATAL: no starter_v0/chat.py and no .lab/chat.py. Looked in:\n  " +
       candidates.join("\n  ") +
-      "\nOn Vercel, enable Settings -> Build -> 'Include source files outside of the Root Directory'."
+      "\nFor a Git deployment, enable Settings -> Build -> 'Include source files outside of the Root Directory'."
   );
   process.exit(1);
 }
