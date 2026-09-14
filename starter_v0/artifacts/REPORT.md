@@ -17,7 +17,10 @@
 
 **Link dùng thử:**
 
-> URL:
+Run in command
+```
+chainlit run starter_v0\app.py
+```
 
 ## A2. Tool agent có
 
@@ -142,7 +145,7 @@ nhóm tự xây.
 | `B03_software_catalog_compliance` | Single-turn | "Phần mềm BitTorrent có được phép sử dụng trong mạng nội bộ công ty không?" | `check_software_catalog(software_name="BitTorrent")` | **PASS** |
 | `B04_multiturn_ticket_tracking` | Multi-turn | 3 lượt hội thoại hỏi tiến độ sự cố mạng, cung cấp mã INC-1002 và yêu cầu tra cứu người phụ trách | `lookup_ticket(ticket_id="INC-1002")` | **PASS** |
 
-*Run evidence file*: `starter_v0/runs/v4_B_bonus_gemini_20260915T043121045224.json` (Total: 4, Passed: 4, Accuracy: 1.0, Provider Errors: 0).
+*Run evidence file*: `starter_v0/runs/v4_B_bonus_gemini_20260915T041911328290.json` (Total: 4, Passed: 4, Accuracy: 1.0, Provider Errors: 0).
 
 
 ## B6. Safety review
@@ -211,6 +214,21 @@ Sao chép mẫu dưới đây cho từng thành viên:
 - **Khó khăn tôi gặp và cách tôi xử lý:** Gặp khó khăn khi mô hình bị áp dụng quá đà quy tắc "3 nguồn" làm phát sinh extra tool call `search_kb` ở case `M08`. Tôi đã xử lý bằng cách thu hẹp điều kiện: chỉ gọi `search_kb` khi người dùng có yêu cầu tìm kiếm bài hướng dẫn/quy trình rõ ràng.
 - **Điều tôi học được từ phần việc này:** Học được phương pháp thiết kế Function Calling Schema chặt chẽ kết hợp với Prompt Engineering để đạt độ chính xác 100% (Accuracy: 1.0) và phòng chống rủi ro Prompt Injection / Exfiltration trong Agent thực tế.
 - **Nếu làm lại, tôi sẽ cải thiện điều gì:** Tôi sẽ xây dựng một bộ kịch bản tự động kiểm thử nhanh (Automated Regression Test Script) để tự động kiểm tra ngay sau mỗi lần chỉnh sửa prompt, giúp rút ngắn thời gian tinh chỉnh ranh giới.
+
+### Nguyễn Minh Dương — 2A202602920
+
+- **Vai trò/phần việc được nhận:** Xây dựng group test cases, phát triển 2 bonus tools (`lookup_ticket`, `check_software_catalog`) và viết test case tương ứng.
+- **Những gì tôi đã thay đổi trong repo chung:**
+  - Tạo group test case giúp phát hiện lỗi trong test G03 (policy tool argument thiếu).
+  - Thêm công cụ bonus `lookup_ticket` và `check_software_catalog` vào `starter_v0/artifacts/tools.yaml` và cập nhật `system_prompt.md`.
+  - Viết test cases cho các công cụ bonus trong `tests/test_tools.py` và dữ liệu eval trong `data/eval_bonus.json`.
+- **File hoặc artifact liên quan:** [tools.yaml](tools.yaml), [system_prompt.md](system_prompt.md), [tests/test_tools.py](tests/test_tools.py), [data/eval_bonus.json](data/eval_bonus.json), [runs/v4_B_bonus_gemini_20260915T043121045224.json](runs/v4_B_bonus_gemini_20260915T043121045224.json).
+- **Commit hash hoặc pull request:** `f79720d`
+- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:** Định nghĩa schema cho các công cụ bonus với các tham số bắt buộc (`ticket_id`, `software_name`, `platform`) để ngăn lỗi missing argument và tránh các lỗ hổng bảo mật.
+- **Khó khăn tôi gặp và cách tôi xử lý:** Đảm bảo tính an toàn khi công cụ `lookup_ticket` không cho phép truy cập thông tin nhạy cảm; đã thiết lập `side_effect: false` và kiểm tra định dạng `ticket_id`.
+- **Điều tôi học được từ phần việc này:** Cách tích hợp tools mới vào pipeline và test suite một cách liền mạch, đồng thời duy trì tính an toàn và độ chính xác.
+- **Nếu làm lại, tôi sẽ cải thiện điều gì:** Thêm các test case đa dạng hơn cho các trường hợp lỗi nhập sai và kiểm tra guardrail tự động.
+
 
 Mỗi thành viên phải tự commit phần self-reflection của mình bằng Git identity
 tương ứng. Reflection phải dẫn đến contribution artifact/commit đã nêu ở trên,
