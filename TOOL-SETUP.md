@@ -248,6 +248,12 @@ Extension:
 python run_eval.py --provider openrouter --version v3 --suite extension --eval-cases data/eval_helpdesk_extension.json
 ```
 
+Bonus (New tools):
+
+```powershell
+python run_eval.py --provider gemini --version v4 --suite bonus --eval-cases data/eval_bonus.json
+```
+
 Adversarial:
 
 ```powershell
