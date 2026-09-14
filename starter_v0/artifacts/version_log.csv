@@ -1,1 +1,2 @@
 version,author,changed_artifact,artifact_version,prompt_hash,tools_hash,reason,hypothesis,metric_name,metric_before,metric_after,run_file
+v0,Role C (thanhnvhust514),baseline,v0+p233ec2cecfdf+teb3e2243f237,233ec2cecfdf,eb3e2243f237,baseline,Thiết lập baseline chưa tối ưu làm mốc so sánh cho cả nhóm,case_accuracy,,0.8667,runs/v0_B_base_openai_20260914T185238636918.json

@@ -44,7 +44,7 @@ total_cases`, và tool result error đã được review thủ công.
 
 | Version | Prompt/tool change | Hypothesis | Metric | Before | After | Run file |
 |---|---|---|---|---:|---:|---|
-| v0 | baseline |  |  |  |  |  |
+| v0 | baseline | Thiết lập baseline chưa tối ưu làm mốc đo lường xuất phát cho cả nhóm | case_accuracy | - | 0.8667 | runs/v0_B_base_openai_20260914T185238636918.json |
 | v1 |  |  |  |  |  |  |
 | v2 |  |  |  |  |  |  |
 | v3 |  |  |  |  |  |  |
@@ -53,7 +53,11 @@ total_cases`, và tool result error đã được review thủ công.
 
 | Case ID | Failure type | Actual calls | What failed | Fix |
 |---|---|---|---|---|
-|  |  |  |  |  |
+| H12_confirm_before_ticket | wrong_boundary (routing) | `inspect_device(asset_id='LT-204', check='vpn')` | User yêu cầu tạo ticket (write action) nhưng model không gọi `clarify` để xin xác nhận trước mà lại route sai sang `inspect_device`. | Bổ sung rule vào System Prompt: Mọi yêu cầu tạo ticket chưa có xác nhận rõ ràng bắt buộc gọi `clarify(response_type='yes_no')`. |
+| H19_ambiguous_environment | missing_info (argument/enum) | `check_service_status(service='email', environment='staging')` | Môi trường "demo của team QA" không khớp enum (`production`/`staging`). Model thiếu thông tin nhưng tự suy đoán gán `staging` thay vì hỏi lại. | Bổ sung hướng dẫn: Nếu environment không rõ ràng hoặc không khớp enum, phải gọi `clarify(response_type='choice', options=['production', 'staging'])`. |
+| M05_ticket_confirmation | wrong_boundary (multi-turn) | `create_ticket(summary='Lỗi VPN', priority='high', asset_id='LT-204', confirmed=False)` | Sau khi user sửa priority và bảo "hãy cho mình xem lại và hỏi xác nhận", model gọi thẳng `create_ticket` với `confirmed=False` thay vì gọi `clarify`. | Làm rõ ranh giới confirmation: Khi user yêu cầu xác nhận, phải dùng `clarify` hỏi user, tuyệt đối không gọi `create_ticket` với `confirmed=False`. |
+| M09_confirmation_invalidated | wrong_boundary (safety/invalidation) | `policy(query='...', policy_area='ticketing')` | Confirmation cũ ở turn 1 bị mất hiệu lực khi turn 2 thay đổi payload (critical + nghi mất dữ liệu). Model không xin xác nhận lại mà lại gọi `policy`. | Bổ sung rule trong System Prompt: Confirmation cũ lập tức vô hiệu khi action payload thay đổi; model phải tổng hợp payload mới và gọi `clarify` để confirm lại. |
+| H06/H19_argument_spec | wrong_arg_value (argument boundary) | `check_service_status(environment='staging')` | Baseline schema trong `tools.yaml` chưa nêu rõ fallback behavior cho invalid argument; model tự gán giá trị arg thay vì reject/clarify. | Role B chuẩn hóa enum, description và strict schema trong `artifacts/tools.yaml` để model không đoán mò tham số. |
 
 ## B3. Team eval cases
 
