@@ -21,8 +21,8 @@ tools:
       type: object
       properties:
         question: {type: string, default: "", description: "Câu hỏi"}
-        response_type: {type: string, enum: [text, yes_no, choice], default: "text", description: "Kiểu trả lời"}
-        options: {type: array, default: [], items: {type: string}, description: "Các lựa chọn"}
+        response_type: {type: string, enum: [text, yes_no, choice], default: "text", description: "Dùng yes_no để xác nhận payload hành động ghi; choice khi giá trị thiếu thuộc tập enum đóng; text cho identifier hoặc dữ liệu tự do."}
+        options: {type: array, default: [], items: {type: string}, description: "Các lựa chọn enum hợp lệ, bắt buộc khi response_type=choice."}
       required: [question]
 
   - name: search_kb
@@ -41,7 +41,7 @@ tools:
       type: object
       properties:
         service: {type: string, enum: [vpn, email, sso, wifi, printing], description: "Dịch vụ được nêu trong yêu cầu: VPN=vpn, Email hoặc Outlook=email, đăng nhập một lần=sso, Wi-Fi=wifi, hệ thống in=printing"}
-        environment: {type: string, enum: [production, staging], default: "production", description: "Giữ đúng môi trường người dùng nêu: production=production và staging=staging; chỉ dùng mặc định production khi người dùng không chỉ định môi trường"}
+        environment: {type: string, enum: [production, staging], default: "production", description: "Giữ đúng environment người dùng nêu. Chỉ có production và staging. Nếu họ nêu demo, test, UAT, QA, sandbox hoặc tên khác, không tự map và không dùng default; gọi clarify với response_type=choice, options=[production, staging]. Chỉ mặc định production khi hoàn toàn không nêu environment."}
       required: [service]
 
   - name: inspect_device
@@ -50,7 +50,7 @@ tools:
       type: object
       properties:
         asset_id: {type: string, description: "Mã tài sản cụ thể lấy nguyên văn từ yêu cầu, ví dụ LT-204 hoặc DT-031; không gộp nhiều mã vào một giá trị"}
-        check: {type: string, enum: [all, network, vpn, security, hardware, software], default: "all", description: "Ánh xạ yêu cầu: tổng thể hoặc toàn bộ=all, kết nối mạng hoặc Wi-Fi=network, VPN=vpn, bảo mật=security, phần cứng=hardware, phần mềm=software"}
+        check: {type: string, enum: [all, network, vpn, security, hardware, software], default: "all", description: "Ánh xạ yêu cầu: tổng thể hoặc toàn bộ=all, kết nối mạng hoặc Wi-Fi=network, VPN=vpn, bảo mật=security, phần cứng=hardware, phần mềm=software. Khi đã có triệu chứng cụ thể phải dùng nhóm tương ứng, kể cả trong yêu cầu multi-tool; không dùng all cho một yêu cầu VPN cụ thể."}
       required: [asset_id]
 
   - name: lookup_user
@@ -104,7 +104,7 @@ tools:
       required: [query]
 
   - name: create_ticket
-    description: "Tạo một ticket hỗ trợ."
+    description: "Tạo ticket hỗ trợ chỉ sau explicit confirmation cho đúng payload hiện tại. Một mô tả ngắn như lỗi VPN là summary hợp lệ; trước confirmation phải gọi clarify yes_no thay vì hỏi thêm chi tiết không bắt buộc hoặc gọi create_ticket để xem trước."
     parameters:
       type: object
       properties:

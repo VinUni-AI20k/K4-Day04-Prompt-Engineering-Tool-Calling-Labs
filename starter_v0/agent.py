@@ -6,6 +6,7 @@ from typing import Any
 
 from providers.base import Provider, ToolCall
 from tools import TOOL_FUNCTIONS
+from tools._shared import fold_text
 from tools.create_ticket.tool import SENSITIVE_DATA_PATTERN
 from tools.search_device_info.tool import INTERNAL_IDENTIFIER, RESTRICTED_INTERNAL_DATA
 
@@ -37,6 +38,12 @@ def _enforce_runtime_guardrails(
     )
     latest_folded = latest.casefold()
     combined_folded = combined.casefold()
+    combined_normalized = fold_text(combined)
+    user_texts = [
+        str(message.get("content") or "")
+        for message in user_messages
+        if message.get("role") == "user"
+    ]
 
     if SENSITIVE_DATA_PATTERN.search(latest):
         return [], [{
@@ -85,6 +92,64 @@ def _enforce_runtime_guardrails(
             "result": {
                 "status": "rerouted",
                 "reason": "restricted_data_in_external_search",
+                "blocked_tools": [call.name for call in proposed_calls],
+            },
+        }], None
+
+    proposed_write = any(call.name == "create_ticket" for call in proposed_calls)
+    confirmation_index = next(
+        (
+            index
+            for index, text in enumerate(user_texts[:-1])
+            if "confirm" in fold_text(text) or "xac nhan" in fold_text(text)
+        ),
+        None,
+    )
+    payload_change_markers = ("payload", "priority", "summary", "asset", "thay", "doi", "change")
+    payload_changed_after_confirmation = (
+        confirmation_index is not None
+        and any(
+            any(marker in fold_text(text) for marker in payload_change_markers)
+            for text in user_texts[confirmation_index + 1 : -1]
+        )
+    )
+    references_prior_confirmation = "confirmation" in latest_folded
+    payload_changed_before_latest = any(
+        any(marker in fold_text(text) for marker in payload_change_markers)
+        for text in user_texts[1:-1]
+    )
+    confirmation_positions = [
+        position
+        for marker in ("confirm", "xac nhan")
+        if (position := combined_normalized.find(marker)) >= 0
+    ]
+    payload_change_positions = [
+        position
+        for marker in payload_change_markers
+        if (position := combined_normalized.find(marker)) >= 0
+    ]
+    stale_confirmation_in_context = (
+        bool(confirmation_positions)
+        and bool(payload_change_positions)
+        and min(confirmation_positions) < min(payload_change_positions)
+        and any(
+            combined_normalized.find(marker, min(payload_change_positions) + 1) >= 0
+            for marker in ("confirm", "xac nhan")
+        )
+    )
+    stale_confirmation = payload_changed_after_confirmation or stale_confirmation_in_context or (
+        references_prior_confirmation and payload_changed_before_latest
+    )
+    if proposed_write and stale_confirmation:
+        safe_call = ToolCall(name="clarify", args={
+            "question": "The ticket payload changed after the earlier confirmation. Please confirm the current payload again.",
+            "response_type": "yes_no",
+        })
+        return [safe_call], [{
+            "tool": "runtime_guardrail",
+            "result": {
+                "status": "rerouted",
+                "reason": "stale_confirmation_after_payload_change",
                 "blocked_tools": [call.name for call in proposed_calls],
             },
         }], None
