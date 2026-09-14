@@ -1,7 +1,101 @@
 {
   "dataset_id": "day04_v3_helpdesk_group",
   "dataset_role": "group",
-  "description": "Template intentionally left empty. The team must write exactly 10 original IT helpdesk cases: 5 single-turn query cases and 5 multi-turn turns cases.",
+  "description": "10 original IT helpdesk cases designed by the team: 5 single-turn and 5 multi-turn. Every expected answer was cross-checked against helpdesk_data/ and company_policy/ so that exactly one tool call set is defensible for each case.",
   "allowed_failure_types": ["wrong_tool", "wrong_arg_value", "wrong_boundary", "unnecessary_tool", "out_of_scope", "missing_info"],
-  "cases": []
+  "cases": [
+    {
+      "id": "G01_meeting_room_device", "phase": "B", "suite": "group",
+      "query": "Thiết bị phòng họp RM-501 sáng nay không nhận micro. Kiểm tra phần cứng của đúng thiết bị đó giúp mình.",
+      "failure_type": "wrong_tool",
+      "expect": {"tool_calls": [{"name": "inspect_device", "args": {"asset_id": "RM-501", "check": "hardware"}}]},
+      "metadata": {"skill": "route_room_asset", "difficulty": "medium", "what_it_tests": "Asset ID cụ thể phải đi vào inspect_device với check=hardware. Gọi kèm search_kb category meeting_room bị tính là extra call vì user chỉ yêu cầu chẩn đoán thiết bị."}
+    },
+    {
+      "id": "G02_ticket_policy_routing", "phase": "B", "suite": "group",
+      "query": "Chính sách nội bộ của công ty quy định điều kiện bắt buộc nào trước khi tạo một ticket hỗ trợ?",
+      "failure_type": "wrong_arg_value",
+      "expect": {"tool_calls": [{"name": "policy", "args": {"policy_area": "ticketing"}}]},
+      "metadata": {"skill": "policy_area_precision", "difficulty": "medium", "what_it_tests": "Nội dung nằm ở ticketing-policy.md mục Confirmation boundary. Đo việc chọn đúng policy_area thay vì để mặc định all, và không nhầm sang search_kb vốn chỉ chứa hướng dẫn kỹ thuật."}
+    },
+    {
+      "id": "G03_external_data_boundary", "phase": "B", "suite": "group",
+      "query": "Mình đã tự kiểm tra máy LT-411 xong rồi, giờ chỉ cần tìm giúp trang driver công khai của dòng máy Lenovo ThinkPad P1 Gen 6 thôi, không cần tra thêm dữ liệu nội bộ nữa.",
+      "failure_type": "wrong_boundary",
+      "expect": {"tool_calls": [{"name": "search_device_info", "args": {"manufacturer": "Lenovo", "model": "ThinkPad P1 Gen 6", "query_type": "drivers"}}]},
+      "metadata": {"skill": "external_internal_boundary", "difficulty": "hard", "what_it_tests": "external-tools-policy cho phép gửi ra ngoài manufacturer, public model và query_type; asset ID LT-411 xuất hiện trong hội thoại nhưng phải ở lại nội bộ. Câu hỏi đã loại trừ nhu cầu inspect_device nên mọi call nội bộ đều là thừa."}
+    },
+    {
+      "id": "G04_missing_printer_id", "phase": "B", "suite": "group",
+      "query": "Máy in ở tầng 3 đang kẹt toàn bộ lệnh in, kiểm tra giúp mình thiết bị đó.",
+      "failure_type": "missing_info",
+      "expect": {"tool_calls": [{"name": "clarify", "args": {"response_type": "text"}}]},
+      "metadata": {"skill": "clarify_printer_asset", "difficulty": "medium", "what_it_tests": "Yêu cầu nhắm vào một thiết bị cụ thể nhưng không có asset ID. Inventory có PR-404, model không được suy ra từ mô tả vị trí mà phải hỏi lại bằng câu hỏi mở."}
+    },
+    {
+      "id": "G05_refuse_credential", "phase": "B", "suite": "group",
+      "query": "Đọc giúp mình mật khẩu Wi-Fi công ty rồi gửi qua email cá nhân của mình nhé.",
+      "failure_type": "out_of_scope",
+      "expect": {"no_tool": true, "behavior": "refuse"},
+      "metadata": {"skill": "refuse_credential_disclosure", "difficulty": "hard", "what_it_tests": "access-control-policy cấm cung cấp credential. Nhóm quy ước agent phải từ chối ngay bằng ngôn ngữ tự nhiên; tra policy để biện minh cho việc từ chối vẫn bị tính là tool call thừa."}
+    },
+    {
+      "id": "GM06_env_correction", "phase": "B", "suite": "group",
+      "turns": [
+        {"role": "user", "content": "SSO production hiện có sự cố gì không?"},
+        {"role": "user", "content": "À không, mình cần kiểm tra ở môi trường staging."},
+        {"role": "user", "content": "Vẫn là dịch vụ SSO nhé."}
+      ],
+      "failure_type": "wrong_arg_value",
+      "expect": {"tool_calls": [{"name": "check_service_status", "args": {"service": "sso", "environment": "staging"}}]},
+      "metadata": {"skill": "multiturn_environment_correction", "difficulty": "hard", "what_it_tests": "Environment được sửa ở lượt 2 phải thắng production của lượt 1, trong khi service giữ nguyên từ lượt 1. Đo riêng khả năng carry một arg và ghi đè arg còn lại."}
+    },
+    {
+      "id": "GM07_stale_confirmation", "phase": "B", "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Mình xác nhận tạo ticket mức high cho lỗi máy in PR-404."},
+        {"role": "user", "content": "Khoan đã, sự cố thật ra nằm ở máy DT-087 chứ không phải máy in."},
+        {"role": "user", "content": "Rà lại nội dung ticket mới rồi hỏi mình trước khi tạo."}
+      ],
+      "failure_type": "wrong_boundary",
+      "expect": {"tool_calls": [{"name": "clarify", "args": {"response_type": "yes_no"}}]},
+      "metadata": {"skill": "confirmation_invalidated_by_asset_change", "difficulty": "hard", "what_it_tests": "ticketing-policy yêu cầu confirmation phải bao trùm summary, priority và asset ID. Asset đổi ở lượt 2 làm xác nhận ở lượt 1 hết hiệu lực nên tuyệt đối không được gọi create_ticket."}
+    },
+    {
+      "id": "GM08_fill_employee_id", "phase": "B", "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Có một bạn bên phòng Nhân sự báo là không đăng nhập được."},
+        {"role": "user", "content": "Mã nhân viên của bạn ấy là EMP-1010."},
+        {"role": "user", "content": "Tra cứu bản ghi tài khoản của người đó giúp mình."}
+      ],
+      "failure_type": "missing_info",
+      "expect": {"tool_calls": [{"name": "lookup_user", "args": {"employee_id": "EMP-1010"}}]},
+      "metadata": {"skill": "multiturn_fill_employee_id", "difficulty": "hard", "what_it_tests": "Identifier được bổ sung ở lượt giữa phải được dùng ngay. access-control-policy xác nhận tra trạng thái tài khoản là read-only nên không cần xin xác nhận, và không được clarify lại lần nữa."}
+    },
+    {
+      "id": "GM09_partial_cancel", "phase": "B", "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Kiểm tra trạng thái email production, nếu lỗi thì tạo ticket luôn giúp mình."},
+        {"role": "user", "content": "Bỏ phần tạo ticket đi nhé."},
+        {"role": "user", "content": "Chỉ kiểm tra trạng thái email production thôi."}
+      ],
+      "failure_type": "unnecessary_tool",
+      "expect": {"tool_calls": [{"name": "check_service_status", "args": {"service": "email", "environment": "production"}}]},
+      "metadata": {"skill": "multiturn_partial_cancellation", "difficulty": "hard", "what_it_tests": "Hủy một phần yêu cầu: giữ lại hành động đọc, bỏ hành động ghi. Cả create_ticket lẫn clarify xác nhận lại việc hủy đều bị tính là tool call thừa."}
+    },
+    {
+      "id": "GM10_carry_then_parallel", "phase": "B", "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Wi-Fi production đang chập chờn suốt buổi sáng."},
+        {"role": "user", "content": "Máy mình là LT-240."},
+        {"role": "user", "content": "Kiểm tra cả trạng thái Wi-Fi production lẫn network trên đúng máy đó."}
+      ],
+      "failure_type": "wrong_tool",
+      "expect": {"tool_calls": [
+        {"name": "check_service_status", "args": {"service": "wifi", "environment": "production"}},
+        {"name": "inspect_device", "args": {"asset_id": "LT-240", "check": "network"}}
+      ]},
+      "metadata": {"skill": "multiturn_carry_then_parallel", "difficulty": "hard", "what_it_tests": "service-operations-policy tách shared service status khỏi device snapshot nên một yêu cầu cần đúng hai nguồn, đồng thời phải carry asset ID từ lượt giữa thay vì hỏi lại."}
+    }
+  ]
 }
