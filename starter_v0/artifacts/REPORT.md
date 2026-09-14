@@ -4,7 +4,7 @@
 
 - Team: SaBiChuong
 - Members: 05
-- Provider/model: <!-- ví dụ: gemini / gemini-2.0-flash -->
+- Provider/model: ANTHROPIC <!-- ví dụ: gemini / gemini-2.0-flash -->
 
 # PHẦN A — Giới thiệu agent
 
