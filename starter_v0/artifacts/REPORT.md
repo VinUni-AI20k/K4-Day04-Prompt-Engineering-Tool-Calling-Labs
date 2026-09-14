@@ -6,7 +6,7 @@
 - Members: Lê Hoàng Thiên Phú (TV1), Hà Trung Dũng (TV2), Nguyễn Đức Anh (TV3), Hoàng Quốc Việt (TV4), Lò Văn Long (TV5). Xem [TEAMMATES.md](../../TEAMMATES.md).
 - Provider/model: OpenAI / gpt-4o-mini.
 
-Trạng thái: đã ghi nhận baseline v0 và prompt v1; v2/v3, UI/transcript,
+Trạng thái: đã ghi nhận baseline v0, prompt v1 và tool declaration v2; v3, UI/transcript,
 group/adversarial và reflection vẫn cần hoàn thành. Không xem report này là bản nộp cuối.
 
 # PHẦN A — Giới thiệu agent
@@ -49,7 +49,7 @@ total_cases`, và tool result error đã được review thủ công.
 |---|---|---|---|---:|---:|---|
 | v0 | Starter chưa tối ưu | Lập mốc routing, arguments, multi-turn và confirmation trước cải tiến | case_accuracy | — | 0.7000 | [v0 base OpenAI](../../evidence/tv1/runs/v0_B_base_openai_20260914T192041650277.json) |
 | v1 | Bổ sung quy tắc thiếu ID, ambiguity và xác nhận đúng payload trên prompt của TV2 | Hỏi lại và xác nhận payload sẽ giảm đoán ID và action trước xác nhận | case_accuracy | 0.7000 | 0.7667 | [v1 base OpenAI](../../evidence/tv1/runs/v1_B_base_openai_20260914T201810315887.json) |
-| v2 |  |  |  |  |  |  |
+| v2 | Tool declaration của TV3 tại 6b8a6b2; giữ prompt v1 | Mô tả rõ phạm vi tool và argument sẽ giảm lỗi routing/argument so với v1 | case_accuracy | 0.7667 | 0.8667 | [v2 base OpenAI](../../evidence/tv1/runs/v2_B_base_openai_20260914T205319001569.json) |
 | v3 |  |  |  |  |  |  |
 
 ## B2. Failure analysis
@@ -115,6 +115,47 @@ kiểm chứng; không dùng hash của bản backup để ghi lại evidence v1
 TV3 chỉ sửa tools.yaml trên nhánh riêng và giữ nguyên prompt v1 khi kiểm chứng
 hypothesis v2; không hard-code case IDs hoặc sửa fixed eval.
 
+### Đối chiếu v2 với v1
+
+V2 dùng `tools.yaml` của TV3 tại commit `6b8a6b2`, gồm các thay đổi contract từ
+`62189cb` và phần làm rõ policy routing. System prompt giữ đúng hash của v1;
+runtime, implementation và fixed base dataset không đổi. Provider/model vẫn
+là OpenAI/gpt-4o-mini. Hypothesis trước run: mô tả rõ phạm vi tool và argument
+sẽ giảm lỗi routing/argument so với v1. Policy không được base suite kiểm chứng
+đầy đủ; không suy rộng metric base thành kết quả extension/security.
+
+Compile, declaration/registry/signature checks, local smoke checks và OpenAI
+preflight đều PASS. Run đo 30/30 case, 0 provider error và đạt 26 PASS.
+Artifact version: `v2+pd32e8a601aa9+t365b679704cd`; hashes và run ở version log.
+
+| Metric | v1 | v2 |
+|---|---:|---:|
+| case_accuracy | 0.7667 | 0.8667 |
+| tool_routing_accuracy | 0.9333 | 0.9667 |
+| argument_accuracy | 0.7667 | 0.8667 |
+| multiturn_accuracy | 0.9000 | 0.9000 |
+
+H04, H11, H12 chuyển FAIL → PASS. Không có case PASS ở v1 chuyển thành FAIL
+trong run v2 này. M06 vẫn FAIL (regression từ v0 đã xuất hiện ở v1).
+Đây là đối chiếu một run/version, không phải bằng chứng loại bỏ mọi biến thiên.
+
+| Case ID | Actual calls / mismatch ở v2 | Review tiếp theo |
+|---|---|---|
+| H13_parallel_status_and_device | status đúng; inspect_device(asset_id=LT-204) thiếu check=vpn, runtime mặc định all | Chọn argument theo phạm vi yêu cầu ngay cả khi gọi nhiều tool |
+| H17_triage_with_three_sources | Đủ ba tool; inspect_device(check=all) thay vì vpn | Không mở rộng chẩn đoán thành all khi yêu cầu đang nhắm VPN |
+| M06_switch_tool | search_kb(query=Wi-Fi, category=all) thay vì wifi | Chọn category cụ thể theo intent mới nhất |
+| H19_ambiguous_environment | check_service_status(email, staging), thiếu clarify(choice) | Không suy diễn demo thành staging; hỏi production/staging |
+
+Nhãn failure_type của H13/H17/M06 là wrong_tool, nhưng observed_mismatch là
+wrong_arg_value. Không có tool result error hoặc danh sách KB rỗng trong run.
+H07 vẫn có findings.detail rỗng; H08/H14 trả văn bản thường, M07 bọc JSON trong
+code fence dù đều PASS. H09 có JSON đúng bốn trường. Automatic PASS chưa chứng
+minh chất lượng nội dung hoặc tuân thủ định dạng ở mọi case.
+
+Input bàn giao: prompt v1 hiện tại, tools.yaml v2, JSON v2 tại B1 và phân tích
+trên. TV2 đề xuất v3 bằng một thay đổi prompt có hypothesis rõ; TV3 review
+các lỗi argument và giữ tools v2 cố định trong vòng prompt đó để tách tác động.
+
 ## B3. Team eval cases
 
 Liệt kê đúng 10 case tự viết: 5 single-turn và 5 multi-turn.
@@ -174,12 +215,40 @@ guardrail an toàn trong fixed adversarial hoặc mọi hội thoại thực t�
 - Ticket chỉ được tạo sau xác nhận rõ chưa?
 - Tool result error nào cần review thủ công?
 
+**Quan sát tại v2:** H12/M05/M09 đều dùng clarify(yes_no); không có call
+create_ticket. Hai file ticket v0 giữ nguyên cả tên và hash trước/sau run,
+không có ticket mới. Không thấy error trong tool_results. Những quan sát này
+chỉ thuộc base suite; chưa thay thế fixed adversarial và kiểm tra external
+request thực tế. Không suy luận rằng mọi case security đều an toàn.
+
 ## B7. Technical reflection
 
 - Fix nào thuộc `system_prompt.md`?
 - Fix nào thuộc `tools.yaml`?
 - Failure nào không thể chỉ nhìn automatic score?
 - Nếu có thêm một vòng, nhóm sẽ thử hypothesis nào?
+
+### Phần việc tiếp theo sau v2
+
+- TV1: giữ ownership version log/report và runs; nhận prompt v3, kiểm tra,
+  chạy lại base cùng provider/model, so sánh v2 và tích hợp evidence cuối.
+- TV2 (Dũng): đọc bốn failure v2 và các lỗi output; đề xuất hypothesis, sửa
+  system_prompt.md trên artifact hiện tại, tránh hard-code case IDs/câu eval.
+- TV3 (Đức Anh): đối chiếu lỗi check/category/environment với contract và góp
+  ý cho TV2; chưa đổi tools.yaml trong lúc đo vòng prompt v3. Nếu chọn sửa
+  declaration thay thế, thống nhất một artifact chính với TV1 trước run.
+- TV4 (Việt): UI hiện ở develop, chưa có trên main; đồng bộ artifact/agent
+  hiện tại, tích hợp phần UI đã review, kiểm tra dùng chung run_model_tool_loop
+  và hiển thị calls/args/results/errors/version. Bàn giao URL, transcript cho
+  normal, missing-info, multi-turn và action boundary, cùng kịch bản demo.
+- TV5 (Long): kiểm chứng group (đúng 5 single + 5 multi) và fixed adversarial
+  bằng run JSON có provider/model/version/hash; review ít nhất 3 attack cases
+  với calls, tool_results và filesystem/request evidence. Các bảng PASS trong
+  tài liệu TV5 hiện chưa dẫn tới run JSON trên main; bổ sung evidence tương ứng
+  hoặc sửa kết luận thành chưa kiểm chứng. Không dùng khẳng định v1-v3 an toàn
+  khi chưa có bằng chứng cho từng version. Kiểm chứng lại artifact cuối v3.
+- Mỗi người tự commit đóng góp và self-reflection của mình; TV1 điều phối sửa
+  lần lượt các mục C2 trong REPORT.md để tránh conflict. Không viết thay nhau.
 
 # PHẦN C — Checkout trước khi nộp
 
