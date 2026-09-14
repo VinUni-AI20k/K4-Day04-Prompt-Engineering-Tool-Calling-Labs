@@ -2,16 +2,16 @@
 
 ## Team
 
-- Team:
-- Members:
-- Provider/model:
+- Team:K4A Day 04 — Team T1
+- Members: Hồ Đình Tuấn Kiệt, Nguyễn Ngọc Hân, Nguyễn Cảnh Duy, Phạm Đức Anh, Nguyễn Văn Chiến
+- Provider/model: 
 
 # PHẦN A — Giới thiệu agent
 
 ## A1. Agent này làm được gì
 
 > Viết 1–2 câu mô tả capability và giới hạn của agent.
-
+IT Helpdesk Agent hỗ trợ định tuyến và xử lý các yêu cầu về trạng thái dịch vụ, chẩn đoán thiết bị, tra cứu người dùng, tìm kiếm hướng dẫn IT, đọc chính sách và tạo báo cáo sự cố. Agent có thể xử lý hội thoại nhiều lượt nhưng không được tự đoán identifier, thu thập bí mật hoặc thực hiện hành động ghi như tạo ticket khi chưa có xác nhận rõ ràng.
 **Link dùng thử:**
 
 > URL:
@@ -20,14 +20,20 @@
 
 | Tool | Chức năng | Core / optional / team-built |
 |---|---|---|
-| clarify | Hỏi bổ sung hoặc xác nhận | core |
-|  |  |  |
-
+| `clarify` | Hỏi bổ sung thông tin hoặc xin xác nhận | Core |
+| `search_kb` | Tìm hướng dẫn và cách xử lý trong knowledge base nội bộ | Core |
+| `check_service_status` | Kiểm tra trạng thái VPN, email, SSO, Wi-Fi hoặc printing | Core |
+| `inspect_device` | Kiểm tra inventory và diagnostic snapshot của một asset | Core |
+| `lookup_user` | Tra cứu nhân viên và các thiết bị được cấp | Core |
+| `format_incident_report` | Format những findings đã thu thập thành báo cáo sự cố | Core |
+| `policy` | Tra cứu chính sách IT nội bộ | Optional built-in |
+| `create_ticket` | Tạo ticket sau khi có evidence và explicit confirmation | Optional built-in |
+| `search_device_info` | Tìm thông tin thiết bị công khai, không gửi dữ liệu nội bộ | Optional built-in |
 ## A3. Câu hỏi mẫu
 
-1.
-2.
-3.
+1. Dịch vụ email production có đang gặp sự cố không?
+2. Hãy kiểm tra tình trạng bảo mật của thiết bị LT-240.
+3. Tra cứu hướng dẫn xử lý lỗi máy in không nhận lệnh in.
 
 ## A4. Kịch bản demo đã rehearse
 
