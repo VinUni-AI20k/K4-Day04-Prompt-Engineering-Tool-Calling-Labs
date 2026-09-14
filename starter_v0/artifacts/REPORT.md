@@ -259,6 +259,45 @@ Mỗi thành viên phải tự commit phần self-reflection của mình bằng 
 tương ứng. Reflection phải dẫn đến contribution artifact/commit đã nêu ở trên,
 không dùng chính phần reflection làm bằng chứng duy nhất cho đóng góp kỹ thuật.
 
+### Đỗ Thái Sơn — 2A202603021
+
+- **Vai trò/phần việc được nhận:** Thành viên 3 — adversarial + safety review (`TEAMMATES.md`
+  dòng 3): review thủ công suite adversarial v0 và v3, chạy/review suite extension, điền
+  `REPORT.md` B4a, B5, B6.
+- **Những gì tôi đã thay đổi trong repo chung:**
+  - Review cả 12 case adversarial của v0 theo `tool_results` và filesystem: xác định 4 ticket được
+    ghi mà không có confirmation thật (A03, A04, A10, A11) và 2 case chỉ được implementation chặn
+    (A05, A12).
+  - So sánh adversarial v0 → v2 → v3 (kể cả 2 bản nháp v3), phát hiện A11 là regression v2 → v3
+    bị che bởi case_accuracy bằng nhau (11/12).
+  - Chạy suite extension trên artifact v3 và review policy routing, ticket có xác nhận và
+    privacy boundary của external search.
+  - Điền B4a, B5, B6 và dòng của mình trong `TEAMMATES.md`.
+- **File hoặc artifact liên quan:** `starter_v0/artifacts/adversarial_review.md`,
+  `starter_v0/artifacts/extension_review.md`, `starter_v0/artifacts/REPORT.md` (B4a, B5, B6),
+  `starter_v0/runs/v3_B_extension_gemini_20260914T191130738784.json`, `TEAMMATES.md`.
+- **Commit hash hoặc pull request:** `95bdd7c` (TEAMMATES), `47c0158` (review adversarial v0),
+  `2d58b55` (so sánh v0/v2/v3), `3d46d2d` (chạy + review extension); branch `contrib/tsun165`.
+- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:** Trước khi chạy extension, tôi phát hiện
+  artifact trên Windows có hash `p13855201a683` thay vì `p113d255554a0` do `core.autocrlf` đổi
+  sang CRLF, dù nội dung không đổi. Tôi khôi phục đúng bytes LF từ commit rồi mới chạy, để run
+  file ghi `v3+p113d255554a0+t54500e7b08c6` và đối chiếu được với `version_log.csv`. Nếu không, run
+  sẽ trông như một artifact version lạ không có trong log.
+- **Khó khăn tôi gặp và cách tôi xử lý:** Tôi chỉ có Gemini key, trong khi nhóm dùng
+  gpt-4o-mini, và không có Tavily key. Tôi vẫn chạy extension để có evidence nhưng ghi rõ giới hạn
+  (khác model nên không so metric giữa suite; E09/E10 chỉ kiểm chứng được args, không có web
+  result thật). Ngoài ra khi merge `main`, mục B6 bị conflict với ghi chú của nhóm trưởng; tôi giữ
+  cả hai phần thay vì ghi đè.
+- **Điều tôi học được từ phần việc này:** Automatic score không đủ để kết luận về safety. PASS
+  vẫn có thể che tool result rỗng (E06) hoặc câu hỏi xác nhận thiếu nội dung (A10 v3); FAIL có thể
+  vô hại vì implementation đã chặn (A05, A12 v0); còn hai version cùng 11/12 lại fail ở hai case
+  khác nhau (A10 v2 và A11 v3). Guardrail chỉ nằm trong prompt thay đổi theo wording, nên action
+  có side effect cần thêm lớp kiểm tra trong implementation.
+- **Nếu làm lại, tôi sẽ cải thiện điều gì:** Tôi sẽ review adversarial ngay sau v1 để phát hiện
+  regression sớm hơn, chạy mỗi suite nhiều lần để đo độ ổn định thay vì dựa vào một run, và chạy
+  extension cùng model với nhóm (có Tavily key) để kết quả so sánh được. Tôi cũng sẽ đề xuất sớm
+  một deterministic test cho `create_ticket` với các dạng confirmation giả.
+
 ## C3. Final checkout
 
 Chỉ nộp bài khi mọi mục dưới đây đã được kiểm tra trên branch cuối cùng của
