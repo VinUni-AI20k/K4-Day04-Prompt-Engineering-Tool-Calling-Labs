@@ -8,59 +8,49 @@
 tools:
   # ---------------- Core tools ----------------
   - name: clarify
-    description: "Hỏi lại người dùng một câu và dừng cho tới lượt sau. Đây là tool phải dùng
-      trong hai tình huống: (1) một giá trị bắt buộc còn thiếu hoặc mơ hồ - mã tài sản, mã
-      nhân viên, môi trường - và người dùng chưa cung cấp ở lượt nào; (2) cần sự đồng ý rõ
-      ràng của người dùng trước một hành động ghi. Trong hai tình huống đó, clarify là tool
-      duy nhất được gọi; không gọi tool dữ liệu với giá trị phỏng đoán và không gọi tool ghi
-      để xem trước."
+    description: "Gửi một câu hỏi cho người dùng."
     parameters:
       type: object
       properties:
-        question: {type: string, default: "", description: "Câu hỏi. Khi xin xác nhận cho hành động ghi, nêu lại đầy đủ payload sẽ được ghi ngay trong câu hỏi này."}
-        response_type: {type: string, enum: [text, yes_no, choice], default: "text", description: "yes_no khi xin xác nhận một hành động. choice khi giá trị còn thiếu thuộc một tập đóng, kèm options. text khi giá trị là tự do, ví dụ mã tài sản hay mã nhân viên."}
-        options: {type: array, default: [], items: {type: string}, description: "Các lựa chọn, bắt buộc khi response_type là choice. Liệt kê đúng các giá trị hợp lệ của tham số còn thiếu."}
+        question: {type: string, default: "", description: "Câu hỏi"}
+        response_type: {type: string, enum: [text, yes_no, choice], default: "text", description: "Kiểu trả lời"}
+        options: {type: array, default: [], items: {type: string}, description: "Các lựa chọn"}
       required: [question]
 
   - name: search_kb
-    description: "Tìm hướng dẫn khắc phục sự cố trong knowledge base nội bộ. Trả về
-      hướng dẫn chung theo chủ đề; không đọc trạng thái thực tế của một thiết bị
-      hay một dịch vụ."
+    description: "Tìm tài liệu hoặc hướng dẫn xử lý kỹ thuật trong knowledge base. Dùng khi người dùng hỏi cách cấu hình, khắc phục hoặc cần quy trình hướng dẫn. Không dùng để kiểm tra trạng thái dịch vụ, chẩn đoán trực tiếp một thiết bị hoặc tra cứu nhân viên; có thể gọi cùng các tool khác khi yêu cầu cần thêm hướng dẫn."
     parameters:
       type: object
       properties:
         query: {type: string, default: "", description: "Nội dung cần tìm"}
-        category: {type: string, enum: [all, vpn, email, wifi, printing, account, security, hardware, software, meeting_room], default: "all", description: "Nhóm hướng dẫn, chọn theo chủ đề người dùng hỏi. Chỉ dùng all khi chủ đề không thuộc rõ nhóm nào."}
+        category: {type: string, enum: [all, vpn, email, wifi, printing, account, security, hardware, software, meeting_room], default: "all", description: "Chọn đúng nhóm từ yêu cầu: VPN=vpn, Outlook hoặc thư điện tử=email, Wi-Fi=wifi, máy in=printing, tài khoản=account, bảo mật=security, phần cứng=hardware, phần mềm=software, phòng họp=meeting_room; dùng all khi không có nhóm cụ thể"}
         top_k: {type: integer, default: 3, description: "Số kết quả"}
       required: [query]
 
   - name: check_service_status
-    description: "Đọc trạng thái hiện tại của một dịch vụ dùng chung theo môi trường.
-      Không chẩn đoán thiết bị của một nhân viên cụ thể."
+    description: "Kiểm tra trạng thái vận hành của dịch vụ dùng chung toàn công ty như VPN, Email, SSO, WiFi hoặc Printing trong production hoặc staging. Dùng khi người dùng hỏi dịch vụ có đang hoạt động, gián đoạn hoặc gặp sự cố diện rộng hay không. Không dùng để chẩn đoán một thiết bị cụ thể; nếu yêu cầu cần cả trạng thái chung và thiết bị thì có thể gọi cùng inspect_device."
     parameters:
       type: object
       properties:
-        service: {type: string, enum: [vpn, email, sso, wifi, printing], description: "Tên dịch vụ"}
-        environment: {type: string, enum: [production, staging], default: "production", description: "Môi trường. Chỉ tồn tại production và staging. Không tự map một tên môi trường khác (demo, test, UAT, QA, sandbox) sang một trong hai giá trị này và cũng không rơi về giá trị mặc định trong trường hợp đó; hãy gọi clarify với response_type choice và options là production và staging."}
+        service: {type: string, enum: [vpn, email, sso, wifi, printing], description: "Dịch vụ được nêu trong yêu cầu: VPN=vpn, Email hoặc Outlook=email, đăng nhập một lần=sso, Wi-Fi=wifi, hệ thống in=printing"}
+        environment: {type: string, enum: [production, staging], default: "production", description: "Giữ đúng môi trường người dùng nêu: production=production và staging=staging; chỉ dùng mặc định production khi người dùng không chỉ định môi trường"}
       required: [service]
 
   - name: inspect_device
-    description: "Đọc snapshot chẩn đoán của đúng một tài sản công ty theo mã tài sản.
-      Không tra cứu nhân viên và không đọc trạng thái của dịch vụ dùng chung."
+    description: "Kiểm tra thông tin và chẩn đoán một thiết bị cụ thể được xác định bằng asset_id. Dùng cho lỗi network, VPN, security, hardware hoặc software trên chính thiết bị đó. Không dùng để kiểm tra trạng thái dịch vụ toàn công ty; nếu yêu cầu cần cả thiết bị và trạng thái chung thì có thể gọi cùng check_service_status."
     parameters:
       type: object
       properties:
-        asset_id: {type: string, description: "Mã tài sản đầy đủ, định dạng LT-/DT-/MB-/PR-/RM- kèm số, ví dụ LT-204. Không nhận mã nhân viên, tên loại thiết bị hay mô tả chung. Không gửi giá trị giữ chỗ, chuỗi rỗng hay chỉ riêng tiền tố; nếu chưa biết mã đầy đủ thì gọi clarify thay vì gọi tool này."}
-        check: {type: string, enum: [all, network, vpn, security, hardware, software], default: "all", description: "Nhóm kiểm tra, chọn theo triệu chứng người dùng nêu: network cho Wi-Fi và kết nối mạng, vpn cho VPN và certificate, security cho mã hoá và khoá máy, hardware cho ổ đĩa và bộ nhớ, software cho ứng dụng và driver. Nếu yêu cầu đã nêu một triệu chứng cụ thể thì vẫn thu hẹp theo triệu chứng đó, kể cả khi mệnh đề sau chỉ nói kiểm tra máy. Chỉ dùng all khi người dùng yêu cầu kiểm tra tổng thể hoặc không nêu triệu chứng nào."}
+        asset_id: {type: string, description: "Mã tài sản cụ thể lấy nguyên văn từ yêu cầu, ví dụ LT-204 hoặc DT-031; không gộp nhiều mã vào một giá trị"}
+        check: {type: string, enum: [all, network, vpn, security, hardware, software], default: "all", description: "Ánh xạ yêu cầu: tổng thể hoặc toàn bộ=all, kết nối mạng hoặc Wi-Fi=network, VPN=vpn, bảo mật=security, phần cứng=hardware, phần mềm=software"}
       required: [asset_id]
 
   - name: lookup_user
-    description: "Tra cứu đúng một nhân viên trong danh bạ theo mã nhân viên và trả về
-      metadata công việc kèm danh sách tài sản được cấp. Không tự chẩn đoán các tài sản đó."
+    description: "Tra cứu hồ sơ người dùng trong danh bạ hỗ trợ bằng employee_id, bao gồm thông tin tài khoản hoặc thiết bị được cấp cho nhân viên. Không dùng để chẩn đoán trực tiếp thiết bị hoặc kiểm tra trạng thái dịch vụ; có thể gọi cùng inspect_device khi yêu cầu cung cấp cả employee_id và asset_id."
     parameters:
       type: object
       properties:
-        employee_id: {type: string, description: "Mã nhân viên đầy đủ, định dạng EMP- kèm số, ví dụ EMP-1003. Không nhận tên người, phòng ban hay mã tài sản. Không gửi giá trị giữ chỗ hay chỉ riêng tiền tố; nếu chưa biết mã đầy đủ thì gọi clarify thay vì gọi tool này."}
+        employee_id: {type: string, description: "Mã nhân viên lấy nguyên văn từ yêu cầu, theo dạng EMP-xxx"}
       required: [employee_id]
 
   - name: format_incident_report
@@ -79,8 +69,8 @@ tools:
               detail: {type: string}
               source: {type: string}
               status: {type: string}
-        template: {type: string, enum: [brief, technical, handoff], default: "brief", description: "Mẫu báo cáo"}
-        incident_title: {type: string, default: "IT incident", description: "Tiêu đề"}
+        template: {type: string, enum: [brief, technical, handoff], default: "brief", description: "Loại báo cáo: ngắn gọn=brief, kỹ thuật hoặc chi tiết=technical, bàn giao hoặc chuyển tiếp=handoff"}
+        incident_title: {type: string, default: "IT incident", description: "Tiêu đề sự cố lấy từ yêu cầu; giữ nguyên tiêu đề cụ thể nếu người dùng đã cung cấp"}
       required: [findings, template]
 
   # ---------------- Optional/advanced tools ----------------
