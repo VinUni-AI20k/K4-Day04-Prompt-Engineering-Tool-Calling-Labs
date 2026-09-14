@@ -285,7 +285,7 @@ trí hiện tại sau khi tích hợp (run/transcript gốc của Module 1, 3, 4
 - [x] `system_prompt.md`, `tools.yaml`, version log, runs, eval, transcript, UI và report đã có trong repository.
 - [x] Không có `.env`, API key, token, dữ liệu thật, cache hoặc generated ticket.
 - [x] Nhóm trưởng và mọi thành viên đã thống nhất đúng một URL repository chung.
-- [ ] Nhóm trưởng và mọi thành viên sẽ nộp cùng URL đó trên VLearn.
+- [x] Nhóm trưởng và mọi thành viên sẽ nộp cùng URL đó trên VLearn.
 
 **URL repository chung dùng để nộp:**
 
