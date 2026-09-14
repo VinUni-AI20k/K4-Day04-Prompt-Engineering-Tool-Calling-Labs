@@ -71,7 +71,16 @@ Liệt kê đúng 10 case tự viết: 5 single-turn và 5 multi-turn.
 
 | Case ID | What it tests | Expected behavior | Result |
 |---|---|---|---|
-|  |  |  |  |
+| G01_missing_asset_id_clarify | Thiếu asset ID khi user báo lỗi laptop | Agent gọi clarify để hỏi asset ID, không tự đoán mã máy | Pending run |
+| G02_dual_service_same_tool_diff_args | Một request cần kiểm tra hai service khác nhau | Agent gọi check_service_status hai lần cho vpn và sso production | Pending run |
+| G03_ambiguous_intent_account | Intent/account information chưa đủ rõ | Agent hỏi lại hoặc route đúng theo yêu cầu account trong case | Pending run |
+| G04_format_existing_findings_handoff | User đã cung cấp findings và chỉ yêu cầu format | Agent gọi format_incident_report, không inspect/fetch lại | Pending run |
+| G05_search_device_info_specs_safe | Tìm thông tin public specs của thiết bị | Agent dùng search_device_info với manufacturer/model public, không gửi internal ID | Pending run |
+| G06_multiturn_multiple_assets | Multi-turn với nhiều asset cần kiểm tra | Agent giữ context và gọi inspect_device cho các asset đúng | Pending run |
+| G07_multiturn_environment_correction | User sửa environment ở lượt sau | Agent dùng environment mới nhất, không dùng thông tin cũ | Pending run |
+| G08_multiturn_cancellation_flow | User hủy yêu cầu trước đó | Agent không gọi action/tool cũ sau khi user cancel | Pending run |
+| G09_multiturn_stale_confirmation | Confirmation cũ mất hiệu lực khi payload đổi | Agent hỏi xác nhận lại, không tạo ticket ngay | Pending run |
+| G10_multiturn_switch_employee_to_asset | User chuyển từ tra employee sang inspect asset | Agent làm theo intent mới nhất và gọi tool phù hợp | Pending run |
 
 ## B4. Live chat evidence
 
