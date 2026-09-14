@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import time
 from typing import Any
 
 from providers.base import ModelResponse, ToolCall
@@ -18,7 +19,7 @@ class OpenAIProvider:
         default_model: str = "gpt-4o-mini",
     ) -> None:
         self.api_key_env = api_key_env
-        self.base_url = base_url
+        self.base_url = base_url or os.getenv("OPENAI_BASE_URL")
         self.default_model = default_model
 
     def complete(
@@ -31,7 +32,7 @@ class OpenAIProvider:
         tool_choice: Any | None = None,
     ) -> ModelResponse:
         try:
-            from openai import OpenAI
+            from openai import OpenAI, APIStatusError, APIConnectionError
         except ImportError as exc:
             raise RuntimeError("Install live provider dependency first: pip install openai") from exc
 
@@ -50,7 +51,19 @@ class OpenAIProvider:
         if tool_choice is not None:
             kwargs["tool_choice"] = tool_choice
 
-        resp = client.chat.completions.create(**kwargs)
+        # Free-tier / shared endpoints occasionally return transient 5xx or
+        # connection errors. Retry a few times with backoff before failing
+        # the case as a provider_error.
+        max_attempts = 3
+        for attempt in range(1, max_attempts + 1):
+            try:
+                resp = client.chat.completions.create(**kwargs)
+                break
+            except (APIStatusError, APIConnectionError) as exc:
+                is_retryable = isinstance(exc, APIConnectionError) or getattr(exc, "status_code", 0) in (429, 500, 502, 503, 504)
+                if not is_retryable or attempt == max_attempts:
+                    raise
+                time.sleep(2 ** attempt)
         msg = resp.choices[0].message
         calls: list[ToolCall] = []
         for call in msg.tool_calls or []:
