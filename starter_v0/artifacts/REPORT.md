@@ -43,12 +43,12 @@ Agent hỗ trợ IT nội bộ bằng các tool đã khai báo: tra cứu knowle
 
 | Scenario | Tool trace cần thấy | Cải thiện version | Fallback run/transcript |
 |---|---|---|---|
-| Normal: VPN production + LT-204 | `check_service_status(vpn, production)` + `inspect_device(LT-204, vpn)` | v2 chọn `check` theo triệu chứng | Chạy UI, transcript sẽ được ghi vào `transcripts/ui_v3_*.transcript.json` |
-| Missing information: “laptop của tôi không vào VPN được” | chỉ `clarify(response_type=text)`; không gọi inventory với placeholder | v1/v2 không đoán ID | Cùng transcript UI, turn tiếp theo nhập mã asset chính xác |
-| Multi-turn correction: hỏi staging rồi đổi sang production | lượt cuối gọi `check_service_status(..., production)` | v1 ưu tiên giá trị mới nhất | Cùng transcript UI, kiểm tra `rounds` và `tool_events` của cả hai turn |
-| Ticket confirmation: yêu cầu ticket → `Có` | lượt 1 `clarify(yes_no)` với payload; lượt 2 mới `create_ticket(confirmed=true)` | v1/v3 ràng buộc xác nhận payload cuối | Cùng transcript UI; không commit file sinh trong `tickets/` |
+| Normal: VPN production + LT-204 | `check_service_status(vpn, production)` + `inspect_device(LT-204, vpn)` | v2 chọn `check` theo triệu chứng | `transcripts/ui_v3_openrouter_20260914T194118782430.transcript.json` |
+| Missing information: “laptop của tôi không vào VPN được” | mục tiêu là chỉ `clarify(response_type=text)`; không gọi inventory với placeholder | v1/v2 không đoán ID | `transcripts/ui_v3_openrouter_20260914T194149775467.transcript.json` — phát hiện model hỏi mã asset trong text nhưng **không gọi `clarify`** |
+| Multi-turn correction: hỏi staging rồi đổi sang production | lượt cuối gọi `check_service_status(..., production)` | v1 ưu tiên giá trị mới nhất | `transcripts/ui_v3_openrouter_20260914T194153266534.transcript.json` |
+| Ticket confirmation: yêu cầu ticket → `Có` | lượt 1 `clarify(yes_no)` với payload; lượt 2 mới `create_ticket(confirmed=true)` | v1/v3 ràng buộc xác nhận payload cuối | `transcripts/ui_v3_openrouter_20260914T194159881442.transcript.json`; ticket fixture đã được xóa, không commit |
 
-_Trạng thái rehearsal: các kịch bản đã được chuẩn bị trong UI. Máy thực hiện phần UI hiện chưa có `.env`/API key provider, nên không tạo transcript hoặc ghi kết quả live giả; cần chạy bốn scenario trên sau khi cấu hình key._
+_Rehearsal chạy qua `ui.py` bằng Streamlit AppTest (headless UI session) với OpenRouter / `openai/gpt-4o-mini`, artifact `v3+p13855201a683+t3a094ea16a06`. AppTest được dùng vì môi trường automation không có browser surface; mọi lượt vẫn đi qua UI, `run_model_tool_loop`, provider và cơ chế ghi transcript thật._
 
 # PHẦN B — Chi tiết và evidence
 
@@ -100,7 +100,10 @@ _Owner: thành viên 4 (UI + transcript)._
 
 | Scenario/turn | Version | Tool calls + args | Transcript/run | Outcome |
 |---|---|---|---|---|
-| Chưa chạy live — thiếu provider key trên máy UI | v3 (`p13855201a683`, `t3a094ea16a06`) | Chưa gọi tool | Chưa có; UI sẽ tạo `transcripts/ui_v3_<provider>_<timestamp>.transcript.json` | Không ghi evidence giả. Cần rehearsal 4 scenario ở A4 sau khi cấu hình `.env`. |
+| Normal | v3 (`p13855201a683`, `t3a094ea16a06`) | `check_service_status(service=vpn, environment=production)`; `inspect_device(asset_id=LT-204, check=vpn)` | `transcripts/ui_v3_openrouter_20260914T194118782430.transcript.json` | `answered`; hai tool result không error. |
+| Missing ID | v3 | Không gọi tool | `transcripts/ui_v3_openrouter_20260914T194149775467.transcript.json` | Model hỏi mã asset trong final text, nhưng không gọi `clarify`; đây là trace không đạt guardrail/tool-trace mong đợi. |
+| Correction turn 1 → 2 | v3 | T1 `check_service_status(vpn, staging)`; T2 `check_service_status(vpn, production)` | `transcripts/ui_v3_openrouter_20260914T194153266534.transcript.json` | `answered` cả hai lượt; giá trị mới nhất thay staging bằng production. |
+| Ticket request → confirmation | v3 | T1 `clarify(response_type=yes_no)`; T2 `create_ticket(summary="VPN không kết nối được", priority=high, asset_id=LT-318, confirmed=true)` | `transcripts/ui_v3_openrouter_20260914T194159881442.transcript.json` | T1 `waiting_for_user`, T2 `answered`; ticket fixture sinh trong rehearsal đã xóa và không được commit. |
 
 ## B4a. Adversarial evidence
 
@@ -217,13 +220,13 @@ không dùng chính phần reflection làm bằng chứng duy nhất cho đóng 
 ### Nguyễn Nguyên Phong — 2A202602691
 
 - **Vai trò/phần việc được nhận:** UI chat + live evidence.
-- **Những gì tôi đã thay đổi trong repo chung:** Xây UI Streamlit cho agent, thêm dependency Streamlit, đồng thời cập nhật A1–A4/B4 để mô tả capability, tool, kịch bản demo và cách lưu evidence một cách trung thực.
+- **Những gì tôi đã thay đổi trong repo chung:** Xây UI Streamlit cho agent, thêm dependency Streamlit, sửa UI tự ưu tiên provider có key trong `.env`, và cập nhật A1–A4/B4 bằng transcript rehearsal thật.
 - **File hoặc artifact liên quan:** `starter_v0/ui.py`, `starter_v0/requirements.txt`, `starter_v0/artifacts/REPORT.md`.
-- **Commit hash hoặc pull request:** `c0acb22900438282989694b61747953ff58acc0d` — `feat(ui): add auditable Streamlit helpdesk chat`.
+- **Commit hash hoặc pull request:** `c0acb22900438282989694b61747953ff58acc0d` — `feat(ui): add auditable Streamlit helpdesk chat`; `b044a32173b02fc16cc22d37ed7d52fe4bdf6d03` — `fix(ui): select configured provider by default`.
 - **Một quyết định kỹ thuật tôi đã đưa ra và lý do:** UI gọi trực tiếp `run_model_tool_loop` từ `chat.py` thay vì tạo agent loop khác. Vì vậy CLI và UI có cùng quy tắc dừng khi `clarify`, cách thực thi tool và cấu trúc `rounds`/`tool_events` trong transcript.
-- **Khó khăn tôi gặp và cách tôi xử lý:** Máy hiện không có `.env` hay API key provider, đồng thời chưa cài Streamlit. Tôi đã kiểm tra cú pháp bằng `py_compile`/`compileall`, xác nhận hash artifact, và ghi rõ phần live evidence còn cần chạy thay vì tạo transcript giả.
+- **Khó khăn tôi gặp và cách tôi xử lý:** UI mặc định chọn OpenAI trong khi môi trường chỉ cấu hình OpenRouter, làm lượt test đầu provider error. Tôi sửa default theo provider có key, dùng Streamlit AppTest khi automation không có browser surface, rồi chỉ giữ transcript OpenRouter thành công. Scenario thiếu ID cũng lộ rõ model trả lời text mà bỏ `clarify`.
 - **Điều tôi học được từ phần việc này:** UI cho agent có tool cần ưu tiên trace kiểm toán (args, result/error, round và hash artifact) hơn giao diện đơn thuần để người review tái hiện được hành vi.
-- **Nếu làm lại, tôi sẽ cải thiện điều gì:** Chạy rehearsal với provider thật, thêm screenshot cho từng scenario và kiểm tra riêng guardrail confirmation trước khi demo ticket.
+- **Nếu làm lại, tôi sẽ cải thiện điều gì:** Thêm guardrail/acceptance test để thiếu asset ID bắt buộc tạo `clarify`, thêm screenshot cho từng scenario và kiểm tra riêng confirmation trước khi demo ticket.
 
 ## C3. Final checkout
 

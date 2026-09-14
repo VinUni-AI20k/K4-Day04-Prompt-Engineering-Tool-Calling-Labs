@@ -1,0 +1,34 @@
+{
+  "transcript_id": "ui_v3_openrouter_20260914T194149775467",
+  "version": "v3",
+  "artifact_version": "v3+p13855201a683+t3a094ea16a06",
+  "prompt_hash": "13855201a6830ba17e217f900d8b3c9a9c64e7a69ea59d0d219e4e10e128f275",
+  "tools_hash": "3a094ea16a06cc23b33785e3afd2be13d4d9895c7449534639bd2ed678c4c230",
+  "provider": "openrouter",
+  "model": "openai/gpt-4o-mini",
+  "system_prompt": "C:\\Users\\nguye\\labday04\\K4-Day04-2A202602662\\starter_v0\\artifacts\\system_prompt.md",
+  "tools": "C:\\Users\\nguye\\labday04\\K4-Day04-2A202602662\\starter_v0\\artifacts\\tools.yaml",
+  "history_window": 5,
+  "max_tool_rounds": 4,
+  "created_at": "2026-09-14T19:41:49",
+  "updated_at": "2026-09-14T19:41:53",
+  "turns": [
+    {
+      "turn_index": 1,
+      "started_at": "2026-09-14T19:41:49",
+      "user": "Laptop của tôi không vào được VPN.",
+      "status": "answered",
+      "assistant_text": "Để giúp bạn kiểm tra vấn đề với VPN, tôi cần mã asset của laptop bạn. Bạn có thể cung cấp mã asset không? Mã này thường có định dạng như LT-204, DT-031, v.v.",
+      "rounds": [
+        {
+          "round": 1,
+          "assistant_text": "Để giúp bạn kiểm tra vấn đề với VPN, tôi cần mã asset của laptop bạn. Bạn có thể cung cấp mã asset không? Mã này thường có định dạng như LT-204, DT-031, v.v.",
+          "tool_calls": [],
+          "tool_results": []
+        }
+      ],
+      "tool_events": [],
+      "ended_at": "2026-09-14T19:41:53"
+    }
+  ]
+}
