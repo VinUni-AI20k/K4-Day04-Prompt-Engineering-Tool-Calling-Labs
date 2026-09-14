@@ -1,7 +1,189 @@
 {
   "dataset_id": "day04_v3_helpdesk_group",
   "dataset_role": "group",
-  "description": "Template intentionally left empty. The team must write exactly 10 original IT helpdesk cases: 5 single-turn query cases and 5 multi-turn turns cases.",
+  "description": "Original team-authored group eval covering 10 IT helpdesk scenarios: 5 single-turn and 5 multi-turn cases.",
   "allowed_failure_types": ["wrong_tool", "wrong_arg_value", "wrong_boundary", "unnecessary_tool", "out_of_scope", "missing_info"],
-  "cases": []
+  "cases": [
+    {
+      "id": "G01_shared_service_status",
+      "phase": "B",
+      "suite": "group",
+      "query": "Kiểm tra Wi-Fi production ở Bangkok floor 4 hiện có sự cố không?",
+      "failure_type": "wrong_tool",
+      "expect": {
+        "tool_calls": [
+          {"name": "check_service_status", "args": {"service": "wifi", "environment": "production"}}
+        ]
+      },
+      "metadata": {
+        "skill": "route_wifi_service",
+        "difficulty": "easy",
+        "what_it_tests": "Shared service status phải dùng status tool, không phải inspect thiết bị."
+      }
+    },
+    {
+      "id": "G02_asset_security_inspect",
+      "phase": "B",
+      "suite": "group",
+      "query": "Kiểm tra phần bảo mật trên LT-240 cho mình.",
+      "failure_type": "wrong_tool",
+      "expect": {
+        "tool_calls": [
+          {"name": "inspect_device", "args": {"asset_id": "LT-240", "check": "security"}}
+        ]
+      },
+      "metadata": {
+        "skill": "route_asset_security",
+        "difficulty": "easy",
+        "what_it_tests": "Một asset cụ thể phải gọi inspect_device với check security."
+      }
+    },
+    {
+      "id": "G03_employee_lookup",
+      "phase": "B",
+      "suite": "group",
+      "query": "Tra cứu nhân viên EMP-1003 và cho biết thiết bị được cấp của họ.",
+      "failure_type": "wrong_tool",
+      "expect": {
+        "tool_calls": [
+          {"name": "lookup_user", "args": {"employee_id": "EMP-1003"}}
+        ]
+      },
+      "metadata": {
+        "skill": "route_employee_lookup",
+        "difficulty": "easy",
+        "what_it_tests": "Lookup user phải dựa trên employee ID, không đoán hoặc dùng asset ID."
+      }
+    },
+    {
+      "id": "G04_incident_response_policy",
+      "phase": "B",
+      "suite": "group",
+      "query": "Xem chính sách incident response của Northstar Labs cho quy trình xử lý sự cố.",
+      "failure_type": "wrong_tool",
+      "expect": {
+        "tool_calls": [
+          {"name": "policy", "args": {"policy_area": "incident_response"}}
+        ]
+      },
+      "metadata": {
+        "skill": "route_policy_lookup",
+        "difficulty": "medium",
+        "what_it_tests": "Yêu cầu rõ ràng về chính sách nội bộ phải route trực tiếp tới policy, không gọi clarify."
+      }
+    },
+    {
+      "id": "G05_out_of_scope_refuse",
+      "phase": "B",
+      "suite": "group",
+      "query": "Viết lệnh Python để đánh dấu tài liệu PDF và gửi email marketing cho khách hàng.",
+      "failure_type": "out_of_scope",
+      "expect": {"no_tool": true, "behavior": "refuse"},
+      "metadata": {
+        "skill": "out_of_scope_non_it_request",
+        "difficulty": "easy",
+        "what_it_tests": "Yêu cầu ngoài phạm vi helpdesk phải từ chối và không gọi tool."
+      }
+    },
+    {
+      "id": "G06_missing_asset_after_clarify",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Kiểm tra Wi-Fi trên máy của mình."},
+        {"role": "user", "content": "Mã thiết bị là LT-240."},
+        {"role": "user", "content": "Chỉ kiểm tra phần network thôi."}
+      ],
+      "failure_type": "wrong_arg_value",
+      "expect": {
+        "tool_calls": [
+          {"name": "inspect_device", "args": {"asset_id": "LT-240", "check": "network"}}
+        ]
+      },
+      "metadata": {
+        "skill": "multiturn_fill_and_refine_asset",
+        "difficulty": "hard",
+        "what_it_tests": "Giữ asset ID từ lượt trước và cập nhật check thành network theo yêu cầu mới."
+      }
+    },
+    {
+      "id": "G07_correction_turn2",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {"role": "user", "content": "VPN staging có ổn không?"},
+        {"role": "user", "content": "À không, tôi muốn email staging, không phải VPN."},
+        {"role": "user", "content": "Kiểm tra email với cùng môi trường staging."}
+      ],
+      "failure_type": "wrong_arg_value",
+      "expect": {
+        "tool_calls": [
+          {"name": "check_service_status", "args": {"service": "email", "environment": "staging"}}
+        ]
+      },
+      "metadata": {
+        "skill": "multiturn_correction_service",
+        "difficulty": "hard",
+        "what_it_tests": "Thay đổi service ở turn sau phải ưu tiên thông tin mới nhất."
+      }
+    },
+    {
+      "id": "G08_cancellation_after_confirm",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Tạo ticket lỗi Outlook chậm trên LT-204 với ưu tiên medium."},
+        {"role": "user", "content": "Đổi thành ưu tiên high và thêm ghi chú 'ghi nhận ảnh hưởng đến user'"},
+        {"role": "user", "content": "Hủy thao tác này, đừng tạo ticket nữa."}
+      ],
+      "failure_type": "wrong_boundary",
+      "expect": {"no_tool": true, "behavior": "cancel_action"},
+      "metadata": {
+        "skill": "multiturn_cancellation",
+        "difficulty": "hard",
+        "what_it_tests": "Lệnh hủy bỏ phải dừng mọi action write và không tạo ticket."
+      }
+    },
+    {
+      "id": "G09_vpn_certificate_inspection",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {"role": "user", "content": "VPN trên LT-318 sắp hết certificate; kiểm tra máy và cho biết tình trạng hiện tại."},
+        {"role": "user", "content": "Đúng rồi, kiểm tra thêm xem certificate có còn hợp lệ hay không."}
+      ],
+      "failure_type": "wrong_tool",
+      "expect": {
+        "tool_calls": [
+          {"name": "inspect_device", "args": {"asset_id": "LT-318", "check": "vpn"}}
+        ]
+      },
+      "metadata": {
+        "skill": "multiturn_asset_vpn_inspection",
+        "difficulty": "hard",
+        "what_it_tests": "Một request kiểm tra trạng thái VPN của một asset cần inspect_device duy nhất để xác định certificate và tình trạng."
+      }
+    },
+    {
+      "id": "G10_compare_two_assets",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {"role": "user", "content": "So sánh tình trạng bảo mật của LT-204 và LT-240."},
+        {"role": "user", "content": "Đúng rồi, hãy xem cả hai máy và tóm tắt chênh lệch."}
+      ],
+      "failure_type": "wrong_tool",
+      "expect": {
+        "tool_calls": [
+          {"name": "inspect_device", "args": {"asset_id": "LT-204", "check": "security"}},
+          {"name": "inspect_device", "args": {"asset_id": "LT-240", "check": "security"}}
+        ]
+      },
+      "metadata": {
+        "skill": "multiturn_compare_two_assets",
+        "difficulty": "hard",
+        "what_it_tests": "Một request so sánh hai asset phải gọi inspect_device cho cả hai máy với cùng check."
+      }
+    }
+  ]
 }
