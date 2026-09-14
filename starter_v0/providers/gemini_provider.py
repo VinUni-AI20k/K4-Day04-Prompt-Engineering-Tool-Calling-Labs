@@ -73,6 +73,7 @@ class GeminiProvider:
     def __init__(
         self,
         *,
+        api_key_env: str = "GEMINI_API_KEY",
         default_model: str = "gemini-2.5-flash",
     ) -> None:
         self.api_key_env = api_key_env

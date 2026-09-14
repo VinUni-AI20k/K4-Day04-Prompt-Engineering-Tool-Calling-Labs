@@ -38,7 +38,7 @@ class OpenAIProvider:
         except ImportError as exc:
             raise RuntimeError("Install live provider dependency first: pip install openai") from exc
 
-        api_key = os.getenv(self.api_key_env)
+        api_key = os.getenv(self.api_key_env) or os.getenv("GROQ_API_KEY")
         if not api_key:
             base = (self.base_url or "").lower()
             if "localhost" in base or "127.0.0.1" in base:
