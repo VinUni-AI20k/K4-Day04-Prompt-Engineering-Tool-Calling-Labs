@@ -150,6 +150,17 @@ Mỗi thành viên phải tự commit phần self-reflection của mình bằng 
 tương ứng. Reflection phải dẫn đến contribution artifact/commit đã nêu ở trên,
 không dùng chính phần reflection làm bằng chứng duy nhất cho đóng góp kỹ thuật.
 
+### Đào Ngọc Bình Thiên — 2A202602814
+
+- **Vai trò/phần việc được nhận:** Team eval cho agent IT Helpdesk.
+- **Những gì tôi đã thay đổi trong repo chung:** Tôi đã xây dựng bộ 10 team eval case original, gồm 5 single-turn và 5 multi-turn. Các case bao phủ những quyết định quan trọng như xử lý ý định mơ hồ, thiếu identifier, format-only, ranh giới external/internal, correction, cancellation, stale confirmation và carry-over context.
+- **File hoặc artifact liên quan:** `starter_v0/data/eval_group.json`.
+- **Commit hash hoặc pull request:** Cập nhật hash commit và URL pull request sau khi phần thay đổi được commit và mở PR.
+- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:** Tôi thiết kế mỗi case để cô lập một failure mode và khai báo expected tool call hoặc `no_tool` rõ ràng. Cách này giúp evaluator phân biệt lỗi routing, argument, context và safety boundary thay vì chỉ đánh giá câu trả lời cuối.
+- **Khó khăn tôi gặp và cách tôi xử lý:** Khó khăn chính là chuyển các tình huống hội thoại thực tế thành schema có thể chấm tự động, đặc biệt với cancellation và confirmation cũ. Tôi xử lý bằng cách tách các bước thành từng turn, đặt failure type cụ thể và chỉ giữ một quyết định chính trong mỗi case.
+- **Điều tôi học được từ phần việc này:** Team eval cần kiểm tra hành vi tool và context state, không chỉ kiểm tra nội dung câu trả lời. Một case ngắn nhưng có expected behavior rõ ràng thường cung cấp evidence hữu ích hơn một prompt dài kiểm tra nhiều hành vi cùng lúc.
+- **Nếu làm lại, tôi sẽ cải thiện điều gì:** Tôi sẽ bổ sung thêm các case kiểm tra kết quả lỗi của tool và đối chiếu bộ team eval với các failure thực tế từ baseline run sớm hơn, để tăng khả năng phát hiện regression giữa các version.
+
 ## C3. Final checkout
 
 Chỉ nộp bài khi mọi mục dưới đây đã được kiểm tra trên branch cuối cùng của
