@@ -1,1 +1,2 @@
-"""Check service status tool package.\n\nThis folder is a Python package used to organize the tool implementation.\n"""
+from .tool import check_service_status
+__all__ = ["check_service_status"]

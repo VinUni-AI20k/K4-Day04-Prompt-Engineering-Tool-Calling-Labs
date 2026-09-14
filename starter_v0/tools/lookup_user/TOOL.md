@@ -7,6 +7,7 @@ requires_env: []
 inputs: [employee_id]
 outputs: [employee, assigned_assets]
 side_effect: false
+requires_confirmation: false
 ---
 # lookup_user
 

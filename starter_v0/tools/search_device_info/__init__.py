@@ -1,1 +1,2 @@
-"""Tool package marker.\n\nThis folder is a Python package for organizing a single helpdesk tool implementation.\n"""
+from .tool import search_device_info
+__all__ = ["search_device_info"]

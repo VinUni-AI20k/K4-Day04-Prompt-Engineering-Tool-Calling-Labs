@@ -1,1 +1,2 @@
-"""Tool package marker.\n\nThis folder is a Python package for organizing a single helpdesk tool implementation.\n"""
+from .tool import lookup_user
+__all__ = ["lookup_user"]
