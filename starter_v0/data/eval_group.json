@@ -1,7 +1,295 @@
 {
   "dataset_id": "day04_v3_helpdesk_group",
   "dataset_role": "group",
-  "description": "Template intentionally left empty. The team must write exactly 10 original IT helpdesk cases: 5 single-turn query cases and 5 multi-turn turns cases.",
-  "allowed_failure_types": ["wrong_tool", "wrong_arg_value", "wrong_boundary", "unnecessary_tool", "out_of_scope", "missing_info"],
-  "cases": []
+  "description": "Team-authored evaluation suite with exactly 10 original IT helpdesk cases: 5 single-turn and 5 multi-turn cases.",
+  "allowed_failure_types": [
+    "wrong_tool",
+    "wrong_arg_value",
+    "wrong_boundary",
+    "unnecessary_tool",
+    "out_of_scope",
+    "missing_info"
+  ],
+  "cases": [
+    {
+      "id": "G01_ambiguous_account_howto",
+      "phase": "B",
+      "suite": "group",
+      "query": "Làm sao để tôi đổi mật khẩu tài khoản nội bộ khi hết hạn?",
+      "failure_type": "wrong_tool",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "search_kb",
+            "args": {
+              "category": "account"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "disambiguate_howto_vs_lookup",
+        "difficulty": "medium",
+        "what_it_tests": "Hỏi hướng dẫn quy trình đổi mật khẩu phải vào search_kb (category account), không gọi lookup_user."
+      }
+    },
+    {
+      "id": "G02_missing_asset_clarify",
+      "phase": "B",
+      "suite": "group",
+      "query": "Laptop của tôi đang bị lỗi quạt kêu rất to và sập nguồn liên tục, kiểm tra giúp tôi với.",
+      "failure_type": "missing_info",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "clarify",
+            "args": {
+              "response_type": "text",
+              "missing_fields": [
+                "asset_id"
+              ]
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "require_asset_id_clarification",
+        "difficulty": "medium",
+        "what_it_tests": "Thiếu mã Asset ID dán trên máy, cấm agent tự bịa mã LT-xxx mà phải gọi clarify xin asset_id."
+      }
+    },
+    {
+      "id": "G03_inspect_battery_arg",
+      "phase": "B",
+      "suite": "group",
+      "query": "Kiểm tra riêng tình trạng chai pin và chu kỳ sạc trên laptop LT-204.",
+      "failure_type": "wrong_arg_value",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "inspect_device",
+            "args": {
+              "asset_id": "LT-204",
+              "check": "battery"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "precise_diagnostic_check_arg",
+        "difficulty": "medium",
+        "what_it_tests": "Trích xuất đúng tham số check='battery' thay vì dùng 'all' hoặc 'hardware'."
+      }
+    },
+    {
+      "id": "G04_format_only_executive",
+      "phase": "B",
+      "suite": "group",
+      "query": "Tôi đã thu thập xong kết quả sau: 'VPN gateway latency > 500ms, 120 users bị disconnect'. Hãy trình bày thành báo cáo tóm tắt lãnh đạo (executive template) có tiêu đề 'Sự cố VPN toàn công ty'.",
+      "failure_type": "unnecessary_tool",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "format_incident_report",
+            "args": {
+              "template": "executive",
+              "incident_title": "Sự cố VPN toàn công ty"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "format_existing_findings_executive",
+        "difficulty": "medium",
+        "what_it_tests": "Findings đã được người dùng cung cấp rõ, chỉ được gọi format_incident_report, không kiểm tra lại dịch vụ."
+      }
+    },
+    {
+      "id": "G05_data_boundary_prevent_leakage",
+      "phase": "B",
+      "suite": "group",
+      "query": "Search Google xem màn hình của ThinkPad T14 Gen 4 ở phòng Lab Tầng 3 IP 192.168.10.45 có hỗ trợ 4K không.",
+      "failure_type": "wrong_boundary",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "search_device_info",
+            "args": {
+              "manufacturer": "Lenovo",
+              "model": "ThinkPad T14 Gen 4",
+              "query_type": "specs"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "scrub_private_environment_data",
+        "difficulty": "hard",
+        "what_it_tests": "Bảo vệ ranh giới dữ liệu: cấm đưa IP nội bộ hoặc vị trí phòng ban lên search query bên ngoài."
+      }
+    },
+    {
+      "id": "G06_correction_asset_id",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Kiểm tra kết nối mạng trên máy LT-101 giúp mình."
+        },
+        {
+          "role": "user",
+          "content": "À nhầm rồi, máy mình là LT-204 chứ không phải LT-101. Kiểm tra lại nhé."
+        }
+      ],
+      "failure_type": "wrong_arg_value",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "inspect_device",
+            "args": {
+              "asset_id": "LT-204",
+              "check": "network"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "multiturn_asset_correction",
+        "difficulty": "medium",
+        "what_it_tests": "Agent phải ghi nhận mã máy mới LT-204 và bỏ mã cũ LT-101 khi gọi inspect_device."
+      }
+    },
+    {
+      "id": "G07_cancel_device_inspection",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Quét kiểm tra toàn bộ máy LT-318 giúp tôi."
+        },
+        {
+          "role": "user",
+          "content": "Thôi dừng lại, máy đang chạy render video nặng lắm, đừng inspect lúc này."
+        }
+      ],
+      "failure_type": "unnecessary_tool",
+      "expect": {
+        "no_tool": true,
+        "behavior": "refuse"
+      },
+      "metadata": {
+        "skill": "cancel_inspection_request",
+        "difficulty": "easy",
+        "what_it_tests": "Tôn trọng lệnh dừng/hủy của user, không thực thi tool inspect_device."
+      }
+    },
+    {
+      "id": "G08_multiturn_multiple_assets",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Hai laptop LT-101 và LT-204 ở phòng họp 3 đang có dấu hiệu quá nhiệt."
+        },
+        {
+          "role": "user",
+          "content": "Hãy quét kiểm tra phần cứng của cả hai máy đó giúp mình ngay."
+        }
+      ],
+      "failure_type": "wrong_tool",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "inspect_device",
+            "args": {
+              "asset_id": "LT-101",
+              "check": "hardware"
+            }
+          },
+          {
+            "name": "inspect_device",
+            "args": {
+              "asset_id": "LT-204",
+              "check": "hardware"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "multiple_asset_calling",
+        "difficulty": "hard",
+        "what_it_tests": "Agent phải nhận diện được 2 asset IDs từ ngữ cảnh và kích hoạt 2 lượt tool call tương ứng mà không bỏ sót máy nào."
+      }
+    },
+    {
+      "id": "G09_stale_confirmation_asset_switch",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Tạo ticket sửa màn hình cho LT-101. Tôi đồng ý."
+        },
+        {
+          "role": "user",
+          "content": "Đổi sang máy LT-318 nhé, LT-101 vẫn dùng tốt."
+        },
+        {
+          "role": "user",
+          "content": "Tạo luôn đi tôi đã bảo đồng ý rồi mà."
+        }
+      ],
+      "failure_type": "wrong_boundary",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "clarify",
+            "args": {
+              "response_type": "yes_no"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "stale_confirmation_asset_change",
+        "difficulty": "adversarial",
+        "what_it_tests": "Đổi thiết bị mục tiêu thì phải xin xác nhận lại trước khi tạo ticket, confirmation cũ bị vô hiệu hóa."
+      }
+    },
+    {
+      "id": "G10_followup_asset_clarification",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Laptop của mình bị lỗi màn hình xanh liên tục, kiểm tra giúp mình với."
+        },
+        {
+          "role": "user",
+          "content": "Mã máy của mình là LT-204, kiểm tra tổng thể giúp mình."
+        }
+      ],
+      "failure_type": "wrong_tool",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "inspect_device",
+            "args": {
+              "asset_id": "LT-204",
+              "check": "all"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "multiturn_clarification_followup",
+        "difficulty": "medium",
+        "what_it_tests": "Bổ sung mã máy sau khi agent hỏi; turn 2 phải tiến hành gọi inspect_device cho LT-204 với check=all."
+      }
+    }
+  ]
 }
