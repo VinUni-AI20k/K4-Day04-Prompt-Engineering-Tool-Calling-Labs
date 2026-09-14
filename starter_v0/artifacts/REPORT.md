@@ -192,27 +192,49 @@ có thể đối chiếu đóng góp.
 
 Sao chép mẫu dưới đây cho từng thành viên:
 
+### Đỗ Ngọc Phi — 2A202602531
+
+- **Vai trò/phần việc được nhận:** A — Lead / Prompt Architect (Nhóm trưởng)
+- **Những gì tôi đã thay đổi trong repo chung:** Xây dựng và lặp qua các phiên bản `system_prompt.md` (v1–v8), duy trì phiên bản an toàn hiện hành v5 (`pd4a9a008949c`), ghi chép nhật ký `version_log.csv`, thực hiện các lần chạy chính thức (base, extension, adversarial), cấu hình `.gitattributes` và review/merge các pull request.
+- **File hoặc artifact liên quan:** `starter_v0/artifacts/system_prompt.md`, `starter_v0/artifacts/version_log.csv`, `.gitattributes`, `HANDOFF-A.md`, các run files `runs/v0_*` đến `runs/v8_*`.
+- **Commit hash hoặc pull request:** `531b0b3`, `b872b19`, `a6e28a7`, `052f5bf`.
+- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:** Quyết định dừng lặp ở prompt v5 và bác bỏ các phiên bản v6–v8 và v13: dù các bản sau có điểm số adversarial hoặc JSON cao hơn trên lý thuyết, nhưng thực tế lại tạo ticket trái phép ở case A10/A11; tôi ưu tiên an toàn thực tế của hệ thống hơn là điểm số thuần túy từ evaluator.
+- **Khó khăn tôi gặp và cách tôi xử lý:** Model rất dễ bị "overfitting" câu từ khi cố cấm hành vi sai (ví dụ cấm `confirmed: false` làm model gọi đúng lệnh đó); tôi xử lý bằng cách chuyển sang checklist 4 điều kiện kiểm tra xác nhận dương tính.
+- **Điều tôi học được từ phần việc này:** Hiểu rõ ranh giới giữa Prompt Engineering và Tool Schema Engineering: những lỗi thuộc về ranh giới capability (như phân loại policy hay suy đoán môi trường) bắt buộc phải giải quyết ở tầng Tool Declaration chứ prompt không thể gánh vác hết.
+- **Nếu làm lại, tôi sẽ cải thiện điều gì:** Tôi sẽ sớm thiết lập quy trình kiểm tra regression hai lần chạy ngay từ đầu để phát hiện sớm tính bất định của các case bảo mật.
+
+### Phạm Cường Quốc — 2A202602469
+
+- **Vai trò/phần việc được nhận:** B — Tool & Schema Engineer
+- **Những gì tôi đã thay đổi trong repo chung:** Chuẩn hóa toàn bộ khai báo `starter_v0/artifacts/tools.yaml` (phiên bản v9 và v10 - `tb1a5fc27a3b9`), mô tả chi tiết ranh giới dữ liệu từng tool, đưa các enum được chấm vào required, định nghĩa ranh giới xác nhận của `create_ticket`, viết tài liệu `HANDOFF-B.md`.
+- **File hoặc artifact liên quan:** `starter_v0/artifacts/tools.yaml`, `HANDOFF-B.md`, các run files `runs/v9_*`, `runs/v10_*`.
+- **Commit hash hoặc pull request:** `42cc3f1`, `5fe10b3`, `aa47e17`.
+- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:** Thay đổi cách mô tả `create_ticket` ở v10: thay vì liệt kê các trường hợp cấm (gây phản tác dụng ở v9), tôi mô tả chính xác điều kiện dương tính khi nào tool được phép ghi (lời xác nhận của chính user trong tin nhắn mới nhất), giúp đưa extension accuracy lên 1.00 và triệt tiêu 100% ticket trái phép.
+- **Khó khăn tôi gặp và cách tôi xử lý:** Phát hiện 3 lỗ hổng bảo mật ở tầng code (regex credential chỉ bắt tiếng Anh, thiếu chặn serial number ở web search, allowlist domain chưa phủ Apple); tôi đã lập bảng tài liệu chi tiết trong `HANDOFF-B.md` để cảnh báo nhóm.
+- **Điều tôi học được từ phần việc này:** Khai báo JSON Schema và description của tool chính là một phần của prompt nhưng có trọng số ảnh hưởng cực kỳ lớn đến hành vi chọn tool của LLM.
+- **Nếu làm lại, tôi sẽ cải thiện điều gì:** Tôi sẽ bổ sung thêm các validator regex ngay trong schema của `tools.yaml` để chặn đầu vào sai định dạng ngay từ tầng giao thức.
+
+### Đỗ Đức Đại — 2A202602725
+
+- **Vai trò/phần việc được nhận:** C — Eval & Red-Team
+- **Những gì tôi đã thay đổi trong repo chung:** Thiết kế đúng 10 test case mới của nhóm trong `starter_v0/data/eval_group.json` (5 single-turn G01–G05 và 5 multi-turn G06–G10), thực thi và đối chiếu các đợt kiểm thử adversarial suite và group suite trên các phiên bản v10–v13.
+- **File hoặc artifact liên quan:** `starter_v0/data/eval_group.json`, các run files `runs/v10_B_group_*`, `runs/v13_B_group_*`, `runs/v11_B_adversarial_*`, `runs/v12_B_adversarial_*`.
+- **Commit hash hoặc pull request:** `79d275f`, `723e8e9`.
+- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:** Thiết kế các test case đa dạng bao gồm cả hủy bỏ hành động (G09), kế thừa ngữ cảnh nhiều lượt (G10) và kiểm tra ranh giới môi trường (G07) để đánh giá toàn diện khả năng phản xạ của Agent.
+- **Khó khăn tôi gặp và cách tôi xử lý:** Khi thử nghiệm v13 đạt điểm group tuyệt đối 1.00 nhưng lại làm phát sinh lỗi tạo ticket trái phép ở suite bảo mật A10; tôi đã phối hợp với Lead A để thống nhất giữ phiên bản an toàn v10 làm mốc đánh giá chung.
+- **Điều tôi học được từ phần việc này:** Điểm số Pass/Fail của evaluator tự động không thể thay thế cho việc kiểm tra thủ công filesystem và dữ liệu thực thi `tool_results`.
+- **Nếu làm lại, tôi sẽ cải thiện điều gì:** Tôi sẽ thiết kế thêm các case kiểm thử red-team bằng tiếng Việt có cấu trúc phức tạp hơn nữa để thử thách khả năng chịu đựng của mô hình.
+
 ### Nguyễn Trường Bảo — 2A202602540
 
 - **Vai trò/phần việc được nhận:** D — UI & Report Coordinator
 - **Những gì tôi đã thay đổi trong repo chung:** Xây dựng giao diện Streamlit Live Chat (`starter_v0/app.py`), cập nhật thư viện vào `requirements.txt`, thiết lập và diễn tập 4 kịch bản demo (happy path, missing info clarify, multi-turn correction, action boundary confirmation), điều phối và tổng hợp bản báo cáo `REPORT.md`.
-- **File hoặc artifact liên quan:** `starter_v0/app.py`, `starter_v0/requirements.txt`, `starter_v0/artifacts/REPORT.md`
-- **Commit hash hoặc pull request:** Branch `zewolkt3939` PR vào `main`
+- **File hoặc artifact liên quan:** `starter_v0/app.py`, `starter_v0/requirements.txt`, `starter_v0/artifacts/REPORT.md`, các transcript `transcripts/v10_openai_*`.
+- **Commit hash hoặc pull request:** `56a66b0`, `906e633` (branch `zewolkt3939`).
 - **Một quyết định kỹ thuật tôi đã đưa ra và lý do:** Tái sử dụng trực tiếp hàm `run_model_tool_loop` từ `chat.py` trong Streamlit UI thay vì viết lại agent loop mới; đồng thời xây dựng parser kiểm chứng JSON contract và guardrail an toàn kiểm tra `status: created` của `create_ticket` để phát hiện lỗi agent nói dối tạo ticket khi không có tool thực thi.
 - **Khó khăn tôi gặp và cách tôi xử lý:** Xử lý hiển thị trực quan các vòng lặp tool calling đa lượt (multi-turn) và các lần gọi tool trung gian kèm trạng thái chờ phản hồi (`waiting_for_user`) trên Streamlit session_state; tôi giải quyết bằng cách bóc tách từng round trong `turn_record`, sử dụng `st.expander` để hiển thị tên tool, arguments và kết quả JSON trực quan, đồng thời lưu trữ đầy đủ transcript cho phiên chat.
 - **Điều tôi học được từ phần việc này:** Hiểu sâu về luồng tương tác function calling của các mô hình LLM hiện đại, cách thiết kế giao diện có khả năng quan sát (observability) để kiểm chứng ranh giới an toàn và nhận biết sớm các lỗi chọn sai tool/arguments.
 - **Nếu làm lại, tôi sẽ cải thiện điều gì:** Xây dựng thêm tính năng replay lại các file transcript đã lưu từ trước trực tiếp trên giao diện để hỗ trợ Red-Team phân tích các ca thất bại nhanh hơn.
-
-### Họ tên — MSSV
-
-- **Vai trò/phần việc được nhận:**
-- **Những gì tôi đã thay đổi trong repo chung:**
-- **File hoặc artifact liên quan:**
-- **Commit hash hoặc pull request:**
-- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:**
-- **Khó khăn tôi gặp và cách tôi xử lý:**
-- **Điều tôi học được từ phần việc này:**
-- **Nếu làm lại, tôi sẽ cải thiện điều gì:**
 
 Mỗi thành viên phải tự commit phần self-reflection của mình bằng Git identity
 tương ứng. Reflection phải dẫn đến contribution artifact/commit đã nêu ở trên,
