@@ -78,6 +78,9 @@ routing accuracy.
 | `policy` | Local knowledge | `company_policy/*.md` | Không |
 | `create_ticket` | Local write action | Ghi vào `starter_v0/tickets/` | Không |
 | `search_device_info` | External search | Tavily Search API | `TAVILY_API_KEY` |
+| `lookup_ticket` | Local status / lookup | `helpdesk_data/tickets.json` & `tickets/` | Không |
+| `check_software_catalog` | Local knowledge | `helpdesk_data/software_catalog.json` | Không |
+
 
 ## 5. Local tools
 
@@ -140,6 +143,23 @@ python -c "from tools import TOOL_FUNCTIONS as T; r=T['policy']('dữ liệu nà
 
 PASS khi trả policy section có source metadata và trust boundary.
 
+### `lookup_ticket`
+
+```powershell
+python -c "from tools import TOOL_FUNCTIONS as T; print(T['lookup_ticket']('LAB-B4A1C802'))"
+```
+
+PASS khi trả đúng ticket, trạng thái (`status`), mức độ ưu tiên (`priority`) và thông tin liên quan.
+
+### `check_software_catalog`
+
+```powershell
+python -c "from tools import TOOL_FUNCTIONS as T; print(T['check_software_catalog']('Docker Desktop', 'windows'))"
+```
+
+PASS khi trả đúng thông tin phần mềm, `status: approved`, giấy phép và nguồn cài đặt `install_source`.
+
+
 ## 6. Action tool: `create_ticket`
 
 Tool này ghi JSON vào `starter_v0/tickets/` khi và chỉ khi `confirmed` là Boolean
@@ -193,7 +213,9 @@ sẽ chặn identifier nội bộ và lọc instruction-like text từ web resul
 
 ```powershell
 python -m compileall -q .
+python -m unittest tests/test_tools.py -v
 ```
+
 
 Sau đó chạy các smoke command ở phần 5–7 cho những tool nhóm sẽ demo. Trước khi
 dùng model thật, chạy lại provider preflight:

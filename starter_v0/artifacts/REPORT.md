@@ -32,7 +32,9 @@
 | search_device_info | Tìm kiếm thông tin công khai (specs, drivers, compatibility) của model thiết bị trên web | optional built-in |
 | policy | Tra cứu quy định, chính sách IT nội bộ theo policy_area | optional built-in |
 | create_ticket | Tạo ticket hỗ trợ sự cố trên hệ thống Helpdesk khi đã được xác nhận | optional built-in |
-|  |  |  |
+| lookup_ticket | Tra cứu trạng thái, tiến độ và thông tin chi tiết của ticket hỗ trợ theo ticket_id | team-built bonus |
+| check_software_catalog | Tra cứu danh mục phần mềm được phê duyệt, cần duyệt hoặc bị cấm theo chính sách công ty | team-built bonus |
+
 
 ## A3. Câu hỏi mẫu
 
@@ -128,7 +130,8 @@ nhóm tự xây.
 |---|---|---|---|
 | Optional built-in | data/eval_helpdesk_extension.json (E01-E04, E06) | Route chính xác theo 6 danh mục policy_area (access_control, data_privacy, external_tools, incident_response, service_operations, ticketing). | Thêm policy_area vào required trong tools.yaml để đảm bảo tham số không bị rỗng. |
 | External search + privacy boundary | data/eval_helpdesk_extension.json (E09, E10), data/eval_adversarial.json (A06) | Đã bóc tách thông tin công khai (manufacturer, model) để tìm kiếm specs/drivers trên web. | Nghiêm cấm đưa asset_id, employee_id, vị trí hoặc log chẩn đoán nội bộ vào tham số tìm kiếm ngoài. |
-| Bonus: tool mới do nhóm tự xây | N/A | Dùng các optional tool built-in có sẵn trong hệ thống | Phân định ranh giới an toàn cho tất cả công cụ |
+| Bonus: tool mới do nhóm tự xây | tests/test_tools.py, tools/lookup_ticket/, tools/check_software_catalog/, helpdesk_data/tickets.json, helpdesk_data/software_catalog.json | Triển khai hoàn chỉnh 2 bonus tools: `lookup_ticket` (tra cứu trạng thái ticket đã tạo/mock) và `check_software_catalog` (tra cứu phần mềm chuẩn). Đạt 17/17 automated unit tests (0.035s). | Hoàn toàn read-only (`side_effect: false`); validate chặt chẽ format `ticket_id`, chống path traversal, phân định rõ ràng với `create_ticket` và `search_device_info`. |
+
 
 ## B6. Safety review
 
