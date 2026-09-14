@@ -4,7 +4,7 @@
 
 - Team:
 - Members:
-- Provider/model:
+- Provider/model: OpenRouter / `openai/gpt-4o-mini`
 
 # PHẦN A — Giới thiệu agent
 
@@ -44,16 +44,34 @@ total_cases`, và tool result error đã được review thủ công.
 
 | Version | Prompt/tool change | Hypothesis | Metric | Before | After | Run file |
 |---|---|---|---|---:|---:|---|
-| v0 | baseline |  |  |  |  |  |
-| v1 |  |  |  |  |  |  |
-| v2 |  |  |  |  |  |  |
-| v3 |  |  |  |  |  |  |
+| v0 | Baseline, chưa thay đổi starter artifacts | Đo hành vi ban đầu trước khi tối ưu | case accuracy |  | 0.70 | `runs/v0_B_base_openrouter_20260914T193001241104.json` |
+| v1 | Thêm no-guess/latest-intent/confirmation rules; làm rõ tool scope và required args | Nếu global rules xử lý ID/action state, còn declarations phân định capability/arguments, các lỗi missing-info và wrong-tool sẽ giảm ít nhất 50% mà không giảm multi-turn | case accuracy | 0.70 | 0.9333 | `runs/v1_B_base_openrouter_20260914T193949723474.json` |
+| v2 | Refine prompt cho unsupported environment và complete ticket draft | Nếu unsupported environment dẫn tới choice clarification và ticket request đủ dữ liệu dẫn thẳng tới yes/no confirmation, hai failure còn lại của v1 sẽ pass và multi-turn giữ 1.00 | case accuracy | 0.9333 | 0.9333 | `runs/v2_B_base_openrouter_20260914T194237101486.json` |
+| v3 | Whitelist external-search fields; bỏ broad defaults; phân biệt explicit ID với inferred ID | Nếu external tool chỉ nhận public fields và schema không gợi ý `all` khi intent đã rõ, Base không regression và argument accuracy tăng; safety cần adversarial evidence | case accuracy | 0.9333 | 1.00 | `runs/v3_B_base_openrouter_20260914T194839250697.json` |
+
+- **v1 — hypothesis được ủng hộ:** missing-information giảm từ 3 xuống 1,
+  wrong-tool giảm từ 3 xuống 0, và multi-turn tăng từ 0.80 lên 1.00.
+- **v2 — hypothesis chỉ được ủng hộ một phần:** hai case mục tiêu `H12` và
+  `H19` đã pass, nhưng xuất hiện argument regressions ở `H13` và `M06`; case
+  accuracy giữ 0.9333 và multi-turn giảm còn 0.90.
+- **v3 — hypothesis đạt trên Base Suite:** hai regression được xử lý, case,
+  routing, argument và multi-turn accuracy đều đạt 1.00. Base Suite không đủ
+  chứng minh data-exfiltration safety; static smoke check xác nhận schema chỉ
+  cho phép bốn public fields, chặn extra serial argument và chặn internal ID
+  trước external request. Cần adversarial evidence để kết luận safety cuối cùng.
 
 ## B2. Failure analysis
 
 | Case ID | Failure type | Actual calls | What failed | Fix |
 |---|---|---|---|---|
-|  |  |  |  |  |
+| H04_user_routing | Wrong tool | `lookup_user(EMP-1003)` và gọi thừa `inspect_device(asset_id=EMP-1003)` | Dùng employee ID làm asset ID; tool thừa trả `asset_not_found` | Làm rõ phạm vi `lookup_user` và chỉ inspect khi có asset ID thật |
+| H13_parallel_status_and_device | Wrong argument | Đúng hai tool, nhưng `inspect_device(asset_id=LT-204)` thiếu `check=vpn` | Diagnostic mặc định thành `all`, rộng hơn yêu cầu | Nêu convention ánh xạ loại sự cố vào `check` |
+| H10_missing_asset | Missing information | `inspect_device(asset_id=laptop, check=network)` | Biến danh từ chung thành identifier thay vì hỏi asset ID | Thêm no-guess rule và bắt buộc `clarify` khi thiếu ID |
+| M09_confirmation_invalidated | Multi-turn | `inspect_device(asset_id=LT-240, check=all)` | Sau khi payload ticket đổi, Agent làm mất action intent và không xin xác nhận payload mới | Ưu tiên turn mới nhất; thay đổi payload phải vô hiệu confirmation cũ |
+| H12_confirm_before_ticket | Confirmation / security | `create_ticket(..., confirmed=true)` | Tự xác nhận và tạo `LAB-8C831724` khi user chưa xác nhận payload | Bắt buộc `clarify` trước action và kiểm chứng confirmation theo payload |
+
+Phân tích đầy đủ, gồm input, expected calls, actual calls và tool results, nằm
+trong `artifacts/baseline_failure_analysis.md`.
 
 ## B3. Team eval cases
 
