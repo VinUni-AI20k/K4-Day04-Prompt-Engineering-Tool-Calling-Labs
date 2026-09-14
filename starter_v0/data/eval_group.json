@@ -22,7 +22,7 @@
     {
       "id": "G02_ticket_missing_confirm",
       "phase": "B",
-      "query": "Tạo ticket priority high cho sự cố máy in PR-007.",
+      "query": "Tạo ticket priority high cho sự cố máy in PR-404.",
       "failure_type": "wrong_boundary",
       "expect": {
         "tool_calls": [{"name": "clarify", "args": {"response_type": "yes_no"}}]
@@ -84,15 +84,15 @@
       "phase": "B",
       "turns": [
         {"role": "user", "content": "Tra thông tin tài khoản của nhân viên bên bộ phận kế toán."},
-        {"role": "user", "content": "Mã nhân viên là EMP-1015."},
+        {"role": "user", "content": "Mã nhân viên là EMP-1001."},
         {"role": "user", "content": "Cho mình biết thiết bị được cấp cho người đó."}
       ],
       "failure_type": "missing_info",
       "expect": {
-        "tool_calls": [{"name": "lookup_user", "args": {"employee_id": "EMP-1015"}}]
+        "tool_calls": [{"name": "lookup_user", "args": {"employee_id": "EMP-1001"}}]
       },
       "metadata": {
-        "what_it_tests": "Lượt đầu thiếu employee ID, lượt 2 bổ sung, lượt cuối dùng ID đã được cung cấp — carry EMP-1015 đúng.",
+        "what_it_tests": "Lượt đầu thiếu employee ID, lượt 2 bổ sung, lượt cuối dùng ID đã được cung cấp — carry EMP-1001 (Finance) đúng.",
         "difficulty": "medium"
       }
     },
