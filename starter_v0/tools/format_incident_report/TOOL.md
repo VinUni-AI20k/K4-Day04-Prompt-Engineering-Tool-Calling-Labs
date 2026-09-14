@@ -4,10 +4,12 @@ track: core
 kind: local_formatter
 requires_env: []
 inputs: [findings, template, incident_title]
-outputs: [markdown, finding_count]
+outputs: [tool, template, markdown, finding_count]
 side_effect: false
 ---
 # format_incident_report
 
 Formats findings already collected by other tools. It does not inspect devices,
-check service status, search knowledge, or create tickets.
+check service status, search knowledge, authorize actions, or create tickets.
+Each finding may contain `label`, `detail`, `source`, and `status`; formatting
+uses `label` (or source) and `detail` (or summary/status) as available.

@@ -45,13 +45,14 @@ Chọn một provider và điền key tương ứng trong `starter_v0/.env`:
 OPENROUTER_API_KEY=...
 
 # Hoặc OpenAI
-OPENAI_API_KEY=...
+OPENAI_API_KEY=
+
 
 # Hoặc Anthropic
 ANTHROPIC_API_KEY=...
 
 # Hoặc Gemini
-GEMINI_API_KEY=...
+GEMINI_API_KEY=
 ```
 
 Chạy preflight với đúng provider:
