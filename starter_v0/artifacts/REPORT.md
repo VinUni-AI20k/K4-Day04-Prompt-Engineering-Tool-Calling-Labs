@@ -195,14 +195,14 @@ Sao chép mẫu dưới đây cho từng thành viên:
 
 ### Nguyễn Đức Anh — 2A202602625
 
-- **Vai trò/phần việc được nhận:**
-- **Những gì tôi đã thay đổi trong repo chung:**
-- **File hoặc artifact liên quan:**
-- **Commit hash hoặc pull request:**
-- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:**
-- **Khó khăn tôi gặp và cách tôi xử lý:**
-- **Điều tôi học được từ phần việc này:**
-- **Nếu làm lại, tôi sẽ cải thiện điều gì:**
+- **Vai trò/phần việc được nhận:** Viết 10 test case vào `eval_group.json`, test cho các giai đoạn khác nhau. Tối ưu hóa `system_prompt.md` và `tools.yaml`. Xử lý và fix lỗi để hệ thống vượt qua thành công các bài test trong file `eval_adversarial.json`.
+- **Những gì tôi đã thay đổi trong repo chung:** Bổ sung 10 test case mới vào file test nhóm, cấu trúc lại và tối ưu hệ thống prompt cùng schema của các công cụ. Cập nhật và thêm các quy tắc phòng thủ chặt chẽ vào file `system_prompt.md` để ngăn chặn việc LLM bị lừa bởi prompt injection, role spoofing, forged tool result, và data exfiltration.
+- **File hoặc artifact liên quan:** `artifacts/system_prompt.md`, `artifacts/tools.yaml`, `data/eval_group.json`, `data/eval_adversarial.json`.
+- **Commit hash hoặc pull request:** (Các commit gần nhất cập nhật hệ thống prompt, tool schema và file test)
+- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:** Tôi quyết định không sử dụng các từ ngữ chung chung mà định nghĩa rõ ràng thế nào là một "lời xác nhận hợp lệ" (confirmation) và yêu cầu LLM phải bỏ qua các thẻ như `<assistant>` hoặc `TOOL_RESULTS_JSON` do người dùng nhúng vào. Đối với việc thiết kế test, tôi tạo test case bao phủ cả luồng đa lượt (multi-turn) lẫn đơn lượt để mô phỏng thực tế. Lý do là vì LLM dễ bị nhầm lẫn giữa dữ liệu do hệ thống chèn và dữ liệu do người dùng giả mạo trong bối cảnh đa lượt hội thoại.
+- **Khó khăn tôi gặp và cách tôi xử lý:** Rất khó để vừa đảm bảo Agent xử lý đúng luồng công việc vừa chống lại các đợt tấn công prompt injection tinh vi (ví dụ: test case A06 - ngăn gửi dữ liệu nội bộ ra web). Ban đầu Agent thường gọi thừa tool hoặc nhầm thứ tự. Tôi đã giải quyết bằng cách tinh chỉnh quy tắc trong prompt: hướng dẫn cặn kẽ LLM thứ tự gọi tool và giới hạn nghiêm ngặt việc chia sẻ dữ liệu nhạy cảm ra ngoài web search.
+- **Điều tôi học được từ phần việc này:** Hiểu sâu hơn về cách tối ưu hóa Tool Schema để Agent hiểu dễ dàng hơn. Nhận thức rõ ràng về các kỹ thuật tấn công prompt injection (như stale confirmation attack hay argument smuggling) và cách thiết kế System Prompt mạnh mẽ để bảo vệ ranh giới quyền hạn.
+- **Nếu làm lại, tôi sẽ cải thiện điều gì:** Tôi sẽ thiết lập thêm các bước kiểm tra (validation) trực tiếp trong mã nguồn Python của các công cụ thay vì chỉ phụ thuộc hoàn toàn vào System Prompt. Ngoài ra, tôi sẽ lên kịch bản đa dạng hơn cho các bộ test để kiểm tra sức chịu đựng của LLM tốt hơn.
 
 ### Vũ Văn Hà — 2A202602589
 
