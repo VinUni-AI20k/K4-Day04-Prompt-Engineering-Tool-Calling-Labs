@@ -1,0 +1,4 @@
+# Keep LF line endings on every OS. run_eval.py and chat.py hash
+# artifacts/system_prompt.md and artifacts/tools.yaml byte-for-byte, so a
+# CRLF checkout on Windows would produce a different artifact_version.
+* text=auto eol=lf
