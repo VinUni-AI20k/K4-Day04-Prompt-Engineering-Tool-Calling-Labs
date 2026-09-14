@@ -128,9 +128,14 @@ cả bốn version. Prompt đã nói rõ giá trị ngoài enum phải hỏi l�
 đã nói `staging` chỉ dùng khi người dùng chỉ định rõ, nhưng model vẫn coi "demo"
 đủ gần với `staging`.
 
-Đây là giới hạn thực sự cần ghi vào report thay vì cố ép cho PASS: thêm luật
-mạnh hơn nữa sẽ có nguy cơ tái tạo regression H02 — agent hỏi lại ở những case
-environment vốn suy ra hợp lệ (H06, M02 đang PASS).
+Ở thời điểm v3, đây được ghi là giới hạn thực sự: thêm luật mạnh hơn nữa có
+nguy cơ tái tạo regression H02 — agent hỏi lại ở những case environment vốn suy
+ra hợp lệ (H06, M02 đang PASS).
+
+> **Cập nhật sau v4:** kết luận này chưa đủ sâu. H19 sửa được, nhưng không phải
+> bằng một luật clarify mạnh hơn trong prompt — mà bằng một dòng mô tả ngay tại
+> `check_service_status.environment` liệt kê các tên không hợp lệ. Xem
+> `v4_review.md`.
 
 ## Trạng thái các suite
 

@@ -46,7 +46,19 @@ tools:
       type: object
       properties:
         service: {type: string, enum: [vpn, email, sso, wifi, printing], description: "Tên dịch vụ"}
-        environment: {type: string, enum: [production, staging], default: "production", description: "Môi trường triển khai: 'production' hoặc 'staging'. Mặc định là 'production'; chỉ dùng 'staging' khi người dùng chỉ định rõ."}
+        environment:
+          type: string
+          enum: [production, staging]
+          default: "production"
+          description: >-
+            Môi trường triển khai. Hệ thống chỉ có đúng hai môi trường:
+            'production' và 'staging'. Chọn giá trị khi người dùng gọi đúng tên
+            một trong hai, hoặc khi ngữ cảnh hội thoại đã xác định môi trường đó.
+            Mặc định 'production' khi người dùng không nhắc tới môi trường nào.
+            Các tên khác như demo, test, dev, QA, UAT, sandbox hay staging của
+            một team riêng KHÔNG tương ứng với môi trường nào ở đây: không tự ánh
+            xạ chúng sang 'staging' hay 'production', mà hỏi lại bằng tool
+            clarify với response_type 'choice' và options là hai giá trị hợp lệ.
       required: [service]
 
   - name: inspect_device
