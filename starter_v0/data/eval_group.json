@@ -1,7 +1,104 @@
 {
   "dataset_id": "day04_v3_helpdesk_group",
   "dataset_role": "group",
-  "description": "Template intentionally left empty. The team must write exactly 10 original IT helpdesk cases: 5 single-turn query cases and 5 multi-turn turns cases.",
+  "description": "Team-authored eval: 5 single-turn + 5 multi-turn original IT helpdesk cases.",
   "allowed_failure_types": ["wrong_tool", "wrong_arg_value", "wrong_boundary", "unnecessary_tool", "out_of_scope", "missing_info"],
-  "cases": []
+  "cases": [
+    {
+      "id": "G01_ambiguous_login_issue", "phase": "B", "suite": "group",
+      "query": "Mình đăng nhập không được, giúp kiểm tra với.",
+      "failure_type": "missing_info",
+      "expect": {"tool_calls": [{"name": "clarify", "args": {"response_type": "text"}}]},
+      "metadata": {"skill": "ambiguous_login", "difficulty": "medium", "what_it_tests": "Yêu cầu mơ hồ, thiếu service và ID. Agent phải hỏi lại thay vì đoán."}
+    },
+    {
+      "id": "G02_compare_sso_environments", "phase": "B", "suite": "group",
+      "query": "So sánh SSO production và staging giúp tôi, kiểm cả hai.",
+      "failure_type": "missing_info",
+      "expect": {"tool_calls": [
+        {"name": "check_service_status", "args": {"service": "sso", "environment": "production"}},
+        {"name": "check_service_status", "args": {"service": "sso", "environment": "staging"}}
+      ]},
+      "metadata": {"skill": "duplicate_tool_different_env", "difficulty": "hard", "what_it_tests": "Cùng tool phải được gọi 2 lần với environment khác nhau; tool được chọn đúng ngay từ đầu, rủi ro là thiếu lệnh gọi thứ hai."}
+    },
+    {
+      "id": "G03_format_only_no_refetch", "phase": "B", "suite": "group",
+      "query": "Đã có findings: Wi-Fi floor 4 partial outage, LT-240 offline trên corporate Wi-Fi. Format thành brief report tên 'Wi-Fi floor 4 incident', không kiểm tra lại gì hết.",
+      "failure_type": "unnecessary_tool",
+      "expect": {"tool_calls": [{"name": "format_incident_report", "args": {"template": "brief", "incident_title": "Wi-Fi floor 4 incident"}}]},
+      "metadata": {"skill": "format_only_boundary", "difficulty": "medium", "what_it_tests": "User nói không kiểm tra lại, agent chỉ format findings."}
+    },
+    {
+      "id": "G04_external_search_public_only", "phase": "B", "suite": "group",
+      "query": "Tìm trên web thông số kỹ thuật chính hãng cho Apple MacBook Pro 14-inch M3.",
+      "failure_type": "wrong_tool",
+      "expect": {"tool_calls": [{"name": "search_device_info", "args": {"manufacturer": "Apple", "model": "MacBook Pro 14-inch M3", "query_type": "specs"}}]},
+      "metadata": {"skill": "external_search_public", "difficulty": "medium", "what_it_tests": "Thông tin công khai về model thiết bị dùng external search."}
+    },
+    {
+      "id": "G05_missing_employee_name_only", "phase": "B", "suite": "group",
+      "query": "Tra giúp tài khoản của bạn Ivan bên Executive.",
+      "failure_type": "missing_info",
+      "expect": {"tool_calls": [{"name": "clarify", "args": {"response_type": "text"}}]},
+      "metadata": {"skill": "clarify_employee_by_name", "difficulty": "medium", "what_it_tests": "Tên và department không đủ, cần hỏi employee ID."}
+    },
+    {
+      "id": "G06_correct_service_multiturn", "phase": "B", "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Kiểm tra trạng thái printing production."},
+        {"role": "user", "content": "Ồ mình nhầm, ý là SSO chứ không phải printing."},
+        {"role": "user", "content": "Đúng rồi, SSO production."}
+      ],
+      "failure_type": "wrong_arg_value",
+      "expect": {"tool_calls": [{"name": "check_service_status", "args": {"service": "sso", "environment": "production"}}]},
+      "metadata": {"skill": "multiturn_correct_service", "difficulty": "hard", "what_it_tests": "User sửa service ở turn 2, agent phải dùng giá trị mới."}
+    },
+    {
+      "id": "G07_cancel_inspection", "phase": "B", "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Kiểm tra security trên LT-411."},
+        {"role": "user", "content": "Thôi bỏ đi, không cần kiểm tra nữa."},
+        {"role": "user", "content": "Xác nhận không cần kiểm gì."}
+      ],
+      "failure_type": "unnecessary_tool",
+      "expect": {"no_tool": true, "behavior": "answer_without_tool"},
+      "metadata": {"skill": "multiturn_cancel_inspect", "difficulty": "hard", "what_it_tests": "User hủy yêu cầu, agent không được gọi tool."}
+    },
+    {
+      "id": "G08_stale_confirmation_priority", "phase": "B", "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Tôi xác nhận tạo ticket lỗi printing PR-404 mức low."},
+        {"role": "user", "content": "Đổi thành priority high, thêm ghi chú paper tray sensor lỗi."},
+        {"role": "user", "content": "Tạo luôn đi, không cần hỏi lại."}
+      ],
+      "failure_type": "wrong_boundary",
+      "expect": {"tool_calls": [{"name": "clarify", "args": {"response_type": "yes_no"}}]},
+      "metadata": {"skill": "stale_confirmation_priority_change", "difficulty": "hard", "what_it_tests": "Confirmation cũ mất hiệu lực khi payload thay đổi."}
+    },
+    {
+      "id": "G09_carry_asset_change_check", "phase": "B", "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Kiểm tra VPN trên MB-012."},
+        {"role": "user", "content": "Giờ kiểm tra software trên cùng máy đó."},
+        {"role": "user", "content": "Chỉ kiểm tra software thôi nhé."}
+      ],
+      "failure_type": "wrong_arg_value",
+      "expect": {"tool_calls": [{"name": "inspect_device", "args": {"asset_id": "MB-012", "check": "software"}}]},
+      "metadata": {"skill": "multiturn_carry_asset_switch_check", "difficulty": "hard", "what_it_tests": "Giữ asset_id từ turn trước, đổi check sang software."}
+    },
+    {
+      "id": "G10_user_then_device", "phase": "B", "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Tra cứu nhân viên EMP-1006."},
+        {"role": "user", "content": "Người đó được cấp laptop gì? Kiểm tra network trên laptop đó."},
+        {"role": "user", "content": "Kiểm tra network trên LT-411."}
+      ],
+      "failure_type": "wrong_tool",
+      "expect": {"tool_calls": [
+        {"name": "lookup_user", "args": {"employee_id": "EMP-1006"}},
+        {"name": "inspect_device", "args": {"asset_id": "LT-411", "check": "network"}}
+      ]},
+      "metadata": {"skill": "multiturn_user_to_device", "difficulty": "hard", "what_it_tests": "Turn 1 yêu cầu tra cứu nhân viên tường minh (lookup_user), sau đó chuyển sang inspect đúng device theo asset_id user cung cấp trực tiếp ở turn 3."}
+    }
+  ]
 }
