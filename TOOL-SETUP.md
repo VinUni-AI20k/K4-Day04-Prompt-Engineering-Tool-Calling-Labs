@@ -12,6 +12,25 @@ tra các tool có sẵn. Quy trình làm bài được tách riêng trong `LAB-G
 
 ## 2. Tạo virtual environment
 
+### Cách khuyến nghị: uv (dùng chung cho cả nhóm)
+
+`starter_v0/` có `pyproject.toml`, `uv.lock` và `.python-version` để mọi thành
+viên cài đúng cùng phiên bản dependency:
+
+```powershell
+cd starter_v0
+uv sync
+if (-not (Test-Path .env)) { Copy-Item .env.example .env }
+uv run python -m compileall -q .
+uv run streamlit run app.py
+```
+
+`uv sync` tạo `starter_v0/.venv/` theo `uv.lock`. Khi thêm dependency, dùng
+`uv add <package>` trong `starter_v0/`, commit cả `pyproject.toml` và `uv.lock`,
+đồng thời cập nhật `requirements.txt` cho người dùng pip.
+
+### Cách thay thế: venv + pip
+
 Windows PowerShell:
 
 ```powershell
