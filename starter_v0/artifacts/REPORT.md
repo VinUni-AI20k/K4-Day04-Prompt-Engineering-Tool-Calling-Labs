@@ -196,16 +196,30 @@ Sao chép mẫu dưới đây cho từng thành viên:
 
 ### Đỗ Ngọc Phi — 2A202602531
 
-> Thành viên tự viết và tự commit phần này.
-
-- **Vai trò/phần việc được nhận:**
+- **Vai trò/phần việc được nhận:** A — Prompt Architect và nhóm trưởng: phụ trách `system_prompt.md`, format output, context carry-over, version hash và `version_log.csv`; chạy các run chính thức; review và merge phần việc của cả nhóm.
 - **Những gì tôi đã thay đổi trong repo chung:**
-- **File hoặc artifact liên quan:**
+  - Tạo `TEAMMATES.md`; bỏ ignore `runs/` và `transcripts/` để evidence được commit.
+  - Chạy baseline v0 và lặp `system_prompt.md` từ v1 đến v8. Mỗi version chạy đủ base, extension và adversarial, ghi hypothesis và kết quả vào `version_log.csv`. Chạy thêm 16 transcript chat (v5–v8) để kiểm tra format JSON, ngữ cảnh nhiều lượt và ranh giới xác nhận.
+  - Chốt prompt hiện hành là v5; viết `HANDOFF-A.md` và các mục B1, B2, B4 trong report.
+  - Thêm `.gitattributes` để máy Windows không bị lệch hash artifact.
+  - Review và merge branch của B, C, D. Sửa các lỗi phát hiện khi review: đưa prompt về v5 sau khi merge branch của C, xoá 5 run lỗi provider, sửa mã hoá `version_log.csv`, sửa các câu trong report không khớp với run.
+  - Tôi dùng Claude Code hỗ trợ chạy eval, phân tích run và review branch; các commit đó có ghi `Co-Authored-By`.
+- **File hoặc artifact liên quan:** `starter_v0/artifacts/system_prompt.md`, `starter_v0/artifacts/version_log.csv`, `starter_v0/runs/v0_*` → `v8_*`, `starter_v0/transcripts/v5_*` → `v8_*`, `HANDOFF-A.md`, `starter_v0/artifacts/REPORT.md` (B1, B2, B4), `TEAMMATES.md`, `.gitignore`, `.gitattributes`.
 - **Commit hash hoặc pull request:**
-- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:**
+  - Prompt: `45555d5` (v0), `15f793d` (v1), `b7175c8` (v2), `b965c71` (v3), `2d693a3` (v4), `f670116` (v5), `b154beb` (v6), `5666960` (v7), `c6622d1` (v8), `b872b19` (đưa về v5).
+  - Tài liệu và cấu hình: `72af4a0` (TEAMMATES), `dbcc0fe` (gitignore), `531b0b3` (report + handoff), `90f9db4` (`.gitattributes`).
+  - Review và tích hợp: `a6e28a7`, `e80a8dc` (sau merge C), `5f50809` (sửa version log và B4a), `def5325` (sửa report sau merge D).
+- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:** Dừng lặp và giữ prompt v5 thay vì v8, dù v8 có adversarial 1.00 và JSON đúng chuẩn 6/6. Khi đọc `tool_results`, lần chạy lại của v8 tạo ticket trái phép ở A11, và trong chat v8 báo `created_ticket` mà không gọi tool nào. v5 có 0 ticket trái phép qua 2 lần chạy. Tôi chọn tiêu chí an toàn đo từ `tool_results` thay vì điểm của evaluator, và chuyển việc xử lý JSON output sang UI.
 - **Khó khăn tôi gặp và cách tôi xử lý:**
-- **Điều tôi học được từ phần việc này:**
+  - A10/A11 cho kết quả khác nhau giữa các lần chạy, nên một lần chạy không đủ để kết luận. Tôi chạy lại adversarial ít nhất 2 lần cho các version quan trọng và đếm ticket trực tiếp từ `tool_results`.
+  - Ở v4, câu cấm có nêu `confirmed: false` lại làm model gọi đúng lệnh đó. Tôi ghi v4 là hypothesis bị bác bỏ, rồi làm v5 từ v3 và chỉ giữ thay đổi đã chứng minh có ích.
+  - Khi tích hợp, run của thành viên dùng Windows bị lệch hash do CRLF. Tôi thêm `.gitattributes` và yêu cầu chạy lại với artifact dạng LF.
+- **Điều tôi học được từ phần việc này:** Evaluator chỉ chấm tool call ở lượt đầu, nên điểm cao không đồng nghĩa với an toàn; phải đọc `tool_results`, filesystem và transcript. Prompt cũng không sửa được mọi lỗi: `policy_area` sai qua 8 version prompt nhưng hết sau khi B mô tả lại enum trong `tools.yaml` (extension 0.50 → 1.00), còn H19 thì cả prompt lẫn declaration đều chưa sửa được.
 - **Nếu làm lại, tôi sẽ cải thiện điều gì:**
+  - Bám khung v1 → v3 của bài và giới hạn số vòng lặp prompt, thay vì đi tới v8.
+  - Chạy mỗi version ít nhất 2 lần ngay từ v0.
+  - Thêm `.gitattributes` ngay khi fork.
+  - Làm việc qua branch và PR từ đầu; giai đoạn đầu tôi đã commit thẳng lên `main`.
 
 ### Phạm Cường Quốc — 2A202602469
 
