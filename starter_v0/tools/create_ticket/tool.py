@@ -8,14 +8,12 @@ from typing import Any
 
 from tools._shared import ROOT, err
 
-
 TICKET_DIR = ROOT / "tickets"
 ASSET_ID_PATTERN = re.compile(r"^(?:LT|DT|MB|PR|RM)-\d+$", re.IGNORECASE)
 SENSITIVE_DATA_PATTERN = re.compile(
     r"\b(?:password|passwd|token|api[ _-]?key|mfa|otp|recovery[ _-]?code)(?:\s*[:=]\s*|\s+(?:is|la|là)\s+)\S+",
     re.IGNORECASE,
 )
-
 
 def create_ticket(
     summary: str = "",
@@ -70,3 +68,5 @@ def create_ticket(
         return {"tool": "create_ticket", "status": "created", "ticket_id": ticket_id, "path": str(path)}
     except Exception as exc:
         return err("create_ticket", exc)
+
+
