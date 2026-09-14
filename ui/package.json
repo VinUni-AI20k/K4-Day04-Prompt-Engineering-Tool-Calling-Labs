@@ -4,9 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:api": "python scripts/local_api.py",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "sync-lab": "node scripts/sync-lab.mjs"
   },
   "dependencies": {
     "class-variance-authority": "^0.7.1",

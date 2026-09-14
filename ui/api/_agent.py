@@ -27,10 +27,13 @@ from pathlib import Path
 from typing import Any
 
 # --- locate the lab package -------------------------------------------------
-# `.lab/` is the copy made by scripts/sync-lab.mjs at install time (Vercel).
-# `../starter_v0` is the live checkout (local dev, before any sync has run).
+# The live checkout wins wherever it exists, so a teammate editing
+# starter_v0/artifacts/ sees their change immediately. `.lab/` is the copy made
+# by scripts/sync-lab.mjs at install time and is only reachable on Vercel, where
+# the project root is ui/ and starter_v0 was never uploaded. Checking `.lab`
+# first would silently serve a stale snapshot during local development.
 _UI_ROOT = Path(__file__).resolve().parents[1]
-_CANDIDATES = [_UI_ROOT / ".lab", _UI_ROOT.parent / "starter_v0"]
+_CANDIDATES = [_UI_ROOT.parent / "starter_v0", _UI_ROOT / ".lab"]
 LAB_ROOT = next((p for p in _CANDIDATES if (p / "chat.py").exists()), None)
 if LAB_ROOT is None:
     raise RuntimeError(
