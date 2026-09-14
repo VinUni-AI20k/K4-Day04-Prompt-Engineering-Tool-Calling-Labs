@@ -174,10 +174,13 @@ with st.sidebar:
     )
     model_name = model_input.strip() or None
 
-    version_label = st.selectbox(
+    version_label = "v3"
+
+    st.text_input(
         "Artifact version",
-        options=["v0", "v1", "v2", "v3"],
-        index=0,
+        value=version_label,
+        disabled=True,
+        help="UI sử dụng artifact cuối trong system_prompt.md và tools.yaml.",
     )
 
     history_window = st.number_input(
