@@ -1,7 +1,97 @@
 {
   "dataset_id": "day04_v3_helpdesk_group",
   "dataset_role": "group",
-  "description": "Template intentionally left empty. The team must write exactly 10 original IT helpdesk cases: 5 single-turn query cases and 5 multi-turn turns cases.",
+  "description": "10 original IT helpdesk cases: 5 single-turn query cases and 5 multi-turn turns cases.",
   "allowed_failure_types": ["wrong_tool", "wrong_arg_value", "wrong_boundary", "unnecessary_tool", "out_of_scope", "missing_info"],
-  "cases": []
+  "cases": [
+    {
+      "id": "G01_lookup_user", "phase": "B",
+      "query": "Tra cứu thông tin của nhân viên EMP-502.",
+      "failure_type": "wrong_tool",
+      "expect": {"tool_calls": [{"name": "lookup_user", "args": {"employee_id": "EMP-502"}}]},
+      "metadata": {"what_it_tests": "Single-turn lookup_user."}
+    },
+    {
+      "id": "G02_service_status", "phase": "B",
+      "query": "Kiểm tra xem hệ thống email trên production có đang bị lỗi không.",
+      "failure_type": "wrong_arg_value",
+      "expect": {"tool_calls": [{"name": "check_service_status", "args": {"service": "email", "environment": "production"}}]},
+      "metadata": {"what_it_tests": "Single-turn check_service_status."}
+    },
+    {
+      "id": "G03_device_info", "phase": "B",
+      "query": "Tìm driver cho Lenovo ThinkPad T14 Gen 4.",
+      "failure_type": "wrong_tool",
+      "expect": {"tool_calls": [{"name": "search_device_info", "args": {"manufacturer": "Lenovo", "model": "ThinkPad T14 Gen 4", "query_type": "drivers"}}]},
+      "metadata": {"what_it_tests": "Single-turn search_device_info external."}
+    },
+    {
+      "id": "G04_clarify_text", "phase": "B",
+      "query": "Màn hình máy tính của tôi bị hỏng, hãy kiểm tra phần cứng thiết bị của tôi ngay.",
+      "failure_type": "wrong_boundary",
+      "expect": {"tool_calls": [{"name": "clarify", "args": {"response_type": "text"}}]},
+      "metadata": {"what_it_tests": "Single-turn clarify text for missing asset_id."}
+    },
+    {
+      "id": "G05_clarify_yes_no", "phase": "B",
+      "query": "Tạo ticket high cho máy LT-999 bị hỏng pin.",
+      "failure_type": "wrong_boundary",
+      "expect": {"tool_calls": [{"name": "clarify", "args": {"response_type": "yes_no"}}]},
+      "metadata": {"what_it_tests": "Single-turn clarify yes_no before creating ticket."}
+    },
+    {
+      "id": "G06_policy_multi", "phase": "B",
+      "turns": [
+        {"role": "user", "content": "Chính sách tạo ticket ra sao?"},
+        {"role": "assistant", "content": "Chính sách yêu cầu phải xác nhận trước khi tạo."},
+        {"role": "user", "content": "Vậy hãy tra cứu quy định về xử lý dữ liệu cá nhân nhé."}
+      ],
+      "failure_type": "wrong_tool",
+      "expect": {"tool_calls": [{"name": "policy", "args": {"policy_area": "data_privacy"}}]},
+      "metadata": {"what_it_tests": "Multi-turn policy lookup."}
+    },
+    {
+      "id": "G07_clarify_choice", "phase": "B",
+      "turns": [
+        {"role": "user", "content": "Tôi không đăng nhập được SSO."},
+        {"role": "user", "content": "Kiểm tra SSO trên môi trường dev giúp tôi."}
+      ],
+      "failure_type": "wrong_boundary",
+      "expect": {"tool_calls": [{"name": "clarify", "args": {"response_type": "choice"}}]},
+      "metadata": {"what_it_tests": "Multi-turn clarify choice for invalid environment."}
+    },
+    {
+      "id": "G08_create_ticket_confirmed", "phase": "B",
+      "turns": [
+        {"role": "user", "content": "Tạo ticket báo lỗi mạng cho LT-123 mức low."},
+        {"role": "assistant", "content": "Bạn có chắc chắn muốn tạo ticket báo lỗi mạng cho LT-123 mức low không?"},
+        {"role": "user", "content": "Đúng, tôi xác nhận tạo ticket."}
+      ],
+      "failure_type": "wrong_boundary",
+      "expect": {"tool_calls": [{"name": "create_ticket", "args": {"priority": "low", "asset_id": "LT-123", "confirmed": true}}]},
+      "metadata": {"what_it_tests": "Multi-turn confirmed ticket creation."}
+    },
+    {
+      "id": "G09_cancel_action", "phase": "B",
+      "turns": [
+        {"role": "user", "content": "Tạo ticket medium lỗi wifi."},
+        {"role": "assistant", "content": "Xác nhận tạo ticket?"},
+        {"role": "user", "content": "Thôi, tôi tự sửa được rồi, không tạo nữa."}
+      ],
+      "failure_type": "unnecessary_tool",
+      "expect": {"no_tool": true},
+      "metadata": {"what_it_tests": "Multi-turn user cancels action."}
+    },
+    {
+      "id": "G10_context_carryover", "phase": "B",
+      "turns": [
+        {"role": "user", "content": "Nhân viên EMP-112 đang dùng máy nào?"},
+        {"role": "assistant", "content": "Nhân viên EMP-112 đang dùng máy LT-555."},
+        {"role": "user", "content": "Hãy kiểm tra phần mềm máy đó."}
+      ],
+      "failure_type": "missing_info",
+      "expect": {"tool_calls": [{"name": "inspect_device", "args": {"asset_id": "LT-555", "check": "software"}}]},
+      "metadata": {"what_it_tests": "Multi-turn context carryover for asset_id."}
+    }
+  ]
 }

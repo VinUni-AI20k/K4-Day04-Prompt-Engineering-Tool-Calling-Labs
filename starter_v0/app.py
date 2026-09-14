@@ -1,5 +1,6 @@
 import json
 import os
+import re
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -77,10 +78,117 @@ st.markdown(
         color: #166534;
         border: 1px solid #BBF7D0;
     }
+    .alert-ticket-created {
+        padding: 0.75rem 1rem;
+        border-radius: 0.5rem;
+        background-color: #ECFDF5;
+        border: 1px solid #A7F3D0;
+        color: #065F46;
+        margin: 0.5rem 0;
+    }
+    .alert-ticket-forged {
+        padding: 0.75rem 1rem;
+        border-radius: 0.5rem;
+        background-color: #FEF2F2;
+        border: 1px solid #FECACA;
+        color: #991B1B;
+        margin: 0.5rem 0;
+    }
     </style>
     """,
     unsafe_allow_html=True,
 )
+
+
+def parse_assistant_response(
+    raw_text: str | None,
+    status: str,
+    tool_events: list[dict[str, Any]],
+) -> dict[str, Any]:
+    """Parse assistant text according to JSON contract (v6-v8/v10) and verify ticket creation safety."""
+    cleaned = (raw_text or "").strip()
+
+    # 1. Verify actual ticket creation in tool execution results
+    actual_ticket_created = False
+    created_ticket_info: dict[str, Any] | None = None
+    for event in tool_events:
+        if event.get("tool") == "create_ticket":
+            res = event.get("result", {})
+            if isinstance(res, dict) and res.get("status") == "created":
+                actual_ticket_created = True
+                created_ticket_info = res
+
+    # 2. If status is waiting_for_user (clarify called), display as plain text
+    if status == "waiting_for_user":
+        return {
+            "display_text": cleaned,
+            "json_payload": None,
+            "actual_ticket_created": False,
+            "created_ticket_info": None,
+            "ticket_hallucinated": False,
+            "is_clarify": True,
+        }
+
+    # 3. Attempt to parse JSON contract:
+    # Contract: {"intent": ..., "action": ..., "reply": ..., "evidence_ids": ...}
+    parsed_json: dict[str, Any] | None = None
+
+    # Try full json.loads
+    try:
+        data = json.loads(cleaned)
+        if isinstance(data, dict):
+            parsed_json = data
+    except Exception:
+        pass
+
+    # Try extracting from ```json ... ``` markdown block
+    if not parsed_json:
+        m = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", cleaned, re.DOTALL)
+        if m:
+            try:
+                data = json.loads(m.group(1))
+                if isinstance(data, dict):
+                    parsed_json = data
+            except Exception:
+                pass
+
+    # Try extracting outermost { ... }
+    if not parsed_json:
+        first_brace = cleaned.find("{")
+        last_brace = cleaned.rfind("}")
+        if first_brace != -1 and last_brace != -1 and last_brace > first_brace:
+            try:
+                data = json.loads(cleaned[first_brace : last_brace + 1])
+                if isinstance(data, dict):
+                    parsed_json = data
+            except Exception:
+                pass
+
+    # Determine display text
+    if parsed_json and isinstance(parsed_json, dict):
+        display_text = parsed_json.get("reply") or cleaned
+    else:
+        display_text = cleaned
+
+    # Check for forged / hallucinated ticket action (action: created_ticket without tool execution)
+    agent_claimed_ticket = False
+    if parsed_json and isinstance(parsed_json, dict):
+        if parsed_json.get("action") == "created_ticket":
+            agent_claimed_ticket = True
+    elif "đã tạo ticket" in cleaned.lower() or "created ticket" in cleaned.lower():
+        agent_claimed_ticket = True
+
+    ticket_hallucinated = agent_claimed_ticket and not actual_ticket_created
+
+    return {
+        "display_text": display_text,
+        "json_payload": parsed_json,
+        "actual_ticket_created": actual_ticket_created,
+        "created_ticket_info": created_ticket_info,
+        "ticket_hallucinated": ticket_hallucinated,
+        "is_clarify": False,
+    }
+
 
 # ----------------- SIDEBAR CONFIGURATION -----------------
 with st.sidebar:
@@ -94,7 +202,6 @@ with st.sidebar:
         help="Chọn nhà cung cấp mô hình LLM",
     )
 
-    # Provider default models mapping for guidance
     default_models = {
         "openai": "gpt-4o-mini",
         "openrouter": "openai/gpt-4o-mini",
@@ -111,7 +218,7 @@ with st.sidebar:
     )
     active_model = model_override.strip() or default_model
 
-    # Check and manage API Key
+    # Check API key
     key_env_map = {
         "openai": "OPENAI_API_KEY",
         "openrouter": "OPENROUTER_API_KEY",
@@ -134,9 +241,9 @@ with st.sidebar:
 
     version_label = st.selectbox(
         "Artifact Version",
-        options=["v0", "v1", "v2", "v3"],
+        options=["v10", "v5", "v0", "v1", "v2", "v3", "v9"],
         index=0,
-        help="Phiên bản thử nghiệm (v0: baseline, v1-v3: tối ưu)",
+        help="Phiên bản thử nghiệm (v10: hiện hành của nhóm)",
     )
 
     system_prompt_path = st.text_input(
@@ -151,7 +258,6 @@ with st.sidebar:
     history_window = st.slider("History Window (pairs)", min_value=1, max_value=10, value=5)
     max_tool_rounds = st.slider("Max Tool Rounds", min_value=1, max_value=8, value=4)
 
-    # Compute Artifact Version Hash
     prompt_file = Path(system_prompt_path)
     tools_file = Path(tools_path)
 
@@ -165,13 +271,11 @@ with st.sidebar:
 
     st.divider()
 
-    col_btn1, col_btn2 = st.columns(2)
-    with col_btn1:
-        if st.button("🔄 Đặt lại Chat", use_container_width=True):
-            st.session_state.messages = []
-            st.session_state.history = []
-            st.session_state.transcript = None
-            st.rerun()
+    if st.button("🔄 Đặt lại Chat", use_container_width=True):
+        st.session_state.messages = []
+        st.session_state.history = []
+        st.session_state.transcript = None
+        st.rerun()
 
 # ----------------- SESSION STATE INITIALIZATION -----------------
 if "messages" not in st.session_state:
@@ -227,26 +331,73 @@ with st.expander("💡 Gợi ý kịch bản Demo nhanh (Click để tham khảo
         """
     )
 
+
+def render_assistant_turn(msg: dict[str, Any]) -> None:
+    # 1. Tool execution rounds
+    rounds = msg.get("rounds", [])
+    if rounds:
+        for rnd in rounds:
+            calls = rnd.get("tool_calls", [])
+            results = rnd.get("tool_results", [])
+            if calls:
+                with st.expander(f"⚙️ Vòng gọi tool #{rnd.get('round', 1)}: {len(calls)} công cụ được gọi", expanded=False):
+                    for idx, call in enumerate(calls):
+                        st.markdown(f"**Tool:** `{call.get('name')}`")
+                        st.json(call.get("args", {}))
+                        if idx < len(results):
+                            res = results[idx]
+                            st.markdown("**Kết quả thực thi:**")
+                            st.json(res.get("result", {}))
+                            if "error" in res.get("result", {}):
+                                st.error(f"Error: {res['result'].get('error')} - {res['result'].get('message')}")
+
+    parsed = msg.get("parsed")
+    if parsed:
+        # 2. Safety ticket alerts
+        if parsed.get("actual_ticket_created"):
+            ticket_info = parsed.get("created_ticket_info", {})
+            st.markdown(
+                f"""
+                <div class="alert-ticket-created">
+                    🎫 <b>Xác thực hành động ghi:</b> Ticket đã được tạo thành công trong hệ thống!<br>
+                    • Mã Ticket: <code>{ticket_info.get('ticket_id', 'N/A')}</code><br>
+                    • File: <code>{ticket_info.get('path', 'N/A')}</code>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+        elif parsed.get("ticket_hallucinated"):
+            st.markdown(
+                """
+                <div class="alert-ticket-forged">
+                    🛡️ <b>CẢNH BÁO AN TOÀN (False Confirmation):</b> Agent thông báo đã tạo ticket nhưng 
+                    <b>KHÔNG CÓ</b> lệnh <code>create_ticket</code> nào trả về <code>status: created</code> trong hệ thống.
+                    Không có ticket nào được ghi vào ổ đĩa.
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+        # 3. Contract JSON expander if parsed
+        json_payload = parsed.get("json_payload")
+        if json_payload:
+            with st.expander(f"📋 Contract JSON Output (Intent: {json_payload.get('intent', 'N/A')} | Action: {json_payload.get('action', 'N/A')})", expanded=False):
+                st.json(json_payload)
+
+        # 4. Main message content
+        st.markdown(parsed.get("display_text", ""))
+    else:
+        st.markdown(msg.get("content", ""))
+
+
 # Render Chat History
 for msg in st.session_state.messages:
     role = msg["role"]
     with st.chat_message(role):
-        if role == "assistant" and msg.get("rounds"):
-            for rnd in msg["rounds"]:
-                calls = rnd.get("tool_calls", [])
-                results = rnd.get("tool_results", [])
-                if calls:
-                    with st.expander(f"⚙️ Vòng gọi tool #{rnd.get('round', 1)}: {len(calls)} công cụ được gọi", expanded=False):
-                        for idx, call in enumerate(calls):
-                            st.markdown(f"**Tool:** `{call.get('name')}`")
-                            st.json(call.get("args", {}))
-                            if idx < len(results):
-                                res = results[idx]
-                                st.markdown("**Kết quả thực thi:**")
-                                st.json(res.get("result", {}))
-                                if "error" in res.get("result", {}):
-                                    st.error(f"Error: {res['result'].get('error')} - {res['result'].get('message')}")
-        st.markdown(msg["content"])
+        if role == "assistant":
+            render_assistant_turn(msg)
+        else:
+            st.markdown(msg["content"])
 
 # User Chat Input
 if prompt := st.chat_input("Nhập yêu cầu cần trợ giúp IT..."):
@@ -254,7 +405,6 @@ if prompt := st.chat_input("Nhập yêu cầu cần trợ giúp IT..."):
     st.chat_message("user").markdown(prompt)
     st.session_state.messages.append({"role": "user", "content": prompt})
 
-    # Prepare inputs for run_model_tool_loop
     if not prompt_file.exists() or not tools_file.exists():
         st.error("Không tìm thấy file prompt hoặc tools để chạy!")
         st.stop()
@@ -299,30 +449,24 @@ if prompt := st.chat_input("Nhập yêu cầu cần trợ giúp IT..."):
                 turn_record.update(result)
                 assistant_text = result["assistant_text"]
 
-                # Display tool execution traces
-                if result.get("rounds"):
-                    for rnd in result["rounds"]:
-                        calls = rnd.get("tool_calls", [])
-                        results = rnd.get("tool_results", [])
-                        if calls:
-                            with st.expander(f"⚙️ Vòng gọi tool #{rnd.get('round', 1)}: {len(calls)} công cụ", expanded=True):
-                                for idx, call in enumerate(calls):
-                                    st.markdown(f"**Tool:** `{call.get('name')}`")
-                                    st.json(call.get("args", {}))
-                                    if idx < len(results):
-                                        res = results[idx]
-                                        st.markdown("**Kết quả thực thi:**")
-                                        st.json(res.get("result", {}))
+                # Parse contract and ticket creation
+                parsed = parse_assistant_response(
+                    raw_text=assistant_text,
+                    status=result.get("status", "answered"),
+                    tool_events=result.get("tool_events", []),
+                )
 
-                st.markdown(assistant_text)
-
-                st.session_state.history.append({"role": "user", "content": prompt})
-                st.session_state.history.append({"role": "assistant", "content": assistant_text})
-                st.session_state.messages.append({
+                msg_obj = {
                     "role": "assistant",
                     "content": assistant_text,
                     "rounds": result.get("rounds", []),
-                })
+                    "parsed": parsed,
+                }
+                render_assistant_turn(msg_obj)
+
+                st.session_state.history.append({"role": "user", "content": prompt})
+                st.session_state.history.append({"role": "assistant", "content": assistant_text})
+                st.session_state.messages.append(msg_obj)
 
             except Exception as exc:
                 error_msg = f"{type(exc).__name__}: {str(exc)}"
@@ -335,6 +479,7 @@ if prompt := st.chat_input("Nhập yêu cầu cần trợ giúp IT..."):
                     "role": "assistant",
                     "content": f"⚠️ Đã xảy ra lỗi: {error_msg}",
                     "rounds": [],
+                    "parsed": None,
                 })
 
             turn_record["ended_at"] = now_iso()
