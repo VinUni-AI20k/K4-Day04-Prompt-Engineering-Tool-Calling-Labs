@@ -18,7 +18,7 @@ class OpenAIProvider:
         default_model: str = "gpt-4o-mini",
     ) -> None:
         self.api_key_env = api_key_env
-        self.base_url = base_url
+        self.base_url = base_url or os.getenv("OPENAI_BASE_URL")
         self.default_model = default_model
 
     def complete(
