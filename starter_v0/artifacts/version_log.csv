@@ -1,1 +1,12 @@
-version,author,changed_artifact,artifact_version,prompt_hash,tools_hash,reason,hypothesis,metric_name,metric_before,metric_after,run_file
+version,author,changed_artifact,artifact_version,prompt_hash,tools_hash,reason,hypothesis,
+  metric_name,metric_before,metric_after,run_file
+    v0,nthanhwork,tools.yaml,v0+p27467914bc4d+t86e19195220e,
+  27467914bc4d93574eb1a418b77247c51682e04401c78fb4445c22b9019185a0,
+  86e19195220e2c3deba00196baa9d00bd06380b4317f92a4b5c6a302ff616bdb,Baseline run with starter
+  artifacts,Initial baseline measurement,case_accuracy,0.0,0.40,
+  v0_B_base_openrouter_20260914T193739775547.json
+    v1,nthanhwork,tools.yaml,v1+p27467914bc4d+t197c3ef9faa6,
+  27467914bc4d93574eb1a418b77247c51682e04401c78fb4445c22b9019185a0,
+  197c3ef9faa63e9461426492d3776bda3bb78b085c3aeb7d19b5d28fc855c973,Enhanced tools.yaml
+  descriptions and boundary rules for Role B,Explicit routing and boundaries increase routing
+  accuracy above 0.70,case_accuracy,0.40,0.8846,v1_B_base_gemini_20260914T195453325220.json
