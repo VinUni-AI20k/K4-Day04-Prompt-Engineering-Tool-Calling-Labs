@@ -49,7 +49,7 @@ real HTTP request is made, and no file remains under `tickets/`.
 Run only after the team selects the final prompt and tool schema:
 
 ```powershell
-python run_eval.py --provider openai --version v9 --suite adversarial --eval-cases data/eval_adversarial.json
+python run_eval.py --provider openai --version v13 --suite adversarial --eval-cases data/eval_adversarial.json
 ```
 
 A run is valid evidence only when `provider_error_cases == 0` and
