@@ -33,8 +33,8 @@ tools:
       type: object
       properties:
         service: {type: string, enum: [vpn, email, sso, wifi, printing], description: "Tên dịch vụ"}
-        environment: {type: string, enum: [production, staging], default: "production", description: "Môi trường"}
-      required: [service]
+        environment: {type: string, enum: [production, staging], description: "Môi trường (BẮT BUỘC). Nếu mập mờ, phải dùng clarify để hỏi người dùng."}
+      required: [service, environment]
 
   - name: inspect_device
     description: "Kiểm tra thông tin và chẩn đoán thiết bị. Tuyệt đối KHÔNG tự đoán asset_id. Nếu chưa có mã tài sản chính xác, phải tra cứu bằng lookup_user hoặc hỏi lại người dùng bằng clarify trước khi gọi."
