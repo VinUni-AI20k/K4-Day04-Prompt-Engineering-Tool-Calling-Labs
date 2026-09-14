@@ -91,7 +91,7 @@ nhóm tự xây.
 |---|---|---|---|
 | Optional built-in | `data/eval_helpdesk_extension.json` | `policy`, `create_ticket`, `search_device_info` hoạt động theo đúng confirmation & privacy | Confirmation boolean strictly validated; private assets blocked from web search |
 | External search + privacy boundary | `tools/search_device_info/tool.py` | Lọc sạch các mã nội bộ LT-, EMP-, hostname trước khi gửi Tavily | Regex `INTERNAL_IDENTIFIER` chặn rò rỉ dữ liệu nội bộ ra ngoài Internet |
-| Bonus: tool mới do nhóm tự xây | `tools/lookup_ticket_status/` | Tra cứu trạng thái ticket từ cả 2 tầng: thư mục live `tickets/` và mock database `mock_tickets.json` | Regex `^LAB-[A-F0-9]{8}$` triệt tiêu nguy cơ Path Traversal và SQL/command injection |
+| Bonus: tool mới do nhóm tự xây | `tools/lookup_ticket_status/` | Tra cứu trạng thái ticket từ cả 2 tầng: thư mục live `tickets/` và mock database `mock_tickets.json`. Unit smoke test `smoke_test.py` bao phủ found/not_found, chuẩn hóa case và các input bị chặn | Regex `^LAB-[A-F0-9]{8}$` triệt tiêu nguy cơ Path Traversal và SQL/command injection |
 
 ## B6. Safety review
 
@@ -145,12 +145,13 @@ Sao chép mẫu dưới đây cho từng thành viên:
 
 - **Vai trò/phần việc được nhận:** Security & Bonus Tool
 - **Những gì tôi đã thay đổi trong repo chung:** 
-  + Thiết kế và xây dựng hoàn chỉnh Bonus Capability: tool `lookup_ticket_status` (gồm `tool.py`, `tool.md`, đăng ký trong `tools/__init__.py`, khai báo schema trong `tools.yaml`, và dữ liệu `helpdesk_data/mock_tickets.json`).
+  + Thiết kế và xây dựng hoàn chỉnh Bonus Capability: tool `lookup_ticket_status` (gồm `tool.py`, `TOOL.md`, `smoke_test.py`, đăng ký trong `tools/__init__.py`, khai báo schema trong `tools.yaml`, và dữ liệu `helpdesk_data/mock_tickets.json`).
   + Thiết kế các test cases cho bonus tool trong `data/eval_group.json` (G01 single-turn và G02 multi-turn).
   + Rà soát và phân tích các ranh giới an toàn cho bộ test adversarial (`eval_adversarial.json`), thiết lập các guardrail chống Path Traversal, role spoofing, credential leaking, và stale confirmation attack.
 - **File hoặc artifact liên quan:** 
   + `starter_v0/tools/lookup_ticket_status/tool.py`
-  + `starter_v0/tools/lookup_ticket_status/tool.md`
+  + `starter_v0/tools/lookup_ticket_status/TOOL.md`
+  + `starter_v0/tools/lookup_ticket_status/smoke_test.py`
   + `starter_v0/helpdesk_data/mock_tickets.json`
   + `starter_v0/tools/__init__.py`
   + `starter_v0/artifacts/tools.yaml`
