@@ -29,23 +29,3 @@ def inspect_device(asset_id: str = "", check: str = "all") -> dict[str, Any]:
         }
     except Exception as exc:
         return err("inspect_device", exc)
-SCHEMA = {
-    "name": "inspect_device",
-    "description": "Kiểm tra thông tin và chẩn đoán của một thiết bị CNTT dựa trên asset_id. Có thể chọn kiểm tra cụ thể hoặc tất cả.",
-    "parameters": {
-        "type": "object",
-        "properties": {
-            "asset_id": {
-                "type": "string",
-                "description": "ID của thiết bị CNTT cần kiểm tra."
-            },
-            "check": {
-                "type": "string",
-                "enum": ["all", "cpu", "memory", "disk", "network"],
-                "default": "all",
-                "description": "Loại kiểm tra chẩn đoán cần thực hiện: 'all' (mặc định), 'cpu', 'memory', 'disk', hoặc 'network'."
-            },
-        },
-        "required": ["asset_id"],
-    }
-}

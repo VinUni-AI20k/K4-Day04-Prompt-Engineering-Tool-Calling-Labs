@@ -26,21 +26,3 @@ def check_service_status(service: str = "", environment: str = "production") -> 
         }
     except Exception as exc:
         return err("check_service_status", exc)
-SCHEMA = {
-    "name": "check_service_status",
-    "description": "Đọc trang trạng thái giả lập xác định cho một dịch vụ dùng chung và môi trường cụ thể. Công cụ này không dùng để chẩn đoán thiết bị cá nhân của nhân viên.",
-    "parameters": {
-        "type": "object",
-        "properties": {
-            "service": {
-                "type": "string",
-                "description": "Tên của dịch vụ cần kiểm tra trạng thái."
-            },
-            "environment": {
-                "type": "string",
-                "description": "Môi trường của dịch vụ cần kiểm tra (ví dụ: production, staging). Mặc định là 'production'."
-            }
-        },
-        "required": ["service"]
-    }
-}

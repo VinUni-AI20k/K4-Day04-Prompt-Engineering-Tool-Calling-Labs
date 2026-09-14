@@ -70,30 +70,3 @@ def create_ticket(
         return err("create_ticket", exc)
 
 
-SCHEMA = {
-    "name": "create_ticket",
-    "description": "Tạo một ticket hỗ trợ kỹ thuật giả lập (lưu tại local). CHÚ Ý: Không được phép đưa thông tin nhạy cảm (mật khẩu, token, MFA) vào tiêu đề. Luôn yêu cầu người dùng xác nhận trước khi đặt 'confirmed' là true.",
-    "parameters": {
-        "type": "object",
-        "properties": {
-            "summary": {
-                "type": "string",
-                "description": "Nội dung tóm tắt sự cố (tối đa 1000 ký tự). Tuyệt đối không chứa password, token, mã MFA hoặc recovery code."
-            },
-            "priority": {
-                "type": "string",
-                "enum": ["low", "medium", "high", "critical"],
-                "description": "Mức độ ưu tiên của sự cố. Mặc định là 'medium'."
-            },
-            "asset_id": {
-                "type": "string",
-                "description": "Mã định danh thiết bị bị lỗi (phải khớp với định dạng như LT-123, DT-456). Để trống nếu sự cố không liên quan đến thiết bị cụ thể."
-            },
-            "confirmed": {
-                "type": "boolean",
-                "description": "Cờ xác nhận. Chỉ truyền giá trị 'true' nếu bạn đã hỏi người dùng và họ đồng ý tạo ticket."
-            }
-        },
-        "required": ["summary", "confirmed"]
-    }
-}

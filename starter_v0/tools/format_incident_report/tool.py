@@ -29,30 +29,3 @@ def format_incident_report(
         "markdown": markdown,
         "finding_count": len(findings),
     }
-SCHEMA = {
-    "name": "format_incident_report",
-    "description": "Tổng hợp các phát hiện từ một sự cố CNTT và định dạng chúng thành báo cáo Markdown. Có thể chọn mẫu 'brief', 'technical', hoặc 'handoff'.",
-    "parameters": {
-        "type": "object",
-        "properties": {
-            "findings": {
-                "type": "array",
-                "items": {"type": "object"},
-                "description": "Danh sách các phát hiện từ sự cố CNTT, mỗi phát hiện là một đối tượng JSON với các trường như 'label', 'source', 'detail', 'summary', hoặc 'status'."
-            },
-            "template": {
-                "type": "string",
-                "enum": ["brief", "technical", "handoff"],
-                "default": "brief",
-                "description": "Mẫu báo cáo Markdown để sử dụng: 'brief' (mặc định), 'technical', hoặc 'handoff'."
-            },
-            "incident_title": {
-                "type": "string",
-                "default": "IT incident",
-                "description": "Tiêu đề của sự cố CNTT để hiển thị trong báo cáo."
-            },
-        },
-        "required": ["findings"],
-    }
-
-}
