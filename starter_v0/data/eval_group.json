@@ -1,7 +1,308 @@
 {
   "dataset_id": "day04_v3_helpdesk_group",
   "dataset_role": "group",
-  "description": "Template intentionally left empty. The team must write exactly 10 original IT helpdesk cases: 5 single-turn query cases and 5 multi-turn turns cases.",
-  "allowed_failure_types": ["wrong_tool", "wrong_arg_value", "wrong_boundary", "unnecessary_tool", "out_of_scope", "missing_info"],
-  "cases": []
+  "description": "Team-authored eval cases for IT Helpdesk Agent by vukhai248. Exactly 10 original cases (5 single-turn, 5 multi-turn) covering all 10 failure modes from LAB-GUIDE.md: ambiguous intent, missing identifier, same tool different args, format-only request, external data boundary, multiple assets, correction, cancellation, stale confirmation, and context switch.",
+  "allowed_failure_types": [
+    "wrong_tool",
+    "wrong_arg_value",
+    "wrong_boundary",
+    "unnecessary_tool",
+    "out_of_scope",
+    "missing_info"
+  ],
+  "cases": [
+    {
+      "id": "G01_missing_asset_id_clarify",
+      "phase": "B",
+      "suite": "group",
+      "query": "Màn hình laptop của tôi bị chớp nháy liên tục khi cắm sạc, kiểm tra giúp tôi với.",
+      "failure_type": "missing_info",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "clarify",
+            "args": {
+              "response_type": "text"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "clarify_missing_asset",
+        "difficulty": "easy",
+        "what_it_tests": "identifier bị thiếu: Khi người dùng báo lỗi phần cứng laptop nhưng không cung cấp Asset ID, agent phải gọi clarify để hỏi mã máy, không tự đoán ID."
+      }
+    },
+    {
+      "id": "G02_dual_service_same_tool_diff_args",
+      "phase": "B",
+      "suite": "group",
+      "query": "Kiểm tra đồng thời trạng thái hoạt động của dịch vụ VPN và dịch vụ SSO trên production giúp mình.",
+      "failure_type": "wrong_tool",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "check_service_status",
+            "args": {
+              "service": "vpn",
+              "environment": "production"
+            }
+          },
+          {
+            "name": "check_service_status",
+            "args": {
+              "service": "sso",
+              "environment": "production"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "same_tool_different_args",
+        "difficulty": "medium",
+        "what_it_tests": "hai tool cùng loại với args khác nhau: Gọi đồng thời 2 lần check_service_status cho 2 dịch vụ dùng chung khác nhau (vpn và sso)."
+      }
+    },
+    {
+      "id": "G03_ambiguous_intent_account",
+      "phase": "B",
+      "suite": "group",
+      "query": "Tài khoản của tôi bị lỗi không thể đăng nhập được vào hệ thống, hỗ trợ tôi với.",
+      "failure_type": "missing_info",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "clarify",
+            "args": {
+              "response_type": "choice"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "clarify_ambiguous_intent",
+        "difficulty": "medium",
+        "what_it_tests": "ambiguous intent: Ý định mơ hồ, người dùng không nói rõ tài khoản SSO, Email hay VPN, agent phải gọi clarify để làm rõ loại dịch vụ trước."
+      }
+    },
+    {
+      "id": "G04_format_existing_findings_handoff",
+      "phase": "B",
+      "suite": "group",
+      "query": "Lập báo cáo bàn giao ca trực với mẫu handoff và tiêu đề 'Sự cố SSO sáng 14/09' từ các thông tin đã ghi nhận: SSO prod bị lỗi ERR_502 lúc 08:30; đã chuyển escalation sang team Identity.",
+      "failure_type": "wrong_arg_value",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "format_incident_report",
+            "args": {
+              "template": "handoff",
+              "incident_title": "Sự cố SSO sáng 14/09"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "format_findings_handoff",
+        "difficulty": "medium",
+        "what_it_tests": "format-only request: Khi người dùng đã đưa sẵn findings và yêu cầu lập báo cáo handoff, agent chỉ gọi format_incident_report, không đi kiểm tra lại dịch vụ."
+      }
+    },
+    {
+      "id": "G05_search_device_info_specs_safe",
+      "phase": "B",
+      "suite": "group",
+      "query": "Tìm thông số kỹ thuật bộ nhớ RAM và CPU hỗ trợ tối đa của dòng laptop Lenovo ThinkPad T14 Gen 4 trên web.",
+      "failure_type": "wrong_arg_value",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "search_device_info",
+            "args": {
+              "manufacturer": "Lenovo",
+              "model": "ThinkPad T14 Gen 4",
+              "query_type": "specs"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "external_device_specs_safe",
+        "difficulty": "medium",
+        "what_it_tests": "external/internal data boundary: Tra cứu specs laptop công khai qua search_device_info chỉ truyền hãng và model công khai, không lộ thông tin nội bộ."
+      }
+    },
+    {
+      "id": "G06_multiturn_multiple_assets",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Kiểm tra tình trạng mạng trên máy laptop LT-204 giúp mình."
+        },
+        {
+          "role": "user",
+          "content": "Tiện thể kiểm tra luôn chẩn đoán mạng trên chiếc LT-240 ở phòng họp bên cạnh."
+        },
+        {
+          "role": "user",
+          "content": "Chỉ kiểm tra network trên đúng máy LT-240 đó."
+        }
+      ],
+      "failure_type": "wrong_arg_value",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "inspect_device",
+            "args": {
+              "asset_id": "LT-240",
+              "check": "network"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "multiturn_multiple_assets",
+        "difficulty": "hard",
+        "what_it_tests": "multiple assets: Xử lý nhiều thiết bị qua các lượt hội thoại, nhận diện đúng asset ID mới nhất LT-240 kèm check network."
+      }
+    },
+    {
+      "id": "G07_multiturn_environment_correction",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Kiểm tra tình trạng dịch vụ SSO trên môi trường production."
+        },
+        {
+          "role": "user",
+          "content": "À mình nhầm, dev đang test bên staging, kiểm tra staging giúp mình."
+        },
+        {
+          "role": "user",
+          "content": "Xác nhận lại trạng thái SSO staging nhé."
+        }
+      ],
+      "failure_type": "wrong_arg_value",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "check_service_status",
+            "args": {
+              "service": "sso",
+              "environment": "staging"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "multiturn_environment_override",
+        "difficulty": "medium",
+        "what_it_tests": "correction ở turn sau: Lượt sau sửa môi trường từ production sang staging, agent phải ưu tiên môi trường mới nhất."
+      }
+    },
+    {
+      "id": "G08_multiturn_cancellation_flow",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Tạo giúp mình một ticket hỗ trợ khẩn cấp lỗi máy in PR-012 không kết nối được."
+        },
+        {
+          "role": "user",
+          "content": "Khoan đã, IT vừa cắm lại dây mạng và máy in hoạt động lại rồi."
+        },
+        {
+          "role": "user",
+          "content": "Huỷ yêu cầu, không cần tạo ticket nữa đâu nhé."
+        }
+      ],
+      "failure_type": "wrong_boundary",
+      "expect": {
+        "no_tool": true,
+        "behavior": "refuse"
+      },
+      "metadata": {
+        "skill": "multiturn_cancellation",
+        "difficulty": "hard",
+        "what_it_tests": "cancellation: Khi người dùng huỷ bỏ yêu cầu tạo ticket ở lượt sau, agent không được gọi create_ticket mà chỉ xác nhận đã huỷ."
+      }
+    },
+    {
+      "id": "G09_multiturn_stale_confirmation",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Tạo ticket lỗi VPN LT-204 với mức ưu tiên low."
+        },
+        {
+          "role": "user",
+          "content": "Đổi mức ưu tiên thành urgent nhé."
+        },
+        {
+          "role": "user",
+          "content": "Hãy cho mình xem lại thông tin và hỏi xác nhận trước khi tạo."
+        }
+      ],
+      "failure_type": "wrong_boundary",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "clarify",
+            "args": {
+              "response_type": "yes_no"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "multiturn_stale_confirmation",
+        "difficulty": "hard",
+        "what_it_tests": "stale confirmation: Sau khi thay đổi priority thành urgent, confirmation cũ mất hiệu lực, agent bắt buộc phải dừng ở bước hỏi xác nhận lại (clarify), không được tự ý tạo ticket."
+      }
+    },
+    {
+      "id": "G10_multiturn_switch_employee_to_asset",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Tra cứu thông tin tài khoản của nhân viên EMP-1005."
+        },
+        {
+          "role": "user",
+          "content": "Thấy bạn ấy được cấp máy LT-318."
+        },
+        {
+          "role": "user",
+          "content": "Kiểm tra riêng kết nối VPN trên chiếc laptop LT-318 đó giúp mình."
+        }
+      ],
+      "failure_type": "wrong_tool",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "inspect_device",
+            "args": {
+              "asset_id": "LT-318",
+              "check": "vpn"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "multiturn_context_switch_tool",
+        "difficulty": "medium",
+        "what_it_tests": "context carry-over / tool switch: Từ kết quả tra cứu nhân viên chuyển sang kiểm tra VPN của thiết bị được gán, chuyển tool chính xác sang inspect_device."
+      }
+    }
+  ]
 }
