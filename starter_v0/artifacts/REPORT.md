@@ -2,9 +2,14 @@
 
 ## Team
 
-- Team:
+- Team: 5AESIUNHAN
 - Members:
-- Provider/model:
+> 1. Phạm Quang Huy - 2A202602900
+> 2. Đỗ Thanh Tùng - 2A202602845
+> 3. Trần Võ Hoàng Nguyên - 2A202602551
+> 4. Ninh Quang Minh - 2A202602432
+> 5. Nguyễn Như Tài - 2A202602976
+- Provider/model: openai / gpt-4o-mini
 
 # PHẦN A — Giới thiệu agent
 
