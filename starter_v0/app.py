@@ -35,6 +35,19 @@ def json_block(value: Any) -> str:
     return json.dumps(value, ensure_ascii=False, indent=2, default=str)
 
 
+def display_reply(text: str | None) -> str:
+    if not text:
+        return ""
+    stripped = text.strip()
+    try:
+        payload = json.loads(stripped)
+    except json.JSONDecodeError:
+        return text
+    if isinstance(payload, dict) and isinstance(payload.get("reply"), str):
+        return payload["reply"]
+    return text
+
+
 def provider_key_status(provider_name: str) -> tuple[str, bool]:
     key_name = PROVIDER_KEYS.get(provider_name, "")
     if not key_name:
@@ -204,7 +217,8 @@ def render_chat_history(history: list[dict[str, str]]) -> None:
     for message in history:
         role = "assistant" if message["role"] == "assistant" else "user"
         with st.chat_message(role):
-            st.markdown(message["content"])
+            content = display_reply(message["content"]) if role == "assistant" else message["content"]
+            st.markdown(content)
 
 
 def run_turn(
