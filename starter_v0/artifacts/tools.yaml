@@ -43,7 +43,7 @@ tools:
       properties:
         asset_id: {type: string, description: "Mã tài sản"}
         check: {type: string, enum: [all, network, vpn, security, hardware, software], default: "all", description: "Nhóm kiểm tra"}
-      required: [asset_id]
+      required: [asset_id, check]
 
   - name: lookup_user
     description: "Tra cứu người dùng trong danh bạ hỗ trợ."
