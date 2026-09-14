@@ -170,7 +170,7 @@ Sao chép mẫu dưới đây cho từng thành viên:
   - Tinh chỉnh ranh giới giữa kiểm tra hạ tầng dùng chung (`check_service_status`) và thiết bị cá nhân (`inspect_device`), tránh gọi thừa tool khi thiếu asset ID (`H10`).
   - Cập nhật nhật ký phiên bản `version_log.csv` cho version v3, ghi nhận version hash SHA-256 tương ứng và hoàn thiện báo cáo `REPORT.md`.
 - **File hoặc artifact liên quan:** `starter_v0/artifacts/system_prompt.md`, `starter_v0/artifacts/version_log.csv`, `starter_v0/artifacts/REPORT.md`.
-- **Commit hash hoặc pull request:** [điền sau khi push nhánh `contrib/vietnh04` và tạo PR]
+- **Commit hash hoặc pull request:** `56efff1` (nhánh `contrib/vietnh04`) / [PR #4](https://github.com/phamquan123158/K4-Day04-2A202602890/pull/new/contrib/vietnh04)
 - **Một quyết định kỹ thuật tôi đã đưa ra và lý do:** Tôi quyết định tách biệt rõ ràng giữa hướng dẫn định dạng JSON text và cơ chế function calling. Trước đây model thường bị nhầm lẫn giữa việc "trả lời định dạng JSON" và "gọi tool", dẫn đến việc trả text JSON mô phỏng hành động thay vì gọi tool `clarify` thật. Bằng cách nhấn mạnh "ALWAYS execute actual tool calls via function calling, JSON format only applies to final text response", model đã phát tool call chính xác 100%.
 - **Khó khăn tôi gặp và cách tôi xử lý:**
   - Rate limit của Gemini Free Tier (5 requests/phút) gây lỗi 429 khi chạy đánh giá 30 case. Tôi đã phối hợp cấu hình cơ chế tự động thử lại (retry with backoff) trong `gemini_provider.py` để quá trình đánh giá diễn ra an toàn và không bị gián đoạn.
