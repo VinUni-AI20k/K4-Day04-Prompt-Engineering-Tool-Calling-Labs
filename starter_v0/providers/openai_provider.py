@@ -15,11 +15,14 @@ class OpenAIProvider:
         *,
         api_key_env: str = "OPENAI_API_KEY",
         base_url: str | None = None,
-        default_model: str = "gpt-4o-mini",
+        default_model: str | None = None,
     ) -> None:
         self.api_key_env = api_key_env
-        self.base_url = base_url
-        self.default_model = default_model
+        self.base_url = base_url or os.getenv("OPENAI_BASE_URL") or os.getenv("OPENAI_API_BASE")
+        if default_model is not None:
+            self.default_model = default_model
+        else:
+            self.default_model = os.getenv("OPENAI_MODEL") or os.getenv("LLM_MODEL") or "gpt-4o-mini"
 
     def complete(
         self,
@@ -37,7 +40,11 @@ class OpenAIProvider:
 
         api_key = os.getenv(self.api_key_env)
         if not api_key:
-            raise RuntimeError(f"Missing API key env var: {self.api_key_env}")
+            base = (self.base_url or "").lower()
+            if "localhost" in base or "127.0.0.1" in base:
+                api_key = "dummy-key"
+            else:
+                raise RuntimeError(f"Missing API key env var: {self.api_key_env}")
 
         client = OpenAI(api_key=api_key, base_url=self.base_url)
         kwargs: dict[str, Any] = {

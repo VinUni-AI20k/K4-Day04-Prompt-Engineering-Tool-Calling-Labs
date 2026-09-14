@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import time
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -264,7 +265,7 @@ def main() -> None:
     parser.add_argument("--phase", choices=["B"], default="B")
     parser.add_argument("--suite", choices=["base", "group", "cross", "extension", "adversarial"], default="base", help="Run label saved to JSON; does not filter --eval-cases.")
     parser.add_argument("--version", required=True)
-    parser.add_argument("--provider", choices=["openai", "openrouter", "anthropic", "gemini"], required=True)
+    parser.add_argument("--provider", choices=["openai", "openai_compatible", "openai-compatible", "openrouter", "anthropic", "gemini"], required=True)
     parser.add_argument("--model", default=None)
     parser.add_argument("--system-prompt", type=Path, default=ARTIFACTS_DIR / "system_prompt.md")
     parser.add_argument("--tools", type=Path, default=ARTIFACTS_DIR / "tools.yaml")
@@ -287,6 +288,7 @@ def main() -> None:
 
     results: list[dict[str, Any]] = []
     for case in cases:
+        time.sleep(1.2)
         print(f"Running {case['id']}...", flush=True)
         agent = HelpdeskAgent(provider, system_prompt=system_prompt, tools=openai_tools, model=args.model)
         try:

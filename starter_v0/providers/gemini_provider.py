@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import time
 from typing import Any
 
 from providers.base import ModelResponse, ToolCall
@@ -72,8 +73,7 @@ class GeminiProvider:
     def __init__(
         self,
         *,
-        api_key_env: str = "GEMINI_API_KEY",
-        default_model: str = "gemini-3.5-flash",
+        default_model: str = "gemini-2.5-flash",
     ) -> None:
         self.api_key_env = api_key_env
         self.default_model = default_model
@@ -105,12 +105,52 @@ class GeminiProvider:
         if declarations:
             config_kwargs["tools"] = [types.Tool(function_declarations=declarations)]
 
+        MODELS_POOL = [
+            model or self.default_model,
+            "gemini-3.1-flash-lite",
+            "gemini-3.5-flash-lite",
+            "gemini-3-flash-preview",
+            "gemini-3.6-flash",
+            "gemini-3.7-flash",
+        ]
+        # remove duplicates while preserving order
+        candidate_models = list(dict.fromkeys(MODELS_POOL))
+
         client = genai.Client(api_key=api_key)
-        resp = client.models.generate_content(
-            model=model or self.default_model,
-            contents=contents,
-            config=types.GenerateContentConfig(**config_kwargs),
-        )
+        resp = None
+        last_error = None
+
+        for cur_model in candidate_models:
+            success = False
+            for attempt in range(5):
+                try:
+                    resp = client.models.generate_content(
+                        model=cur_model,
+                        contents=contents,
+                        config=types.GenerateContentConfig(**config_kwargs),
+                    )
+                    success = True
+                    break
+                except Exception as exc:
+                    last_error = exc
+                    err_msg = str(exc)
+                    if "429" in err_msg or "RESOURCE_EXHAUSTED" in err_msg:
+                        if "limit: 20" in err_msg or "limit: 0" in err_msg or "limit:" in err_msg:
+                            # Quota per model reached, immediately break to next model in pool!
+                            break
+                        delay = 2.5 * (attempt + 1)
+                        time.sleep(delay)
+                        continue
+                    elif any(code in err_msg for code in ["503", "UNAVAILABLE", "500", "504"]):
+                        delay = 2.0 * (attempt + 1)
+                        time.sleep(delay)
+                        continue
+                    raise
+            if success:
+                break
+        else:
+            if last_error:
+                raise last_error
 
         text_parts: list[str] = []
         calls: list[ToolCall] = []
