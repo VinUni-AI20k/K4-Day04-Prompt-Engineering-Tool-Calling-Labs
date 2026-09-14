@@ -1,7 +1,101 @@
 {
   "dataset_id": "day04_v3_helpdesk_group",
   "dataset_role": "group",
-  "description": "Template intentionally left empty. The team must write exactly 10 original IT helpdesk cases: 5 single-turn query cases and 5 multi-turn turns cases.",
+  "description": "Team-authored IT helpdesk eval set with exactly 10 cases: 5 single-turn and 5 multi-turn cases that isolate realistic routing, argument, context, and boundary decisions.",
   "allowed_failure_types": ["wrong_tool", "wrong_arg_value", "wrong_boundary", "unnecessary_tool", "out_of_scope", "missing_info"],
-  "cases": []
+  "cases": [
+    {
+      "id": "G01_missing_asset_clarify", "phase": "B", "suite": "group",
+      "query": "Laptop của bạn bên Finance cứ rớt VPN sau khi đổi mật khẩu, kiểm tra đúng máy đó giúp mình.",
+      "failure_type": "missing_info",
+      "expect": {"tool_calls": [{"name": "clarify", "args": {"response_type": "text"}}]},
+      "metadata": {"skill": "clarify_missing_asset", "difficulty": "medium", "what_it_tests": "Có ngữ cảnh thiết bị nhưng thiếu asset ID; không được đoán máy từ phòng ban hoặc triệu chứng VPN."}
+    },
+    {
+      "id": "G02_policy_status_ambiguity", "phase": "B", "suite": "group",
+      "query": "Email production có ổn theo quy định vận hành không, hay đang vi phạm policy?",
+      "failure_type": "missing_info",
+      "expect": {"tool_calls": [{"name": "clarify", "args": {"response_type": "choice"}}]},
+      "metadata": {"skill": "clarify_policy_vs_status", "difficulty": "hard", "what_it_tests": "Câu hỏi trộn trạng thái vận hành với policy nhưng không yêu cầu rõ nguồn nào; phải hỏi lại thay vì tự chọn status hoặc policy."}
+    },
+    {
+      "id": "G03_out_of_scope_no_tool", "phase": "B", "suite": "group",
+      "query": "Viết giúp mình kế hoạch marketing ra mắt sản phẩm mới và dự báo doanh thu quý tới.",
+      "failure_type": "out_of_scope",
+      "expect": {"no_tool": true, "behavior": "refuse"},
+      "metadata": {"skill": "out_of_scope_business", "difficulty": "medium", "what_it_tests": "Yêu cầu công việc kinh doanh ngoài IT helpdesk phải từ chối ngắn gọn và không gọi tool."}
+    },
+    {
+      "id": "G04_unknown_environment_clarify", "phase": "B", "suite": "group",
+      "query": "Kiểm tra SSO trên môi trường UAT/canary của QA xem có đang lỗi không.",
+      "failure_type": "missing_info",
+      "expect": {"tool_calls": [{"name": "clarify", "args": {"response_type": "choice", "options": ["production", "staging"]}}]},
+      "metadata": {"skill": "clarify_unknown_environment", "difficulty": "hard", "what_it_tests": "Tên môi trường không thuộc enum production/staging không được tự map sang staging."}
+    },
+    {
+      "id": "G05_format_only_no_refetch", "phase": "B", "suite": "group",
+      "query": "Đã có findings: LT-318 VPN certificate expires soon; VPN production degraded. Chỉ chuyển thành handoff report tên 'VPN certificate LT-318', không kiểm tra lại.",
+      "failure_type": "unnecessary_tool",
+      "expect": {"tool_calls": [{"name": "format_incident_report", "args": {"template": "handoff", "incident_title": "VPN certificate LT-318"}}]},
+      "metadata": {"skill": "format_without_refetch", "difficulty": "hard", "what_it_tests": "Findings đã có và người dùng cấm kiểm tra lại; chỉ format report, không inspect/status/search thêm."}
+    },
+    {
+      "id": "G06_multiturn_asset_after_clarify", "phase": "B", "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Máy của mình không vào được Wi-Fi công ty, kiểm tra giúp."},
+        {"role": "user", "content": "Asset ID là LT-240."},
+        {"role": "user", "content": "Đúng máy đó, chỉ kiểm tra kết nối network thôi."}
+      ],
+      "failure_type": "missing_info",
+      "expect": {"tool_calls": [{"name": "inspect_device", "args": {"asset_id": "LT-240", "check": "network"}}]},
+      "metadata": {"skill": "multiturn_fill_asset", "difficulty": "hard", "what_it_tests": "Carry asset ID được bổ sung sau đó dùng check mới nhất; không quay lại hỏi hoặc dùng check=all."}
+    },
+    {
+      "id": "G07_multiturn_correction_service_environment", "phase": "B", "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Kiểm tra VPN production giúp mình."},
+        {"role": "user", "content": "À không, môi trường staging."},
+        {"role": "user", "content": "Và dịch vụ cần xem là email, không phải VPN."}
+      ],
+      "failure_type": "wrong_arg_value",
+      "expect": {"tool_calls": [{"name": "check_service_status", "args": {"service": "email", "environment": "staging"}}]},
+      "metadata": {"skill": "multiturn_correct_service_environment", "difficulty": "hard", "what_it_tests": "Turn sau sửa cả service và environment; giá trị mới phải thắng toàn bộ giá trị cũ."}
+    },
+    {
+      "id": "G08_multiturn_cancel_ticket", "phase": "B", "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Tạo ticket critical cho lỗi SSO production."},
+        {"role": "user", "content": "Khoan, hủy yêu cầu tạo ticket."},
+        {"role": "user", "content": "Chỉ xác nhận là bạn đã hủy, không làm gì thêm."}
+      ],
+      "failure_type": "unnecessary_tool",
+      "expect": {"no_tool": true, "behavior": "answer_without_tool"},
+      "metadata": {"skill": "multiturn_cancel_action", "difficulty": "hard", "what_it_tests": "Cancellation ở turn mới nhất phải thắng yêu cầu action cũ; không clarify và không create_ticket."}
+    },
+    {
+      "id": "G09_multiturn_chain_user_then_device", "phase": "B", "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Tra cứu tài khoản EMP-1003 trước."},
+        {"role": "user", "content": "Thiết bị cần kiểm tra là LT-204."},
+        {"role": "user", "content": "Giờ kiểm tra security của thiết bị đó và vẫn giữ thông tin nhân viên trong ngữ cảnh."}
+      ],
+      "failure_type": "wrong_tool",
+      "expect": {"tool_calls": [
+        {"name": "lookup_user", "args": {"employee_id": "EMP-1003"}},
+        {"name": "inspect_device", "args": {"asset_id": "LT-204", "check": "security"}}
+      ]},
+      "metadata": {"skill": "multiturn_chain_two_tools", "difficulty": "hard", "what_it_tests": "Xâu chuỗi directory context và device diagnostic; dùng hai tool riêng, không biến EMP-* thành asset ID."}
+    },
+    {
+      "id": "G10_multiturn_switch_to_kb", "phase": "B", "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Kiểm tra trạng thái printing production."},
+        {"role": "user", "content": "Không cần status nữa, mình cần bài hướng dẫn xử lý print queue."},
+        {"role": "user", "content": "Tìm hướng dẫn cho Windows, đừng kiểm tra service."}
+      ],
+      "failure_type": "wrong_tool",
+      "expect": {"tool_calls": [{"name": "search_kb", "args": {"category": "printing"}}]},
+      "metadata": {"skill": "multiturn_switch_tool", "difficulty": "hard", "what_it_tests": "Intent mới thay thế status bằng KB search; không gọi stale check_service_status."}
+    }
+  ]
 }
