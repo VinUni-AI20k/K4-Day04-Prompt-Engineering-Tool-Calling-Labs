@@ -18,7 +18,7 @@ tools:
       required: [question]
 
   - name: search_kb
-    description: "Tìm hướng dẫn hỗ trợ kỹ thuật."
+    description: "Find technical instructions and troubleshooting articles in the local KB, not live service health or asset diagnostics."
     parameters:
       type: object
       properties:
@@ -28,7 +28,7 @@ tools:
       required: [query]
 
   - name: check_service_status
-    description: "Kiểm tra trạng thái một dịch vụ."
+    description: "Read shared service health, not diagnostics of an individual device or troubleshooting instructions."
     parameters:
       type: object
       properties:
@@ -37,7 +37,7 @@ tools:
       required: [service]
 
   - name: inspect_device
-    description: "Kiểm tra thông tin và chẩn đoán thiết bị."
+    description: "Read inventory and diagnostics for a specific asset, not employee account data, assigned-device lists or shared service health."
     parameters:
       type: object
       properties:
@@ -46,7 +46,7 @@ tools:
       required: [asset_id]
 
   - name: lookup_user
-    description: "Tra cứu người dùng trong danh bạ hỗ trợ."
+    description: "Look up an employee account and assigned-device list by employee ID. One call returns both. An assignment-list request does not require inspect_device."
     parameters:
       type: object
       properties:
