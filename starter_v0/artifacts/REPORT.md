@@ -3,7 +3,7 @@
 ## Team
 
 - Team: Điền tên nhóm.
-- Members: Bùi Hoàng Anh — MSSV 2A202602697; bổ sung GitHub username và các thành viên khác nếu có.
+- Members: Bùi Hoàng Anh — MSSV 2A202602697.
 - Provider/model: Gemini `gemini-3.1-flash-lite`.
 
 # PHẦN A — Giới thiệu agent
