@@ -19,7 +19,7 @@ Agent là IT Helpdesk Assistant sử dụng dữ liệu giả lập của Norths
 
 **Link dùng thử:**
 
-> URL: `http://localhost:8501` — chỉ truy cập được khi chạy Streamlit trên máy local.
+> URL: `https://vinunicodelabday04nguyenvuanh2a202602502-fd8lxdfuxuikhy7sfqnmd.streamlit.app/` 
 
 ## A2. Tool agent có
 
