@@ -5,6 +5,7 @@ from typing import Any
 
 import yaml
 
+from .approved_software_catalog.tool import approved_software_catalog
 from .clarify.tool import ask_user
 from .check_service_status.tool import check_service_status
 from .create_ticket.tool import create_ticket
@@ -22,6 +23,7 @@ from .search_device_info.tool import search_device_info
 #   artifacts/tools.yaml  ->  this dict  ->  data/eval_base.json + data/eval_helpdesk_extension.json
 # Otherwise the eval raises "not declared in tools.yaml" or scores every call as a name mismatch.
 TOOL_FUNCTIONS = {
+    "approved_software_catalog": approved_software_catalog,
     "clarify": ask_user,
     "search_kb": search_kb,
     "search_device_info": search_device_info,

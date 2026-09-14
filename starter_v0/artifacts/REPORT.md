@@ -21,7 +21,7 @@
 | Tool | Chức năng | Core / optional / team-built |
 |---|---|---|
 | clarify | Hỏi bổ sung hoặc xác nhận | core |
-|  |  |  |
+| approved_software_catalog | Tra trạng thái phê duyệt và compatibility của phần mềm trong catalog local | team-built bonus |
 
 ## A3. Câu hỏi mẫu
 
@@ -61,7 +61,7 @@ Liệt kê đúng 10 case tự viết: 5 single-turn và 5 multi-turn.
 
 | Case ID | What it tests | Expected behavior | Result |
 |---|---|---|---|
-|  |  |  |  |
+| G10_approved_vpn_catalog | Routing đến bonus tool và giữ lookup read-only/local | `approved_software_catalog(category=vpn, operating_system=macos, approval_status=approved)` | Chờ live group eval; deterministic smoke test PASS |
 
 ## B4. Live chat evidence
 
@@ -89,7 +89,7 @@ nhóm tự xây.
 |---|---|---|---|
 | Optional built-in |  |  |  |
 | External search + privacy boundary |  |  |  |
-| Bonus: tool mới do nhóm tự xây |  |  |  |
+| Bonus: `approved_software_catalog` | `evidence/bonus/approved_software_catalog_smoke.json`, `evidence/bonus/role_e_security_smoke.json` | Tìm đúng `SW-VPN-001`, lọc OS và trả trạng thái approval ổn định | Read-only; từ chối asset/employee ID và credential; kết quả không cho phép cài đặt |
 
 ## B6. Safety review
 
