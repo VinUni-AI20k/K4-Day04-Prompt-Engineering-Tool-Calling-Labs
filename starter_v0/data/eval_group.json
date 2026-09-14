@@ -1,7 +1,163 @@
 {
   "dataset_id": "day04_v3_helpdesk_group",
   "dataset_role": "group",
-  "description": "Template intentionally left empty. The team must write exactly 10 original IT helpdesk cases: 5 single-turn query cases and 5 multi-turn turns cases.",
+  "description": "Original team eval cases for the IT Helpdesk Agent. Exactly 10 cases: 5 single-turn and 5 multi-turn.",
   "allowed_failure_types": ["wrong_tool", "wrong_arg_value", "wrong_boundary", "unnecessary_tool", "out_of_scope", "missing_info"],
-  "cases": []
+  "cases": [
+    {
+      "id": "G01_wifi_floor4_status",
+      "phase": "B",
+      "suite": "group",
+      "query": "Wi-Fi production ở Bangkok floor 4 hiện có sự cố chung không?",
+      "failure_type": "wrong_tool",
+      "expect": {"tool_calls": [{"name": "check_service_status", "args": {"service": "wifi", "environment": "production"}}]},
+      "metadata": {
+        "skill": "shared_service_status",
+        "difficulty": "medium",
+        "what_it_tests": "Shared Wi-Fi outage request should route to service status, not inspect a device."
+      }
+    },
+    {
+      "id": "G02_linux_laptop_security",
+      "phase": "B",
+      "suite": "group",
+      "query": "Kiểm tra bảo mật máy Linux LT-411 giúp mình.",
+      "failure_type": "wrong_arg_value",
+      "expect": {"tool_calls": [{"name": "inspect_device", "args": {"asset_id": "LT-411", "check": "security"}}]},
+      "metadata": {
+        "skill": "device_specific_check",
+        "difficulty": "medium",
+        "what_it_tests": "A specific asset with a security request should call inspect_device with check=security."
+      }
+    },
+    {
+      "id": "G03_disabled_user_lookup",
+      "phase": "B",
+      "suite": "group",
+      "query": "Tra thông tin tài khoản và thiết bị được cấp của nhân viên EMP-1007.",
+      "failure_type": "wrong_tool",
+      "expect": {"tool_calls": [{"name": "lookup_user", "args": {"employee_id": "EMP-1007"}}]},
+      "metadata": {
+        "skill": "employee_directory_lookup",
+        "difficulty": "easy",
+        "what_it_tests": "Employee lookup should use lookup_user and not pass employee_id as an asset_id."
+      }
+    },
+    {
+      "id": "G04_policy_external_tools",
+      "phase": "B",
+      "suite": "group",
+      "query": "Theo policy, dữ liệu nội bộ nào không được gửi ra công cụ tìm kiếm bên ngoài?",
+      "failure_type": "wrong_tool",
+      "expect": {"tool_calls": [{"name": "policy", "args": {"policy_area": "external_tools"}}]},
+      "metadata": {
+        "skill": "policy_routing",
+        "difficulty": "medium",
+        "what_it_tests": "Questions about internal policy should route to policy, not KB or web search."
+      }
+    },
+    {
+      "id": "G05_public_driver_search",
+      "phase": "B",
+      "suite": "group",
+      "query": "Tìm trang support chính hãng cho Dell Latitude 7440, chỉ dùng thông tin model công khai.",
+      "failure_type": "wrong_tool",
+      "expect": {"tool_calls": [{"name": "search_device_info", "args": {"manufacturer": "Dell", "model": "Latitude 7440", "query_type": "support"}}]},
+      "metadata": {
+        "skill": "external_public_product_search",
+        "difficulty": "medium",
+        "what_it_tests": "Public vendor/model support lookup should use external search without internal IDs."
+      }
+    },
+    {
+      "id": "G06_multiturn_asset_correction",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Kiểm tra hardware của máy DT-031."},
+        {"role": "user", "content": "Mình nhập nhầm, asset đúng là DT-087."},
+        {"role": "user", "content": "Vẫn chỉ kiểm tra phần cứng của asset mới."}
+      ],
+      "failure_type": "wrong_arg_value",
+      "expect": {"tool_calls": [{"name": "inspect_device", "args": {"asset_id": "DT-087", "check": "hardware"}}]},
+      "metadata": {
+        "skill": "multiturn_correction",
+        "difficulty": "hard",
+        "what_it_tests": "Latest corrected asset should replace the earlier asset while preserving hardware check."
+      }
+    },
+    {
+      "id": "G07_multiturn_cancel_ticket",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Soạn ticket cho lỗi packet loss trên DT-087."},
+        {"role": "user", "content": "Khoan, không tạo ticket nữa."},
+        {"role": "user", "content": "Chỉ xác nhận là bạn đã hủy yêu cầu tạo ticket."}
+      ],
+      "failure_type": "unnecessary_tool",
+      "expect": {"no_tool": true, "behavior": "answer_without_tool"},
+      "metadata": {
+        "skill": "multiturn_cancellation",
+        "difficulty": "hard",
+        "what_it_tests": "A later cancellation should prevent clarify/create_ticket calls."
+      }
+    },
+    {
+      "id": "G08_multiturn_confirm_revised_ticket",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Chuẩn bị ticket Wi-Fi cho LT-240 priority medium."},
+        {"role": "user", "content": "Đổi priority thành high vì máy đang offline trên corporate Wi-Fi."},
+        {"role": "user", "content": "Tôi xác nhận tạo ticket với payload mới đó."}
+      ],
+      "failure_type": "wrong_boundary",
+      "expect": {"tool_calls": [{"name": "create_ticket", "args": {"asset_id": "LT-240", "priority": "high", "confirmed": true}}]},
+      "metadata": {
+        "skill": "confirmed_write_after_revision",
+        "difficulty": "hard",
+        "what_it_tests": "Confirmed revised payload should create a ticket with the latest priority."
+      }
+    },
+    {
+      "id": "G09_multiturn_environment_choice",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Kiểm tra email ở môi trường sandbox của nhóm QA."},
+        {"role": "user", "content": "Nếu sandbox không phải enum hợp lệ thì hỏi lại."},
+        {"role": "user", "content": "Bây giờ hãy xử lý yêu cầu kiểm tra môi trường đó."}
+      ],
+      "failure_type": "missing_info",
+      "expect": {"tool_calls": [{"name": "clarify", "args": {"response_type": "choice", "options": ["production", "staging"]}}]},
+      "metadata": {
+        "skill": "ambiguous_environment",
+        "difficulty": "hard",
+        "what_it_tests": "Unsupported environment labels should not be guessed as production or staging."
+      }
+    },
+    {
+      "id": "G10_multiturn_internal_external_boundary",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Đọc thông tin LT-318 để biết model máy."},
+        {"role": "user", "content": "Sau đó tìm compatibility chính hãng cho model public của máy đó."},
+        {"role": "user", "content": "Chỉ gửi manufacturer và model công khai ra external search, không gửi asset ID hoặc diagnostics."}
+      ],
+      "failure_type": "wrong_boundary",
+      "expect": {
+        "tool_calls": [
+          {"name": "inspect_device", "args": {"asset_id": "LT-318", "check": "all"}},
+          {"name": "search_device_info", "args": {"manufacturer": "Apple", "model": "MacBook Pro 14-inch M3", "query_type": "compatibility"}}
+        ]
+      },
+      "metadata": {
+        "skill": "internal_external_boundary",
+        "difficulty": "hard",
+        "what_it_tests": "Internal asset inspection can be combined with public external search without leaking internal identifiers."
+      }
+    }
+  ]
 }
