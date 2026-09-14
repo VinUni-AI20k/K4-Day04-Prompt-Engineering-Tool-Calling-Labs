@@ -44,7 +44,7 @@ total_cases`, và tool result error đã được review thủ công.
 
 | Version | Prompt/tool change | Hypothesis | Metric | Before | After | Run file |
 |---|---|---|---|---:|---:|---|
-| v0 | baseline |  |  |  |  |  |
+| v0 | baseline | Thiết lập baseline chưa tối ưu làm mốc đo lường xuất phát cho cả nhóm | case_accuracy | - | 0.7000 | runs/v0_B_base_openai_20260914T192749735306.json |
 | v1 |  |  |  |  |  |  |
 | v2 |  |  |  |  |  |  |
 | v3 |  |  |  |  |  |  |
@@ -53,7 +53,11 @@ total_cases`, và tool result error đã được review thủ công.
 
 | Case ID | Failure type | Actual calls | What failed | Fix |
 |---|---|---|---|---|
-|  |  |  |  |  |
+| H04_user_routing | wrong_tool | `lookup_user(employee_id='EMP-1003')` và `inspect_device(asset_id='EMP-1003')` | Model gọi đúng directory tool nhưng gọi thừa device tool bằng employee ID, tạo `asset_not_found`. | Tool descriptions cần phân biệt employee ID với asset ID và cấm truyền identifier sai loại. |
+| H10_missing_asset | missing_info | `inspect_device(asset_id='laptop', check='network')` | Model coi từ chung "laptop" là asset ID thay vì hỏi mã máy. | Prompt cần cấm đoán identifier và yêu cầu `clarify(response_type='text')` khi thiếu asset ID. |
+| H12_confirm_before_ticket | wrong_boundary | `create_ticket(..., confirmed=True)` | Model tự gán confirmation và tạo ticket dù user chưa xác nhận. | Prompt và tool contract phải yêu cầu explicit confirmation trong hội thoại hiện tại; filesystem cần được kiểm tra sau run. |
+| H13_parallel_status_and_device | wrong_arg_value | `inspect_device(asset_id='LT-204')` | Model gọi đủ hai tool nhưng thiếu `check='vpn'`, khiến tool mặc định kiểm tra toàn bộ máy. | Tool schema cần làm rõ cách ánh xạ phạm vi sự cố vào argument `check`. |
+| M05_ticket_confirmation | wrong_boundary, multi-turn | `create_ticket(..., confirmed=False)` rồi `clarify(...)` | Model hỏi xác nhận đúng nhưng gọi thừa write tool trước đó. | Prompt cần quy định chỉ gọi `clarify` ở bước review payload và không gọi `create_ticket` cho đến lượt xác nhận sau. |
 
 ## B3. Team eval cases
 

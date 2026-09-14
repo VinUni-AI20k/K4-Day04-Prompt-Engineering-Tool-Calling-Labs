@@ -23,6 +23,14 @@ QUERY_LABELS = {
     "compatibility": "hardware and operating system compatibility",
 }
 INTERNAL_IDENTIFIER = re.compile(r"\b(?:LT|DT|MB|PR|RM|EMP)-\d+\b", re.IGNORECASE)
+RESTRICTED_EXTERNAL_DATA = re.compile(
+    r"(?:"
+    r"\b(?:asset|employee)[ _-]?id\b|"
+    r"\b(?:serial(?:[ _-]?number)?|service[ _-]?tag|hostname|host[ _-]?name|location|assigned[ _-]?(?:to|user)|diagnostics?|diagnostic[ _-]?log)\b\s*[:=]|"
+    r"\b(?:password|passwd|token|api[ _-]?key|mfa|otp|recovery[ _-]?code)\b\s*[:=]"
+    r")",
+    re.IGNORECASE,
+)
 
 
 def _domain(url: str) -> str:
@@ -67,6 +75,12 @@ def search_device_info(
             "tool": "search_device_info",
             "error": "restricted_internal_identifier",
             "message": "Remove asset and employee identifiers before external search.",
+        }
+    if RESTRICTED_EXTERNAL_DATA.search(f"{manufacturer_value} {model_value}"):
+        return {
+            "tool": "search_device_info",
+            "error": "restricted_internal_data",
+            "message": "Use public manufacturer and model names only; remove internal metadata and credentials.",
         }
     if query_type_value not in QUERY_LABELS:
         return {"tool": "search_device_info", "error": "invalid_query_type", "query_type": query_type_value}
