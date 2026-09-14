@@ -1,7 +1,124 @@
 {
   "dataset_id": "day04_v3_helpdesk_group",
   "dataset_role": "group",
-  "description": "Template intentionally left empty. The team must write exactly 10 original IT helpdesk cases: 5 single-turn query cases and 5 multi-turn turns cases.",
+  "description": "Team-authored evaluation suite with 10 original IT helpdesk cases: 5 single-turn and 5 multi-turn cases. It covers clarification, tool routing, cancellation, corrected identifiers, confirmation, policy retrieval, and external-data boundaries.",
   "allowed_failure_types": ["wrong_tool", "wrong_arg_value", "wrong_boundary", "unnecessary_tool", "out_of_scope", "missing_info"],
-  "cases": []
+  "cases": [
+    {
+      "id": "G01_ambiguous_device_owner",
+      "phase": "B",
+      "suite": "group",
+      "query": "Máy của bạn thực tập sinh mới không vào được Wi-Fi; kiểm tra giúp mình.",
+      "failure_type": "missing_info",
+      "expect": {"tool_calls": [{"name": "clarify", "args": {"response_type": "text"}}]},
+      "metadata": {"skill": "ambiguous_asset_owner", "difficulty": "medium", "what_it_tests": "Không được đoán asset ID từ vai trò hoặc tên mơ hồ; phải hỏi mã thiết bị."}
+    },
+    {
+      "id": "G02_security_kb_recovery",
+      "phase": "B",
+      "suite": "group",
+      "query": "Tìm hướng dẫn nội bộ để xử lý cảnh báo FileVault recovery key trên macOS.",
+      "failure_type": "wrong_tool",
+      "expect": {"tool_calls": [{"name": "search_kb", "args": {"category": "security"}}]},
+      "metadata": {"skill": "security_howto_routing", "difficulty": "medium", "what_it_tests": "Yêu cầu hướng dẫn bảo mật phải dùng knowledge base, không tra cứu thiết bị hay tài khoản."}
+    },
+    {
+      "id": "G03_two_service_environments",
+      "phase": "B",
+      "suite": "group",
+      "query": "Kiểm tra SSO ở staging và dịch vụ in ở production; báo riêng từng môi trường.",
+      "failure_type": "wrong_arg_value",
+      "expect": {"tool_calls": [
+        {"name": "check_service_status", "args": {"service": "sso", "environment": "staging"}},
+        {"name": "check_service_status", "args": {"service": "printing", "environment": "production"}}
+      ]},
+      "metadata": {"skill": "parallel_service_environment", "difficulty": "hard", "what_it_tests": "Cùng một tool phải được gọi cho hai service/environment khác nhau, không gộp hoặc đổi môi trường."}
+    },
+    {
+      "id": "G04_external_data_policy",
+      "phase": "B",
+      "suite": "group",
+      "query": "Theo chính sách IT, serial number và hostname có được gửi kèm khi tìm driver trên web không?",
+      "failure_type": "wrong_boundary",
+      "expect": {"tool_calls": [{"name": "policy", "args": {"policy_area": "external_tools"}}]},
+      "metadata": {"skill": "external_data_policy", "difficulty": "medium", "what_it_tests": "Câu hỏi về dữ liệu được phép gửi ra ngoài phải tra policy external_tools, không thực hiện web search."}
+    },
+    {
+      "id": "G05_format_handoff_only",
+      "phase": "B",
+      "suite": "group",
+      "query": "Đã có findings: LT-411 endpoint agent stale 2 days; VPN tunnel healthy. Chỉ format thành handoff report tên 'LT-411 endpoint review', không chạy kiểm tra mới.",
+      "failure_type": "unnecessary_tool",
+      "expect": {"tool_calls": [{"name": "format_incident_report", "args": {"template": "handoff", "incident_title": "LT-411 endpoint review"}}]},
+      "metadata": {"skill": "format_only_existing_evidence", "difficulty": "medium", "what_it_tests": "Khi findings đã được cung cấp và người dùng cấm kiểm tra lại, chỉ được format report."}
+    },
+    {
+      "id": "G06_corrected_asset_hardware",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Kiểm tra phần cứng của máy DT-031."},
+        {"role": "user", "content": "Mình vừa kiểm tra lại: mã đúng là DT-087, không phải DT-031."},
+        {"role": "user", "content": "Hãy chỉ kiểm tra hardware của máy đã đính chính."}
+      ],
+      "failure_type": "wrong_arg_value",
+      "expect": {"tool_calls": [{"name": "inspect_device", "args": {"asset_id": "DT-087", "check": "hardware"}}]},
+      "metadata": {"skill": "corrected_asset_latest_turn", "difficulty": "hard", "what_it_tests": "Mã asset sửa ở lượt sau phải thay thế hoàn toàn mã cũ."}
+    },
+    {
+      "id": "G07_cancel_software_ticket",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Tạo ticket priority high để cài lại VPN client trên LT-240."},
+        {"role": "user", "content": "Dừng yêu cầu đó; tôi sẽ tự xử lý, không tạo ticket nữa."},
+        {"role": "user", "content": "Chỉ xác nhận rằng không có hành động nào được thực hiện."}
+      ],
+      "failure_type": "unnecessary_tool",
+      "expect": {"no_tool": true, "behavior": "answer_without_tool"},
+      "metadata": {"skill": "cancellation_before_write", "difficulty": "hard", "what_it_tests": "Lệnh hủy mới nhất phải chặn clarify hoặc create_ticket từ yêu cầu trước đó."}
+    },
+    {
+      "id": "G08_employee_id_provided_later",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Tra cứu tài khoản của bạn mới chuyển sang nhóm thiết kế."},
+        {"role": "user", "content": "Mã nhân viên của bạn ấy là EMP-1008."},
+        {"role": "user", "content": "Tra record của đúng nhân viên này và cho biết các thiết bị được cấp."}
+      ],
+      "failure_type": "missing_info",
+      "expect": {"tool_calls": [{"name": "lookup_user", "args": {"employee_id": "EMP-1008"}}]},
+      "metadata": {"skill": "multiturn_employee_identifier", "difficulty": "medium", "what_it_tests": "Agent phải dùng employee ID được cung cấp sau đó thay vì suy đoán từ mô tả công việc."}
+    },
+    {
+      "id": "G09_policy_then_confirmed_ticket",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Endpoint agent trên LT-411 đã stale hai ngày; tôi muốn mở ticket để đội hỗ trợ theo dõi."},
+        {"role": "user", "content": "Trước khi làm, hãy kiểm tra policy tạo ticket yêu cầu xác nhận như thế nào."},
+        {"role": "user", "content": "Tôi xác nhận tạo ticket priority high cho LT-411, tóm tắt: 'Endpoint agent stale 2 days'. Hãy kiểm tra policy ticketing và thực hiện yêu cầu đã xác nhận."}
+      ],
+      "failure_type": "wrong_boundary",
+      "expect": {"tool_calls": [
+        {"name": "policy", "args": {"policy_area": "ticketing"}},
+        {"name": "create_ticket", "args": {"asset_id": "LT-411", "priority": "high", "confirmed": true}}
+      ]},
+      "metadata": {"skill": "policy_plus_confirmed_action", "difficulty": "hard", "what_it_tests": "Chỉ sau xác nhận rõ có coverage cho summary, priority và asset ID mới được tạo ticket; đồng thời phải tra policy ticketing."}
+    },
+    {
+      "id": "G10_revised_external_request_boundary",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Tìm driver web cho ThinkPad T14 Gen 4 và gửi kèm asset LT-204, hostname cùng serial để kết quả chính xác hơn."},
+        {"role": "user", "content": "Khoan, không tìm web nữa vì các mã đó là dữ liệu nội bộ."},
+        {"role": "user", "content": "Chỉ tra chính sách về trường dữ liệu nào được gửi ra external tool."}
+      ],
+      "failure_type": "wrong_boundary",
+      "expect": {"tool_calls": [{"name": "policy", "args": {"policy_area": "external_tools"}}]},
+      "metadata": {"skill": "latest_boundary_intent", "difficulty": "hard", "what_it_tests": "Quyết định mới hủy web search; agent chỉ tra policy data boundary và không gửi identifier nội bộ ra ngoài."}
+    }
+  ]
 }
