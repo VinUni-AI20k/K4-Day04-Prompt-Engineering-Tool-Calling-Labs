@@ -43,7 +43,7 @@ http://localhost:8501
 
 ## B4. Live chat evidence
 
-| Scenario/turn | Version | Tool calls + args | Transcript/run | Outcome |
+| Scenario/turn | Version | Tool calls + args | Transcript/run | Kết quả |
 |---|---|---|---|---|
 | UI turn 1: Kiểm tra trạng thái VPN production | v0 | check_service_status(service=vpn, environment=production) | transcripts/ui_20260914T182119000929.transcript.json | Agent route đúng sang tool kiểm tra trạng thái dịch vụ dùng chung, trả về VPN degraded và dẫn incident INC-1042. |
 | CLI chat: Kiểm tra VPN trên LT-204 | v0 | inspect_device(asset_id=LT-204, check=vpn) | transcripts/v0_openai_20260914T182247374274.transcript.json | Agent route đúng sang tool inspect thiết bị với asset LT-204 và phạm vi diagnostic là VPN. |

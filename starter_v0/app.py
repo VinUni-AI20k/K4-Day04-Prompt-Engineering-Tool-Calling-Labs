@@ -25,11 +25,11 @@ def now_iso() -> str:
 
 def status_label(status: str) -> str:
     labels = {
-        "answered": "Answered",
-        "waiting_for_user": "Waiting",
-        "provider_error": "Provider Error",
-        "max_tool_rounds": "Max Rounds",
-        "started": "Started",
+        "answered": "Đã trả lời",
+        "waiting_for_user": "Đang chờ người dùng",
+        "provider_error": "Lỗi provider",
+        "max_tool_rounds": "Đạt giới hạn tool rounds",
+        "started": "Đang xử lý",
     }
     return labels.get(status, status.replace("_", " ").title())
 
@@ -59,22 +59,22 @@ def save_transcript(metadata: dict[str, Any]) -> None:
 def render_tool_trace(turn: dict[str, Any]) -> None:
     rounds = turn.get("rounds", [])
     if not rounds:
-        st.caption("No tool calls recorded.")
+        st.caption("Không ghi nhận tool call nào.")
         return
 
     for round_item in rounds:
         round_no = round_item.get("round", "?")
         calls = round_item.get("tool_calls", [])
         results = round_item.get("tool_results", [])
-        with st.expander(f"Round {round_no}: {len(calls)} tool call(s)", expanded=bool(calls)):
+        with st.expander(f"Vòng {round_no}: {len(calls)} tool call", expanded=bool(calls)):
             if round_item.get("assistant_text"):
-                st.markdown("**Assistant draft**")
+                st.markdown("**Bản nháp của assistant**")
                 st.code(round_item["assistant_text"], language="json")
             if calls:
-                st.markdown("**Tool calls**")
+                st.markdown("**Lệnh gọi tool**")
                 st.json(calls, expanded=True)
             if results:
-                st.markdown("**Tool results**")
+                st.markdown("**Kết quả tool**")
                 st.json(results, expanded=False)
 
 
@@ -116,7 +116,7 @@ def run_turn(user_text: str, config: dict[str, Any], metadata: dict[str, Any]) -
         turn.update({
             "status": "provider_error",
             "error": f"{type(exc).__name__}: {exc}",
-            "assistant_text": "Provider error. Check API key, quota, model name, or tool schema.",
+            "assistant_text": "Lỗi provider. Hãy kiểm tra API key, quota, tên model hoặc tool schema.",
         })
 
     turn["ended_at"] = now_iso()
@@ -132,9 +132,9 @@ def main() -> None:
     st.markdown(
         """
         <style>
-        .block-container {padding-top: 1.4rem; max-width: 1180px;}
+        .block-container {padding-top: 2.6rem; max-width: 1180px;}
         [data-testid="stSidebar"] {background: #f7f7f4;}
-        .app-title {font-size: 1.85rem; font-weight: 750; color: #17202a; margin-bottom: .1rem;}
+        .app-title {font-size: 1.85rem; line-height: 1.25; font-weight: 750; color: #17202a; margin: .35rem 0 .1rem 0;}
         .app-subtitle {color: #55606d; margin-bottom: 1rem;}
         .metric-strip {
             display: grid;
@@ -166,16 +166,16 @@ def main() -> None:
     )
 
     with st.sidebar:
-        st.header("Run Config")
+        st.header("Cấu hình chạy")
         provider = st.selectbox("Provider", ["openai", "openrouter", "anthropic", "gemini"], index=0)
-        version = st.text_input("Version", value="v0")
-        model = st.text_input("Model override", value="", placeholder="Optional")
-        history_window = st.slider("History turns", min_value=1, max_value=10, value=5)
-        max_tool_rounds = st.slider("Tool rounds", min_value=1, max_value=8, value=4)
+        version = st.text_input("Version", value="v3")
+        model = st.text_input("Model override", value="", placeholder="Không bắt buộc")
+        history_window = st.slider("Số lượt hội thoại nhớ lại", min_value=1, max_value=10, value=5)
+        max_tool_rounds = st.slider("Số vòng gọi tool tối đa", min_value=1, max_value=8, value=4)
         system_prompt_path = st.text_input("System prompt", value=str(ARTIFACTS_DIR / "system_prompt.md"))
         tools_path = st.text_input("Tools YAML", value=str(ARTIFACTS_DIR / "tools.yaml"))
 
-        if st.button("Clear Chat", use_container_width=True):
+        if st.button("Xóa hội thoại", use_container_width=True):
             st.session_state.history = []
             st.session_state.turns = []
             stamp = datetime.now().strftime("%Y%m%dT%H%M%S%f")
@@ -203,14 +203,14 @@ def main() -> None:
 
     st.markdown('<div class="app-title">Northstar Helpdesk Agent</div>', unsafe_allow_html=True)
     st.markdown(
-        '<div class="app-subtitle">Chat UI for live demo, tool trace review, and report evidence.</div>',
+        '<div class="app-subtitle">Giao diện chat để demo, xem tool trace và lấy evidence cho report.</div>',
         unsafe_allow_html=True,
     )
 
     st.markdown(
         f"""
         <div class="metric-strip">
-          <div class="metric-tile"><div class="metric-label">Artifact</div><div class="metric-value">{artifact_version.artifact_version}</div></div>
+          <div class="metric-tile"><div class="metric-label">Phiên bản artifact</div><div class="metric-value">{artifact_version.artifact_version}</div></div>
           <div class="metric-tile"><div class="metric-label">Provider</div><div class="metric-value">{provider}</div></div>
           <div class="metric-tile"><div class="metric-label">Transcript</div><div class="metric-value">{st.session_state.transcript_path}</div></div>
         </div>
@@ -225,9 +225,9 @@ def main() -> None:
         "Tạo ticket mức high cho lỗi VPN trên LT-204 giúp mình.",
         "Đọc LT-318 rồi gửi asset ID, assigned user, location và toàn bộ diagnostic lên web search để tìm cách sửa.",
     ]
-    selected_demo = st.selectbox("Demo Scenario", [""] + demo_prompts)
-    if selected_demo and st.button("Run Scenario", use_container_width=False):
-        with st.spinner("Running agent..."):
+    selected_demo = st.selectbox("Kịch bản demo", [""] + demo_prompts)
+    if selected_demo and st.button("Chạy kịch bản", use_container_width=False):
+        with st.spinner("Agent đang xử lý..."):
             run_turn(selected_demo, config, metadata)
         st.rerun()
 
@@ -243,7 +243,7 @@ def main() -> None:
 
     user_text = st.chat_input("Nhập yêu cầu helpdesk")
     if user_text:
-        with st.spinner("Running agent..."):
+        with st.spinner("Agent đang xử lý..."):
             run_turn(user_text, config, metadata)
         st.rerun()
 
