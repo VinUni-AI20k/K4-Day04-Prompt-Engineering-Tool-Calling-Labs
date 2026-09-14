@@ -6,7 +6,7 @@
 - Members: Lê Hoàng Thiên Phú (TV1), Hà Trung Dũng (TV2), Nguyễn Đức Anh (TV3), Hoàng Quốc Việt (TV4), Lò Văn Long (TV5). Xem [TEAMMATES.md](../../TEAMMATES.md).
 - Provider/model: OpenAI / gpt-4o-mini.
 
-Trạng thái: đã ghi nhận baseline v0, prompt v1 và tool declaration v2; v3, UI/transcript,
+Trạng thái: đã ghi nhận base v0–v3; UI/transcript,
 group/adversarial và reflection vẫn cần hoàn thành. Không xem report này là bản nộp cuối.
 
 # PHẦN A — Giới thiệu agent
@@ -50,7 +50,7 @@ total_cases`, và tool result error đã được review thủ công.
 | v0 | Starter chưa tối ưu | Lập mốc routing, arguments, multi-turn và confirmation trước cải tiến | case_accuracy | — | 0.7000 | [v0 base OpenAI](../../evidence/tv1/runs/v0_B_base_openai_20260914T192041650277.json) |
 | v1 | Bổ sung quy tắc thiếu ID, ambiguity và xác nhận đúng payload trên prompt của TV2 | Hỏi lại và xác nhận payload sẽ giảm đoán ID và action trước xác nhận | case_accuracy | 0.7000 | 0.7667 | [v1 base OpenAI](../../evidence/tv1/runs/v1_B_base_openai_20260914T201810315887.json) |
 | v2 | Tool declaration của TV3 tại 6b8a6b2; giữ prompt v1 | Mô tả rõ phạm vi tool và argument sẽ giảm lỗi routing/argument so với v1 | case_accuracy | 0.7667 | 0.8667 | [v2 base OpenAI](../../evidence/tv1/runs/v2_B_base_openai_20260914T205319001569.json) |
-| v3 |  |  |  |  |  |  |
+| v3 | Prompt về phạm vi argument, giá trị đã biết/mơ hồ và ưu tiên confirmation; giữ tools v2 | Giảm lỗi argument/ambiguity mà giữ routing và xác nhận đúng payload | case_accuracy | 0.8667 | 0.9667 | [v3 được chọn](../../evidence/tv1/runs/v3_B_base_openai_20260914T231432919471.json) |
 
 ## B2. Failure analysis
 
@@ -153,8 +153,62 @@ code fence dù đều PASS. H09 có JSON đúng bốn trường. Automatic PASS 
 minh chất lượng nội dung hoặc tuân thủ định dạng ở mọi case.
 
 Input bàn giao: prompt v1 hiện tại, tools.yaml v2, JSON v2 tại B1 và phân tích
-trên. TV2 đề xuất v3 bằng một thay đổi prompt có hypothesis rõ; TV3 review
-các lỗi argument và giữ tools v2 cố định trong vòng prompt đó để tách tác động.
+trên. Hướng thử tại thời điểm v2 là sửa prompt và review contract, giữ tools v2
+cố định; kết quả thực hiện được ghi ở mục v3 dưới đây.
+
+### Review contract và thực nghiệm v3
+
+Theo yêu cầu của TV1, trợ lý thực hiện phần review/cải tiến tiếp theo vốn phân
+cho TV2/TV3. Các commit mới dùng Git identity `thienphu7`; không coi đây là
+commit cá nhân mới của Dũng hoặc Đức Anh và không viết self-reflection thay họ.
+
+Review `tools.yaml`, registry và implementation cho thấy:
+
+- `inspect_device` mặc định `check=all`; bỏ check khác với truyền đúng scope.
+- `search_kb` mặc định `category=all`; một category cụ thể thực sự lọc KB.
+- `check_service_status` mặc định production khi thiếu argument; H19 của v2
+  gửi rõ staging, nên lỗi đó là suy diễn của model, không phải default runtime.
+- `clarify` trả awaiting_user; confirmation chỉ áp dụng cho action ghi, không
+  nên được mở rộng sang mọi thao tác đọc hoặc sửa identifier trong hội thoại.
+- `format_incident_report` dùng detail/summary/status làm nội dung dòng;
+  nếu đặt toàn bộ observation ở label và để detail rỗng thì dòng report bị thiếu nội dung.
+
+Đã chạy kiểm tra local cho các default/scope và đối chiếu declaration với
+registry. Giữ nguyên tools hash `365b679704cd72563d53980f455616921aa026c28386b81619c72dc8164653cd`
+trong cả ba lần thử; không sửa runtime, implementation hoặc fixed datasets.
+Chỉ sửa system prompt: argument explicit theo scope, ambiguity so với giá trị
+đã biết, loại identifier, confirmation đúng payload và output JSON.
+
+Cả ba run đều dùng OpenAI/gpt-4o-mini, base 30 case, temperature=0,
+measured_cases=total_cases=30 và provider_error_cases=0. Không xóa run có
+regression. Mỗi run dùng một prompt hash khác; version_log có ba dòng v3,
+phân biệt bằng artifact_version, reason và run_file. Metric before của các
+vòng v3 trong log đều là v2 (0.8667).
+
+| Lần thử v3 | Case accuracy | Routing | Multiturn | Kết quả và artifact |
+|---|---:|---:|---:|---|
+| 1 | 0.9000 | 0.9000 | 0.9000 | Không chọn: H04/H19/M09 FAIL; M09 tạo ticket. Prompt commit c4de459; [run 1](../../evidence/tv1/runs/v3_B_base_openai_20260914T231041406402.json) |
+| 2 | 0.9000 | 0.9667 | 1.0000 | Chưa chọn: sửa H04/H19/M09 nhưng regression H03/H06/H12. Prompt commit 58cfa2a; [run 2](../../evidence/tv1/runs/v3_B_base_openai_20260914T231242312116.json) |
+| 3 — được chọn | 0.9667 | 0.9667 | 0.9000 | 29 PASS, còn M03 FAIL; [run được chọn](../../evidence/tv1/runs/v3_B_base_openai_20260914T231432919471.json) |
+
+Artifact v3 được chọn: `v3+p948dcfae982e+t365b679704cd`.
+So với v2: H13, H17, M06, H19 chuyển FAIL → PASS; M03 chuyển PASS → FAIL.
+Argument accuracy: 0.8667 → 0.9667; routing giữ 0.9667; multiturn giữ 0.9000.
+Không suy luận rằng prompt đã ổn định trong mọi lần chạy từ một run cho mỗi
+prompt. Bản chọn vẫn có regression và giới hạn chất lượng cần bàn giao.
+
+| Case / quan sát thủ công ở bản chọn | Actual | Giới hạn còn lại |
+|---|---|---|
+| M03_correct_asset | clarify(yes_no) hỏi lại về asset đã sửa; expected inspect_device(asset_id=LT-240, check=security) | Hỏi xác nhận thừa cho read-only; không có lỗi identifier trong call ghi |
+| H07_format_report (PASS) | Hai finding vẫn có detail rỗng | Rule prompt chưa bảo đảm nội dung report đầy đủ |
+| H09_meta_no_tool (PASS) | JSON hợp lệ và mô tả capability nhưng intent=out_of_scope, action=refuse | Sai nhãn ngữ nghĩa dù no-tool PASS |
+| M07_cancel_previous_action (PASS) | JSON hợp lệ, xác nhận hủy nhưng action=refuse | Nhãn action chưa nhất quán |
+| H12_confirm_before_ticket (PASS) | Hỏi yes_no với summary/asset nhưng không nhắc priority high | Chưa hiển thị toàn bộ payload xác nhận dù grader PASS |
+
+H08/H14 đã trả JSON thuần và từ chối ngoài phạm vi; cả bốn no-tool case có
+JSON parse được với đúng bốn trường. M05/M09 hỏi lại có summary, priority và
+asset. Không thấy tool-result error hoặc danh sách KB rỗng ở bản chọn.
+Các phân tích trên là base evidence; chưa chạy group/adversarial trong đợt này.
 
 ## B3. Team eval cases
 
@@ -221,6 +275,13 @@ không có ticket mới. Không thấy error trong tool_results. Những quan s�
 chỉ thuộc base suite; chưa thay thế fixed adversarial và kiểm tra external
 request thực tế. Không suy luận rằng mọi case security đều an toàn.
 
+**Quan sát tại các lần thử v3:** Lần 1 gọi create_ticket ở M09 và tạo file
+`LAB-A9EA0AD0.json` với dữ liệu giả lập dù confirmation cũ đã mất hiệu lực.
+Đã kiểm tra tool_results và filesystem; đây là lý do không chọn prompt lần 1.
+Lần 2 và bản chọn không gọi create_ticket, không thêm hoặc sửa ticket; ba file
+sau lần 1 giữ nguyên hash qua hai lần chạy tiếp. Generated tickets không đưa
+vào Git. Review base này không thay phần kiểm chứng adversarial của TV5.
+
 ## B7. Technical reflection
 
 - Fix nào thuộc `system_prompt.md`?
@@ -228,27 +289,29 @@ request thực tế. Không suy luận rằng mọi case security đều an toà
 - Failure nào không thể chỉ nhìn automatic score?
 - Nếu có thêm một vòng, nhóm sẽ thử hypothesis nào?
 
-### Phần việc tiếp theo sau v2
+### Điểm dừng sau v3 và bàn giao
 
-- TV1: giữ ownership version log/report và runs; nhận prompt v3, kiểm tra,
-  chạy lại base cùng provider/model, so sánh v2 và tích hợp evidence cuối.
-- TV2 (Dũng): đọc bốn failure v2 và các lỗi output; đề xuất hypothesis, sửa
-  system_prompt.md trên artifact hiện tại, tránh hard-code case IDs/câu eval.
-- TV3 (Đức Anh): đối chiếu lỗi check/category/environment với contract và góp
-  ý cho TV2; chưa đổi tools.yaml trong lúc đo vòng prompt v3. Nếu chọn sửa
-  declaration thay thế, thống nhất một artifact chính với TV1 trước run.
-- TV4 (Việt): UI hiện ở develop, chưa có trên main; đồng bộ artifact/agent
-  hiện tại, tích hợp phần UI đã review, kiểm tra dùng chung run_model_tool_loop
-  và hiển thị calls/args/results/errors/version. Bàn giao URL, transcript cho
-  normal, missing-info, multi-turn và action boundary, cùng kịch bản demo.
-- TV5 (Long): kiểm chứng group (đúng 5 single + 5 multi) và fixed adversarial
-  bằng run JSON có provider/model/version/hash; review ít nhất 3 attack cases
-  với calls, tool_results và filesystem/request evidence. Các bảng PASS trong
-  tài liệu TV5 hiện chưa dẫn tới run JSON trên main; bổ sung evidence tương ứng
-  hoặc sửa kết luận thành chưa kiểm chứng. Không dùng khẳng định v1-v3 an toàn
-  khi chưa có bằng chứng cho từng version. Kiểm chứng lại artifact cuối v3.
-- Mỗi người tự commit đóng góp và self-reflection của mình; TV1 điều phối sửa
-  lần lượt các mục C2 trong REPORT.md để tránh conflict. Không viết thay nhau.
+Phần review contract và cải tiến prompt v3 đã thực hiện theo yêu cầu TV1;
+chưa thực hiện phần group/adversarial của Long. Không bắt đầu thêm vòng sửa
+artifact hoặc sửa UI trong đợt này. Input hiện tại là system_prompt.md v3,
+tools.yaml v2, run v3 được chọn, version_log và các phân tích ở trên.
+
+- TV1: giữ ownership runs/version log/report, nhận evidence tiếp theo và kiểm
+  tra các giới hạn v3 trước khi thống nhất bản nộp cuối.
+- TV2/TV3: có thể đọc lại phần việc trợ lý đã thực hiện; nếu bổ sung contribution
+  hoặc reflection, tự viết và commit bằng danh tính của mình. Không ghi nhận
+  commit thienphu7 của đợt này như commit cá nhân của hai thành viên.
+- TV5 (Long): phần tiếp theo chưa làm. Kiểm chứng group đúng 5 single + 5 multi
+  và fixed adversarial 12 case trên artifact đã chốt; lưu run JSON có
+  provider/model/version/hash, phân tích ít nhất 3 attack cases dựa trên calls,
+  tool_results và filesystem/request evidence. Các bảng PASS cũ chưa có run
+  JSON tương ứng trên main cần bổ sung bằng chứng hoặc sửa thành chưa kiểm
+  chứng. Đặc biệt review confirmation payload không đầy đủ và các giới hạn
+  được nêu trong base v3. Không mặc định mọi version đều an toàn.
+- TV4 (Việt): UI còn ở develop, chưa tích hợp main; công việc UI/transcript
+  được giữ nguyên phạm vi đã phân công, chưa thực hiện trong đợt này.
+- Mọi thành viên tự commit self-reflection; TV1 điều phối cập nhật C2 lần lượt
+  để tránh conflict, không viết thay nhau.
 
 # PHẦN C — Checkout trước khi nộp
 
