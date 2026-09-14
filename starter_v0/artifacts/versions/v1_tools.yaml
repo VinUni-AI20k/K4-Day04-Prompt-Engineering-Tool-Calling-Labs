@@ -8,18 +8,13 @@
 tools:
   # ---------------- Core tools ----------------
   - name: clarify
-    description: "Hỏi lại người dùng một câu và dừng cho tới lượt sau. Đây là tool phải dùng
-      trong hai tình huống: (1) một giá trị bắt buộc còn thiếu hoặc mơ hồ - mã tài sản, mã
-      nhân viên, môi trường - và người dùng chưa cung cấp ở lượt nào; (2) cần sự đồng ý rõ
-      ràng của người dùng trước một hành động ghi. Trong hai tình huống đó, clarify là tool
-      duy nhất được gọi; không gọi tool dữ liệu với giá trị phỏng đoán và không gọi tool ghi
-      để xem trước."
+    description: "Gửi một câu hỏi cho người dùng."
     parameters:
       type: object
       properties:
-        question: {type: string, default: "", description: "Câu hỏi. Khi xin xác nhận cho hành động ghi, nêu lại đầy đủ payload sẽ được ghi ngay trong câu hỏi này."}
-        response_type: {type: string, enum: [text, yes_no, choice], default: "text", description: "yes_no khi xin xác nhận một hành động. choice khi giá trị còn thiếu thuộc một tập đóng, kèm options. text khi giá trị là tự do, ví dụ mã tài sản hay mã nhân viên."}
-        options: {type: array, default: [], items: {type: string}, description: "Các lựa chọn, bắt buộc khi response_type là choice. Liệt kê đúng các giá trị hợp lệ của tham số còn thiếu."}
+        question: {type: string, default: "", description: "Câu hỏi"}
+        response_type: {type: string, enum: [text, yes_no, choice], default: "text", description: "Kiểu trả lời"}
+        options: {type: array, default: [], items: {type: string}, description: "Các lựa chọn"}
       required: [question]
 
   - name: search_kb
@@ -30,7 +25,7 @@ tools:
       type: object
       properties:
         query: {type: string, default: "", description: "Nội dung cần tìm"}
-        category: {type: string, enum: [all, vpn, email, wifi, printing, account, security, hardware, software, meeting_room], default: "all", description: "Nhóm hướng dẫn, chọn theo chủ đề người dùng hỏi. Chỉ dùng all khi chủ đề không thuộc rõ nhóm nào."}
+        category: {type: string, enum: [all, vpn, email, wifi, printing, account, security, hardware, software, meeting_room], default: "all", description: "Nhóm hướng dẫn"}
         top_k: {type: integer, default: 3, description: "Số kết quả"}
       required: [query]
 
@@ -41,7 +36,7 @@ tools:
       type: object
       properties:
         service: {type: string, enum: [vpn, email, sso, wifi, printing], description: "Tên dịch vụ"}
-        environment: {type: string, enum: [production, staging], default: "production", description: "Môi trường. Chỉ tồn tại production và staging. Không tự map một tên môi trường khác (demo, test, UAT, QA, sandbox) sang một trong hai giá trị này và cũng không rơi về giá trị mặc định trong trường hợp đó; hãy gọi clarify với response_type choice và options là production và staging."}
+        environment: {type: string, enum: [production, staging], default: "production", description: "Môi trường"}
       required: [service]
 
   - name: inspect_device
@@ -50,8 +45,8 @@ tools:
     parameters:
       type: object
       properties:
-        asset_id: {type: string, description: "Mã tài sản đầy đủ, định dạng LT-/DT-/MB-/PR-/RM- kèm số, ví dụ LT-204. Không nhận mã nhân viên, tên loại thiết bị hay mô tả chung. Không gửi giá trị giữ chỗ, chuỗi rỗng hay chỉ riêng tiền tố; nếu chưa biết mã đầy đủ thì gọi clarify thay vì gọi tool này."}
-        check: {type: string, enum: [all, network, vpn, security, hardware, software], default: "all", description: "Nhóm kiểm tra, chọn theo triệu chứng người dùng nêu: network cho Wi-Fi và kết nối mạng, vpn cho VPN và certificate, security cho mã hoá và khoá máy, hardware cho ổ đĩa và bộ nhớ, software cho ứng dụng và driver. Nếu yêu cầu đã nêu một triệu chứng cụ thể thì vẫn thu hẹp theo triệu chứng đó, kể cả khi mệnh đề sau chỉ nói kiểm tra máy. Chỉ dùng all khi người dùng yêu cầu kiểm tra tổng thể hoặc không nêu triệu chứng nào."}
+        asset_id: {type: string, description: "Mã tài sản, định dạng LT-/DT-/MB-/PR-/RM- kèm số, ví dụ LT-204. Không nhận mã nhân viên, tên loại thiết bị hay mô tả chung."}
+        check: {type: string, enum: [all, network, vpn, security, hardware, software], default: "all", description: "Nhóm kiểm tra"}
       required: [asset_id]
 
   - name: lookup_user
@@ -60,7 +55,7 @@ tools:
     parameters:
       type: object
       properties:
-        employee_id: {type: string, description: "Mã nhân viên đầy đủ, định dạng EMP- kèm số, ví dụ EMP-1003. Không nhận tên người, phòng ban hay mã tài sản. Không gửi giá trị giữ chỗ hay chỉ riêng tiền tố; nếu chưa biết mã đầy đủ thì gọi clarify thay vì gọi tool này."}
+        employee_id: {type: string, description: "Mã nhân viên, định dạng EMP- kèm số, ví dụ EMP-1003. Không nhận tên người, phòng ban hay mã tài sản."}
       required: [employee_id]
 
   - name: format_incident_report
