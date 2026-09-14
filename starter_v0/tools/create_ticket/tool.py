@@ -60,6 +60,7 @@ def create_ticket(
             "ticket_id": ticket_id,
             "summary": normalized_summary,
             "priority": normalized_priority,
+            "status": "open",
             "asset_id": normalized_asset or None,
             "created_at": now.isoformat(),
             "source": "educational_local_mock",
