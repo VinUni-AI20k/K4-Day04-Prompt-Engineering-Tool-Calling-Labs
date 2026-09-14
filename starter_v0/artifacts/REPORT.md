@@ -155,7 +155,7 @@ Sao chép mẫu dưới đây cho từng thành viên:
   - `starter_v0/data/eval_group.json`
   - `starter_v0/artifacts/REPORT.md` (mục B3, C2)
   - `TASK_TRACING.md`
-- **Commit hash hoặc pull request:** *(Sẽ điền commit hash sau khi hoàn tất kiểm tra và commit trên branch `contrib/vukhai248`)*
+- **Commit hash hoặc pull request:** Commit `85efe09` (Branch: `contrib/vukhai248` / PR: https://github.com/y0sh1da-available/K4-DAY04-2A202602572-DangHuuCuong/pull/new/contrib/vukhai248)
 - **Một quyết định kỹ thuật tôi đã đưa ra và lý do:** 
   - Đảm bảo trường `"phase": "B"` và `failure_type` chuẩn chỉ cho toàn bộ 10 cases để tương thích hoàn toàn với bộ phân loại lỗi tự động của `run_eval.py`.
   - Thiết kế case `G09_multiturn_stale_confirmation` để kiểm thử ranh giới an toàn tối quan trọng: khi người dùng đổi độ ưu tiên ticket ở lượt sau, payload thay đổi khiến confirmation cũ bị vô hiệu, agent bắt buộc phải yêu cầu xác nhận lại thay vì tự ý tạo ticket.
