@@ -20,10 +20,14 @@ Agent là IT Helpdesk Assistant sử dụng dữ liệu giả lập của Norths
 **Link dùng thử:**
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 > URL: `http://localhost:8501` — chỉ truy cập được khi chạy Streamlit trên máy local.
 =======
 > URL: `https://vinunicodelabday04nguyenvuanh2a202602502-fd8lxdfuxuikhy7sfqnmd.streamlit.app/` 
 >>>>>>> 14f0e6a433b041bd4064537d7834ddcf1a2a6542
+=======
+> URL: `https://vinunicodelabday04nguyenvuanh2a202602502-fd8lxdfuxuikhy7sfqnmd.streamlit.app/` 
+>>>>>>> 8c93fdede8230baf80a0c5ae1fe4fa054b9876c3
 
 ## A2. Tool agent có
 
@@ -278,7 +282,24 @@ có thể đối chiếu đóng góp.
 
 Sao chép mẫu dưới đây cho từng thành viên:
 
-### Duy Nguyễn (duynguy3n2916) — [Điền MSSV]
+### Nguyễn Vũ Anh — 2A202602502
+- **Vai trò/phần việc được nhận:** Prompt Architect / Lead.
+- **Những gì tôi đã thay đổi trong repo chung:** 
+  - Khởi tạo môi trường, chạy đo lường Baseline v0 (70% accuracy).
+  - Tối ưu hóa kiến trúc `system_prompt.md` qua 3 vòng lặp v1 -> v2 -> v3 (đạt 100% accuracy trên 30 core cases).
+  - Quản lý nhật ký phiên bản `version_log.csv` và kiểm chứng dữ liệu SHA-256 hash.
+- **File hoặc artifact liên quan:** `artifacts/system_prompt.md`, `artifacts/version_log.csv`, `runs/v3_B_base_openrouter_20260914T184659357322.json`.
+- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:** 
+  Tách bạch rõ ranh giới giữa việc tra cứu danh bạ (`lookup_user`) và chẩn đoán thiết bị (`inspect_device`), đồng thời bắt buộc model phải truyền tường minh `response_type` khi gọi `clarify`. Quyết định này giúp triệt tiêu hoàn toàn hiện tượng gọi thừa tool và đưa độ chính xác từ 90% lên 100%.
+- **Khó khăn tôi gặp và cách tôi xử lý:** 
+  Ở phiên bản v3 đầu tiên, việc đưa câu ví dụ cụ thể vào prompt đã gây ra lỗi thoái thoái (regression) ở case H02. Tôi đã nhận diện nguyên nhân qua `parse_runs.py` và sửa lại quy tắc theo dạng điều kiện logic tổng quát thay vì dùng câu mẫu cụ thể.
+- **Điều tôi học được từ phần việc này:** 
+  Prompt chính là code: không thể viết theo cảm tính mà phải phát triển theo phương pháp khoa học (Hypothesis-driven), đo lường bằng traces thực tế và liên tục kiểm tra lỗi thoái thoái (regression testing).
+- **Nếu làm lại, tôi sẽ cải thiện điều gì:** 
+  Tôi sẽ phân loại các nhóm lỗi theo ma trận rủi ro ngay từ baseline để tối ưu số vòng lặp nhanh hơn.
+
+
+### Nguyễn Thành Duy-2A202602804
 
 - **Vai trò/phần việc được nhận:** Tool & Schema Engineer (Role B)
 - **Những gì tôi đã thay đổi trong repo chung:**
@@ -302,9 +323,63 @@ Sao chép mẫu dưới đây cho từng thành viên:
 - **Điều tôi học được từ phần việc này:** Hiểu sâu sắc rằng Tool Declaration và JSON schema chính là một phần của System Prompt; việc mô tả ranh giới rõ ràng giữa các tools đóng vai trò quyết định độ chính xác của Function Calling.
 - **Nếu làm lại, tôi sẽ cải thiện điều gì:** Viết thêm automated schema validator và unit tests cho từng tool trước khi chạy full eval để tiết kiệm quota gọi mô hình.
 
-Mỗi thành viên phải tự commit phần self-reflection của mình bằng Git identity
-tương ứng. Reflection phải dẫn đến contribution artifact/commit đã nêu ở trên,
-không dùng chính phần reflection làm bằng chứng duy nhất cho đóng góp kỹ thuật.
+
+### Phạm Quang Đạt — 2A202602704
+
+- **GitHub username:** `datpq-alpha`
+
+- **Vai trò/phần việc được nhận:**  
+  UI & Report Coordinator — xây dựng giao diện live chat bằng Streamlit, kiểm thử các kịch bản demo, lưu transcript và tổng hợp evidence vào báo cáo.
+
+- **Những gì tôi đã thay đổi trong repo chung:**
+  1. Xây dựng `app.py` bằng Streamlit và tái sử dụng `run_model_tool_loop` từ `chat.py`.
+  2. Thêm giao diện cấu hình provider/model, quản lý lịch sử hội thoại bằng session state và hỗ trợ multi-turn.
+  3. Hiển thị tool name, arguments, tool result/error, round, status, artifact version, prompt hash và tools hash.
+  4. Thêm chức năng lưu và tải transcript JSON.
+  5. Cố định UI sử dụng artifact `v3` để tránh gắn nhãn sai cho prompt và tools hiện tại.
+  6. Thêm dependency Streamlit vào `requirements.txt`.
+  7. Chạy base eval v3, group eval, adversarial eval và các kịch bản live-chat.
+  8. Tổng hợp version evidence, failure analysis, group cases, live-chat evidence và adversarial review vào `REPORT.md`.
+
+- **File hoặc artifact liên quan:**
+  - `starter_v0/app.py`
+  - `starter_v0/requirements.txt`
+  - `starter_v0/artifacts/REPORT.md`
+  - `starter_v0/artifacts/version_log.csv`
+  - `starter_v0/runs/v3_B_base_openrouter_20260914T193937815536.json`
+  - `starter_v0/runs/v3_B_group_openrouter_20260914T194930612346.json`
+  - `starter_v0/runs/v3_B_adversarial_openrouter_20260914T195310005694.json`
+  - `starter_v0/transcripts/v3_openrouter_20260914T201005858928.transcript.json`
+
+- **Commit hash hoặc pull request:**
+  - `496e09e` — xây dựng Streamlit chat UI.
+  - `6026853` — thêm Streamlit dependency.
+  - `60fd8de` — bổ sung UI v3, report và evaluation evidence.
+  - Branch: `quangdat`.
+  - [Commit evidence 60fd8de](https://github.com/vuanh259/K4A-DAY04-2A202602502/commit/60fd8de)
+
+- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:**  
+  Tôi quyết định tái sử dụng trực tiếp `run_model_tool_loop` từ `chat.py` thay vì viết một agent loop riêng cho Streamlit. Cách này giúp CLI và UI có cùng hành vi gọi tool, đồng thời transcript trong UI phản ánh đúng tool name, arguments và results của runtime chung. Tôi cũng cố định version của UI là `v3` vì repo chỉ có một bộ `system_prompt.md` và `tools.yaml` hiện hành; dropdown `v0–v3` trước đó chỉ đổi nhãn nhưng không tải artifact lịch sử tương ứng.
+
+- **Khó khăn tôi gặp và cách tôi xử lý:**  
+Trương Việt Anh — 2A202602444
+- Vai trò/phần việc được nhận: Eval & Red-Team.
+- Những gì tôi đã thay đổi trong repo chung:
+  - Thiết lập và chạy bộ đánh giá Baseline v0 trên 30 core cases, ghi nhận kết quả ban đầu 70% accuracy và phân loại các lỗi theo nhóm wrong_tool, missing_info và wrong_boundary.
+  - Chạy lại bộ Base Eval trên phiên bản v1 sau khi Prompt Architect và Tool Schema Engineer cập nhật hệ thống, xác nhận 30/30 cases PASS, case_accuracy = 100% và không có provider error.
+  - Thiết kế bộ eval_group.json gồm đúng 10 test case original, bao gồm 5 single-turn và 5 multi-turn, nhằm kiểm tra tool routing, argument extraction, clarification, confirmation boundary và khả năng duy trì intent qua nhiều lượt.
+  - Chạy Group Eval trên v1 và phát hiện case G09_multi_parallel_status_device thất bại do Agent truyền check="all" thay vì check="vpn", dù đã chọn đúng inspect_device và check_service_status.
+  - Phân tích trace của case G09 và xác định failure thực tế là wrong_arg_value, sau đó cập nhật lại nhãn failure trong eval_group.json để phản ánh đúng nguyên nhân lỗi.
+- File hoặc artifact liên quan: data/eval_group.json, runs/v0_B_base_openrouter_20260914T182724887893.json, runs/v1_B_base_openrouter_20260914T190416681480.json, runs/v1_B_group_openrouter_20260914T200051614351.json.
+- Commit hash hoặc pull request: d24a242 — Add group evaluation cases (branch: feature-TruongVietAnh).
+- Một quyết định kỹ thuật tôi đã đưa ra và lý do:
+  Tôi không chỉ dựa vào nhãn failure tổng quát của evaluator mà kiểm tra trực tiếp actual_tool_calls, expected arguments và trace của từng case thất bại. Ở case G09, evaluator ban đầu được khai báo wrong_tool, nhưng trace cho thấy Agent đã chọn đúng cả hai tool và chỉ truyền sai inspect_device.check="all" thay vì "vpn". Vì vậy tôi phân loại lại case thành wrong_arg_value. Cách làm này giúp failure analysis phản ánh đúng nguyên nhân kỹ thuật và cung cấp evidence chính xác hơn cho Prompt Architect và Tool Schema Engineer.
+- Khó khăn tôi gặp và cách tôi xử lý:
+  Trong lần chạy Baseline đầu tiên bằng Gemini, nhiều case gặp provider_error do giới hạn quota nên kết quả không đủ điều kiện làm evidence. Tôi chuyển sang OpenRouter và chạy lại toàn bộ 30 cases, đạt measured_cases = 30 và provider_error_cases = 0. Sau đó, khi Group Eval chỉ đạt 9/10, tôi kiểm tra run JSON thay vì chỉ nhìn accuracy tổng để xác định chính xác argument gây lỗi.
+- Điều tôi học được từ phần việc này:
+Eval không chỉ là chạy test và nhìn tỷ lệ PASS/FAIL. Một kết quả đánh giá có giá trị cần đảm bảo toàn bộ cases được đo, không có provider error và phải phân tích trace để xác định Agent sai ở routing, argument, multi-turn context hay safety boundary. Tôi cũng hiểu rõ hơn vai trò của regression testing khi mỗi thay đổi ở prompt hoặc tool schema cần được kiểm chứng lại trên cùng một bộ test.
+- Nếu làm lại, tôi sẽ cải thiện điều gì:
+  Tôi sẽ thiết kế bộ Group Eval và ma trận phân loại failure ngay từ khi chạy baseline, đồng thời chuẩn bị trước các adversarial cases tập trung vào confirmation boundary, prompt injection và data exfiltration để phát hiện các vấn đề safety sớm hơn.
 
 ## C3. Final checkout
 
