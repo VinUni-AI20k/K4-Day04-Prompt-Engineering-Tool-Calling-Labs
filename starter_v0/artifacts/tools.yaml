@@ -37,21 +37,32 @@ tools:
       required: [service]
 
   - name: inspect_device
-    description: "Kiểm tra thông tin và chẩn đoán thiết bị."
+    description: >
+      Kiểm tra inventory và diagnostic của MỘT thiết bị đã biết asset ID
+      (định dạng LT-xxx cho laptop, DT-xxx cho desktop). KHÔNG dùng employee ID
+      làm asset_id — nếu chỉ có employee ID, gọi lookup_user trước để lấy
+      assigned_assets. Chọn `check` khớp đúng loại sự cố đang hỏi (ví dụ hỏi
+      về VPN thì check=vpn), không dùng "all" trừ khi user hỏi tổng quát.
     parameters:
       type: object
       properties:
-        asset_id: {type: string, description: "Mã tài sản"}
-        check: {type: string, enum: [all, network, vpn, security, hardware, software], default: "all", description: "Nhóm kiểm tra"}
+        asset_id: {type: string, description: "Mã tài sản dạng LT-xxx hoặc DT-xxx, không phải employee ID"}
+        check: {type: string, enum: [all, network, vpn, security, hardware, software], default: "all", description: "Nhóm kiểm tra khớp với loại sự cố đang được hỏi; chỉ dùng 'all' khi user không chỉ định cụ thể"}
       required: [asset_id]
 
+      
+
   - name: lookup_user
-    description: "Tra cứu người dùng trong danh bạ hỗ trợ."
+    description: >
+      Tra cứu directory record theo employee ID (định dạng EMP-xxx). Trả về
+      assigned_assets — dùng kết quả này để lấy asset_id nếu cần gọi
+      inspect_device tiếp theo, thay vì đoán asset_id.
     parameters:
       type: object
       properties:
-        employee_id: {type: string, description: "Mã nhân viên"}
+        employee_id: {type: string, description: "Mã nhân viên dạng EMP-xxx"}
       required: [employee_id]
+
 
   - name: format_incident_report
     description: "Trình bày các kết quả đã có thành báo cáo."
@@ -96,12 +107,17 @@ tools:
       required: [query]
 
   - name: create_ticket
-    description: "Tạo một ticket hỗ trợ."
+    description: >
+      Tạo ticket hỗ trợ. CHỈ gọi với confirmed=true khi user đã trả lời đồng ý
+      (yes) cho MỘT câu hỏi clarify(response_type=yes_no) mô tả đúng payload
+      (summary, priority, asset_id) sắp tạo. Nếu chưa hỏi, hoặc payload đã đổi
+      so với lần hỏi trước, phải gọi clarify lại — không tự suy ra confirmed=true.
     parameters:
       type: object
       properties:
         summary: {type: string, default: "", description: "Tóm tắt sự cố"}
         priority: {type: string, enum: [low, medium, high, critical], default: "medium", description: "Mức ưu tiên"}
         asset_id: {type: string, default: "", description: "Mã tài sản nếu có"}
-        confirmed: {type: boolean, default: false, description: "Đã được người dùng xác nhận"}
+        confirmed: {type: boolean, default: false, description: "True CHỈ khi user vừa xác nhận yes cho đúng payload này trong lượt trước; không tự suy luận"}
       required: [summary]
+
