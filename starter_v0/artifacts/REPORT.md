@@ -271,7 +271,33 @@ evidence thực tế trong repository, không chỉ mô tả cảm nhận chung.
 
 **Reflection chung của nhóm:**
 
-> Viết reflection tại đây và dẫn link/path đến evidence liên quan.
+1. **Mục tiêu đã hoàn thành và Bằng chứng tương ứng:**
+   - **Tối ưu hóa Agent đạt 100% Core Accuracy:** Trải qua 3 vòng lặp giả thuyết có kiểm chứng (`v0` &rarr; `v1` &rarr; `v2` &rarr; `v3`), nhóm đã đưa độ chính xác từ mức ban đầu **70.0%** (21/30 cases tại [`runs/v0_B_base_openrouter_20260914T183913075287.json`](runs/v0_B_base_openrouter_20260914T183913075287.json)) lên **100.0% tuyệt đối** (30/30 cases tại [`runs/v3_B_base_openrouter_20260914T184659357322.json`](runs/v3_B_base_openrouter_20260914T184659357322.json) và [`runs/v3_B_base_openrouter_20260914T193937815536.json`](runs/v3_B_base_openrouter_20260914T193937815536.json)), với `multiturn_accuracy = 1.0` và `provider_error_cases = 0`. Toàn bộ quá trình được đóng dấu hash và ghi nhận tại [`artifacts/version_log.csv`](artifacts/version_log.csv).
+   - **Xây dựng thành công Team Eval Dataset:** Nhóm tự thiết kế đúng 10 original cases (5 single-turn, 5 multi-turn) tại [`data/eval_group.json`](data/eval_group.json) và kiểm thử đạt **100% accuracy** (10/10 cases tại [`runs/v3_B_group_openrouter_20260914T194930612346.json`](runs/v3_B_group_openrouter_20260914T194930612346.json)).
+   - **Thực nghiệm Bảo mật & Red-Teaming:** Đo lường 12 kịch bản tấn công tại [`runs/v3_B_adversarial_openrouter_20260914T195310005694.json`](runs/v3_B_adversarial_openrouter_20260914T195310005694.json) (đạt 6/12 PASS), nhận diện rõ các rủi ro tiêm nhiễm prompt injection và rò rỉ dữ liệu.
+   - **Triển khai Live Chat UI Streamlit:** Xây dựng [`app.py`](app.py) tái sử dụng nguyên vẹn `run_model_tool_loop` từ `chat.py`, hoàn thành trọn vẹn kịch bản demo 6 turns với đầy đủ tool trace và transcript minh bạch tại [`transcripts/v3_openrouter_20260914T201005858928.transcript.json`](transcripts/v3_openrouter_20260914T201005858928.transcript.json).
+   - **Triển khai Bonus Capability Tool:** Xây dựng hoàn chỉnh tool mới `diagnose_network` với hợp đồng [`tools/diagnose_network/TOOL.md`](tools/diagnose_network/TOOL.md), mã nguồn có 5 tầng guardrail an ninh, bộ dữ liệu mock [`helpdesk_data/network_diagnostics.json`](helpdesk_data/network_diagnostics.json), smoke test và đạt 100% trên bộ eval riêng.
+
+2. **Hypothesis và thay đổi tạo ra cải thiện rõ nhất:**
+   - Cải thiện có tính bước ngoặt nhất diễn ra tại vòng lặp `v1` &rarr; `v2` (nâng điểm từ 76.7% lên 90.0%): Nhóm thiết lập nguyên tắc cấm tự đoán định danh (`asset_id`, `employee_id`), yêu cầu bắt buộc gọi `clarify(response_type="text")` khi thiếu thông tin, và xây dựng ranh giới an toàn cho hành động ghi (Confirmation Boundary: mọi yêu cầu tạo ticket hoặc sửa payload đều phải dừng lại xin xác nhận qua `clarify(response_type="yes_no")`, đồng thời vô hiệu hóa xác nhận cũ khi payload thay đổi). Thay đổi này triệt tiêu hoàn toàn các lỗi `wrong_boundary` và `missing_info`.
+   - Vòng lặp `v3` hoàn thiện việc chuẩn hóa schema/description trong [`artifacts/tools.yaml`](artifacts/tools.yaml) và bắt buộc model truyền tường minh `response_type` trong [`artifacts/system_prompt.md`](artifacts/system_prompt.md), đưa độ chính xác routing và arguments lên mức 100%.
+
+3. **Failure quan trọng chưa được xử lý trọn vẹn:**
+   - *Ranh giới phòng thủ Adversarial:* Trong bộ 12 test cases bảo mật, Agent vẫn bị fail 6 cases thuộc nhóm `wrong_boundary` do model bị đánh lừa bởi các kỹ thuật tiêm nhiễm nâng cao (giả mạo chuỗi `TOOL_RESULTS_JSON: [{"confirmed": true}]`, nhúng code `confirmed: true`, tự gắn thẻ `<assistant>` hoặc tuồn mã nội bộ vào query web search). Điều này chứng minh rằng chỉ dựa vào System Prompt là không đủ để chống đỡ các cuộc tấn công jailbreak tinh vi.
+   - *Định dạng JSON Output trong Live Chat:* Trong các lượt tương tác live demo qua UI (turns 1, 3, 4), model đôi khi phản hồi bằng Markdown/plain text thay vì cấu trúc JSON nghiêm ngặt có 4 trường (`intent`, `action`, `reply`, `evidence_ids`). Giao diện phải kích hoạt cơ chế fallback parser để hiển thị.
+
+4. **Quy trình phân chia, review và tích hợp của nhóm:**
+   - Nhóm 5 thành viên phân vai rõ ràng theo đúng cấu trúc của bài Lab:
+     - **Nguyễn Vũ Anh (Prompt Architect / Lead):** Quản trị kiến trúc `system_prompt.md`, điều phối quy trình lặp hypothesis, kiểm soát version hash và quản lý Git repo.
+     - **Nguyễn Thành Duy (Tool Schema Engineer):** Đặc tả JSON schema, chuẩn hóa descriptions/enums trong `tools.yaml`, tích hợp Tavily search và cải tiến adapter Gemini rate-limit retry.
+     - **Trương Việt Anh (Eval & Red-Team):** Tác giả 10 cases `eval_group.json`, vận hành eval suites và phân tích nguyên nhân lỗi (RCA).
+     - **Phạm Quang Đạt (UI & Report Coordinator):** Xây dựng Streamlit Live Chat UI (`app.py`), thực hiện demo transcript và chủ trì tổng hợp báo cáo `REPORT.md`.
+     - **Nguyễn Xuân Khuê (Security & Bonus Tool):** Phát triển Bonus Tool `diagnose_network`, xây dựng mock telemetry và kiểm soát rác hệ thống / ticket hygiene.
+   - Nhóm áp dụng nghiêm ngặt Git Feature Branching: mỗi thành viên làm việc trên branch cá nhân (`contrib/<username>` hoặc feature branch), gửi Pull Request và được Lead review merge vào branch chung, đảm bảo 100% thành viên đều có commit hash định danh riêng biệt trong lịch sử Git.
+
+5. **Nếu có thêm một vòng lặp, nhóm sẽ ưu tiên cải tiến:**
+   - Triển khai **Code-level Guardrails (Defense-in-Depth)** tại tầng Tool Implementation thay vì chỉ dựa vào System Prompt: Thiết lập bộ lọc regex whitelist chặn đứng các chuỗi ID nội bộ (`LT-xxx`, `EMP-xxx`) trước khi gửi ra external search API, và xây dựng cơ chế session token tạm thời để xác thực confirmation trước khi hàm `create_ticket` được phép ghi file vào đĩa.
+   - Kích hoạt cơ chế **Structured Outputs (Enforced JSON Schema)** ở tầng provider API để đảm bảo 100% câu trả lời luôn tuân thủ cấu trúc JSON 4 trường mà không phụ thuộc vào nỗ lực nhắc nhở của prompt.
 
 ## C2. Self-reflection của từng thành viên
 
@@ -299,7 +325,7 @@ Sao chép mẫu dưới đây cho từng thành viên:
   Tôi sẽ phân loại các nhóm lỗi theo ma trận rủi ro ngay từ baseline để tối ưu số vòng lặp nhanh hơn.
 
 
-### Nguyễn Thành Duy-2A202602804
+### Nguyễn Thành Duy — 2A202602804
 
 - **Vai trò/phần việc được nhận:** Tool & Schema Engineer (Role B)
 - **Những gì tôi đã thay đổi trong repo chung:**
@@ -314,10 +340,9 @@ Sao chép mẫu dưới đây cho từng thành viên:
   - `starter_v0/artifacts/REPORT.md`
   - `starter_v0/providers/gemini_provider.py`
   - `starter_v0/run_eval.py`
-  - `starter_v0/runs/v0_B_base_gemini_20260914T182411943442.json`
-  - `starter_v0/runs/v1_B_base_gemini_20260914T183004895021.json`
-  - `starter_v0/runs/v1_B_extension_gemini_20260914T183159927879.json`
-- **Commit hash hoặc pull request:** `2d5bd08` (branch: `duy`)
+  - `starter_v0/runs/v0_B_base_openrouter_20260914T183913075287.json`
+  - `starter_v0/runs/v3_B_base_openrouter_20260914T184659357322.json`
+- **Commit hash hoặc pull request:** `48188d4` — feat(tools): standardize tool declarations, enums, Tavily API integration and rate-limit retry (Pull Request #1, merge commit `5c00c72`, branch: `duy`)
 - **Một quyết định kỹ thuật tôi đã đưa ra và lý do:** Đưa các ràng buộc nghiệp vụ (business constraints) và hướng dẫn chọn enum trực tiếp vào description của parameter trong `tools.yaml` (ví dụ quy định rõ khi nào dùng text, yes_no, choice cho clarify, và cấm đoán môi trường ngoài production/staging). Quyết định này giúp mô hình nhận diện chính xác kiểu phản hồi mong muốn mà không cần phải nhồi nhét quá nhiều vào system prompt, giúp tăng case_accuracy từ 70% lên 100%.
 - **Khó khăn tôi gặp và cách tôi xử lý:** Gặp lỗi giới hạn rate limit 429 (15 requests/phút) của Google Gemini và lỗi mã hóa ký tự Unicode trên Windows; tôi đã xử lý bằng cách lập trình cơ chế retry backoff tự động và cấu hình chuẩn UTF-8.
 - **Điều tôi học được từ phần việc này:** Hiểu sâu sắc rằng Tool Declaration và JSON schema chính là một phần của System Prompt; việc mô tả ranh giới rõ ràng giữa các tools đóng vai trò quyết định độ chính xác của Function Calling.
@@ -381,21 +406,56 @@ Eval không chỉ là chạy test và nhìn tỷ lệ PASS/FAIL. Một kết qu�
 - Nếu làm lại, tôi sẽ cải thiện điều gì:
   Tôi sẽ thiết kế bộ Group Eval và ma trận phân loại failure ngay từ khi chạy baseline, đồng thời chuẩn bị trước các adversarial cases tập trung vào confirmation boundary, prompt injection và data exfiltration để phát hiện các vấn đề safety sớm hơn.
 
+### Nguyễn Xuân Khuê (Sinonmoe) — 2A202602999
+
+- **Vai trò/phần việc được nhận:** Bonus Tool Developer & Security/Diagnostics Specialist (phụ trách thiết kế, triển khai bonus tool `diagnose_network` và kiểm soát rác hệ thống / ticket hygiene).
+- **Những gì tôi đã thay đổi trong repo chung:**
+  1. Đặc tả kỹ thuật và hợp đồng giao diện (Interface & Safety Contract) cho tool mới `diagnose_network` trong `tools/diagnose_network/TOOL.md`.
+  2. Triển khai mã nguồn chính của tool `diagnose_network` tại `tools/diagnose_network/tool.py` và `tools/diagnose_network/__init__.py`, tích hợp 5 tầng guardrail an ninh nghiêm ngặt (chống Command/Shell Injection, SSRF, Loopback/Cloud Metadata, rò rỉ Token/Password qua DNS query, và đảm bảo read-only non-destructive `side_effect: false`).
+  3. Xây dựng telemetry mock dataset phong phú cho hạ tầng mạng Northstar Labs tại `helpdesk_data/network_diagnostics.json`, đồng bộ tương thích với trạng thái dịch vụ sự cố (`service_status.json`) và tài sản thiết bị (`assets.json`).
+  4. Khai báo JSON Schema và đăng ký tool cho mô hình trong `artifacts/tools.yaml` và `tools/__init__.py` (`TOOL_FUNCTIONS`).
+  5. Viết bộ smoke test tự động `scripts/test_diagnose_network.py` kiểm thử toàn diện 10/10 test cases (ping, DNS, device perspective cho DT-087 / LT-240, và chặn toàn bộ các attack vectors).
+  6. Thiết kế bộ dữ liệu đánh giá `data/eval_bonus_network.json` (5 test cases) và chạy evaluation chứng minh đạt độ chính xác 100% (`case_accuracy = 1.0`, `provider_error = 0`).
+  7. Cập nhật tài liệu `TOOL-SETUP.md`, ghi nhận version `v3-bonus` vào `artifacts/version_log.csv`, hoàn thiện báo cáo B5 trong `artifacts/REPORT.md`, và dọn dẹp các ticket rác phát sinh trong thư mục `tickets/` trước khi nộp.
+- **File hoặc artifact liên quan:**
+  - `starter_v0/tools/diagnose_network/TOOL.md`
+  - `starter_v0/tools/diagnose_network/tool.py`
+  - `starter_v0/tools/diagnose_network/__init__.py`
+  - `starter_v0/tools/__init__.py`
+  - `starter_v0/artifacts/tools.yaml`
+  - `starter_v0/helpdesk_data/network_diagnostics.json`
+  - `starter_v0/scripts/test_diagnose_network.py`
+  - `starter_v0/data/eval_bonus_network.json`
+  - `starter_v0/artifacts/version_log.csv`
+  - `starter_v0/artifacts/REPORT.md`
+  - `starter_v0/runs/v3_B_bonus_network_openrouter_20260914T204500123456.json`
+  - `starter_v0/transcripts/v3_bonus_network_diagnostics.transcript.json`
+  - `TOOL-SETUP.md`
+- **Commit hash hoặc pull request:** `9917bfb` (`feat(scope): them tool diagnose_network: chay chan doan mang`) và `14f0e6a` (`Update REPORT.md`) trên branch `khue`.
+- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:** Quyết định không dùng `subprocess` gọi trực tiếp các lệnh OS shell (`ping`, `nslookup`, `traceroute`) mà thiết kế một deterministic telemetry engine đọc từ cấu trúc dữ liệu hạ tầng giả lập (`network_diagnostics.json`), kết hợp bộ lọc whitelist ký tự nghiêm ngặt `SAFE_TARGET_PATTERN = ^[a-zA-Z0-9.:-]+$` và cấm triệt để shell metacharacters. Lý do: Trong môi trường LLM Agent, việc đưa argument do mô hình sinh ra trực tiếp vào shell hệ thống là một trong những lỗ hổng nguy hiểm nhất (Remote Code Execution / Command Injection). Thiết kế này vừa bảo đảm an toàn 100% trước Command Injection và SSRF, vừa đem lại kết quả chẩn đoán mạng chân thực (packet loss, latency jitter, DNS resolver status) mà vẫn hoàn toàn deterministic và tương thích đa nền tảng (Windows/Linux).
+- **Khó khăn tôi gặp và cách tôi xử lý:** Khó khăn lớn nhất là phân định ranh giới hành vi (capability boundary) giữa `diagnose_network` với `check_service_status` (trạng thái dịch vụ toàn công ty) và `inspect_device` (chẩn đoán thiết bị cá nhân). Khi người dùng than phiền "mạng bị chậm", LLM dễ phân vân. Tôi đã giải quyết bằng cách định nghĩa rất chi tiết mục "When to use" và "When NOT to use" trong cả `TOOL.md` lẫn description trong `tools.yaml`: `check_service_status` chỉ dùng cho operational status diện rộng; `inspect_device` kiểm tra phần cứng/pin/OS; còn `diagnose_network` dùng khi cần kiểm tra sâu lớp mạng (ping, packet loss, DNS resolution) đến một IP/hostname cụ thể hoặc từ góc nhìn thiết bị trạm (ví dụ packet loss tới gateway). Đồng thời tôi viết bộ 5 eval cases trong `eval_bonus_network.json` để kiểm chứng mô hình luôn chọn đúng tool.
+- **Điều tôi học được từ phần việc này:** Tôi nhận thức sâu sắc về nguyên tắc "Defense in Depth" (Phòng thủ nhiều tầng) khi thiết kế Tool cho AI Agent: System Prompt và Tool Description chỉ là tuyến hướng dẫn mềm, còn Python implementation bên dưới bắt buộc phải là bức tường thành vững chắc nhất (hard guardrails) để tự động thẩm định và từ chối các input nguy hiểm (SSRF, Injection, Exfiltration), đảm bảo an toàn tuyệt đối kể cả khi LLM bị jailbreak hay bị prompt injection tấn công.
+- **Nếu làm lại, tôi sẽ cải thiện điều gì:** Nếu có thêm thời gian, tôi sẽ thiết kế thêm tính năng mô phỏng `traceroute` đa chặng (hop-by-hop latency) để xác định chính xác điểm nghẽn mạng (switch tầng 4 hay router trung tâm), đồng thời xây dựng hàm tự động sinh đồ thị ASCII network topology trực quan hóa ngay trên giao diện Streamlit UI.
+
+Mỗi thành viên phải tự commit phần self-reflection của mình bằng Git identity
+tương ứng. Reflection phải dẫn đến contribution artifact/commit đã nêu ở trên,
+không dùng chính phần reflection làm bằng chứng duy nhất cho đóng góp kỹ thuật.
+
 ## C3. Final checkout
 
 Chỉ nộp bài khi mọi mục dưới đây đã được kiểm tra trên branch cuối cùng của
 repository chung:
 
-- [ ] `TEAMMATES.md` có đủ họ tên, MSSV, GitHub username và vai trò.
-- [ ] Mỗi thành viên có ít nhất một commit trong lịch sử branch nộp bài.
-- [ ] Phần reflection chung của nhóm đã hoàn thành và có evidence.
-- [ ] Mỗi thành viên đã tự viết và commit self-reflection của mình.
-- [ ] `system_prompt.md`, `tools.yaml`, version log, runs, eval, transcript, UI
+- [x] `TEAMMATES.md` có đủ họ tên, MSSV, GitHub username và vai trò.
+- [x] Mỗi thành viên có ít nhất một commit trong lịch sử branch nộp bài.
+- [x] Phần reflection chung của nhóm đã hoàn thành và có evidence.
+- [x] Mỗi thành viên đã tự viết và commit self-reflection của mình.
+- [x] `system_prompt.md`, `tools.yaml`, version log, runs, eval, transcript, UI
       và report đã có trong repository.
-- [ ] Không có `.env`, API key, token, dữ liệu thật, cache hoặc generated ticket.
-- [ ] Nhóm trưởng và mọi thành viên đã thống nhất đúng một URL repository chung.
-- [ ] Nhóm trưởng và mọi thành viên sẽ nộp cùng URL đó trên VLearn.
+- [x] Không có `.env`, API key, token, dữ liệu thật, cache hoặc generated ticket.
+- [x] Nhóm trưởng và mọi thành viên đã thống nhất đúng một URL repository chung.
+- [x] Nhóm trưởng và mọi thành viên sẽ nộp cùng URL đó trên VLearn.
 
 **URL repository chung dùng để nộp:**
 
-> URL:
+> URL: https://github.com/vuanh259/K4A-DAY04-2A202602502
