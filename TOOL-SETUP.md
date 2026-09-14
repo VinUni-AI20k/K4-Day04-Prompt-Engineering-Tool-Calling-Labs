@@ -214,6 +214,22 @@ Base:
 python run_eval.py --provider openrouter --version v0 --suite base --eval-cases data/eval_base.json
 ```
 
+Base run hợp lệ sẽ tự thêm hoặc cập nhật đúng dòng version trong
+`artifacts/version_log.csv`. Với `v1`, `v2`, `v3`, truyền metadata của vòng thử
+nghiệm, ví dụ:
+
+```powershell
+python run_eval.py --provider openrouter --version v1 --suite base --eval-cases data/eval_base.json --author "github-user" --changed-artifact "system_prompt.md" --reason "Fix confirmation failures in v0" --hypothesis "Explicit payload-bound confirmation will improve wrong_boundary cases without increasing extra calls"
+```
+
+`metric_before` được lấy từ version trước và `metric_after` mặc định dùng
+`case_accuracy`. Chạy lại cùng version sẽ cập nhật dòng đó, không tạo dòng
+trùng. Run có provider error vẫn được lưu JSON nhưng không được ghi vào version
+log. Dùng `--no-version-log` cho exploratory base run không dùng làm evidence.
+
+Các suite `group`, `extension` và `adversarial` chỉ lưu run JSON, không thay đổi
+version log của base.
+
 Group:
 
 ```powershell
