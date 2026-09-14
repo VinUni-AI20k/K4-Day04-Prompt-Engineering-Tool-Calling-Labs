@@ -3,7 +3,7 @@
 ## Team
 
 - Team: _TODO tên nhóm_ (repo: https://github.com/vuhuyng04/K4-Day04-2A202602662)
-- Members: xem `TEAMMATES.md` — Nguyễn Vũ Huy (vuhuyng04, nhóm trưởng), thiendao, _TODO thành viên 3_, _TODO thành viên 4_
+- Members: xem `TEAMMATES.md` — Nguyễn Vũ Huy (vuhuyng04, nhóm trưởng), thiendao, _TODO thành viên 3_, Nguyễn Nguyên Phong (Heargreaves)
 - Provider/model: openai / gpt-4o-mini (temperature 0)
 
 > Phân công điền report: **Huy** — B1, B2, B7, C1, C3. **Thành viên 2 (thiendao)** — B3.
@@ -13,30 +13,42 @@
 
 ## A1. Agent này làm được gì
 
-> _Owner: thành viên 4._ Viết 1–2 câu mô tả capability và giới hạn của agent.
+Agent hỗ trợ IT nội bộ bằng các tool đã khai báo: tra cứu knowledge base, trạng thái dịch vụ, inventory/directory, policy và tạo báo cáo/ticket có xác nhận. Agent chỉ trả lời dựa trên kết quả tool/fixture; không xử lý bí mật, không đoán mã nội bộ và không thực hiện external search hoặc ghi ticket khi chưa thỏa boundary tương ứng.
 
 **Link dùng thử:**
 
-> URL: _TODO (UI local: `streamlit run ui.py` hoặc tương đương)_
+> UI local: từ `starter_v0/` chạy `streamlit run ui.py` (cần cài `requirements.txt` và cấu hình API key cho provider được chọn).
 
 ## A2. Tool agent có
 
 | Tool | Chức năng | Core / optional / team-built |
 |---|---|---|
 | clarify | Hỏi bổ sung hoặc xác nhận | core |
-|  |  |  |
+| search_kb | Tìm hướng dẫn trong knowledge base nội bộ | core |
+| check_service_status | Kiểm tra trạng thái dịch vụ dùng chung | core |
+| inspect_device | Xem inventory và chẩn đoán của một asset ID | core |
+| lookup_user | Tra directory theo employee ID và asset được cấp | core |
+| format_incident_report | Định dạng evidence đã có thành báo cáo Markdown | core |
+| policy | Tra chính sách IT nội bộ | optional built-in |
+| create_ticket | Tạo ticket sau xác nhận `yes_no` cho payload cuối | optional built-in (write action) |
+| search_device_info | Tìm thông tin model công khai qua dịch vụ ngoài | optional built-in (external) |
 
 ## A3. Câu hỏi mẫu
 
-1.
-2.
-3.
+1. `VPN production có đang lỗi không? Đồng thời kiểm tra VPN của LT-204.`
+2. `Cho mình biết trạng thái tài khoản và thiết bị được cấp của EMP-1007.`
+3. `Tạo ticket ưu tiên high cho LT-318: VPN không kết nối được.` Sau câu hỏi xác nhận của agent, trả lời `Có` để demo write action có kiểm soát.
 
 ## A4. Kịch bản demo đã rehearse
 
 | Scenario | Tool trace cần thấy | Cải thiện version | Fallback run/transcript |
 |---|---|---|---|
-|  |  |  |  |
+| Normal: VPN production + LT-204 | `check_service_status(vpn, production)` + `inspect_device(LT-204, vpn)` | v2 chọn `check` theo triệu chứng | `transcripts/ui_v3_openrouter_20260914T194118782430.transcript.json` |
+| Missing information: “laptop của tôi không vào VPN được” | mục tiêu là chỉ `clarify(response_type=text)`; không gọi inventory với placeholder | v1/v2 không đoán ID | `transcripts/ui_v3_openrouter_20260914T194149775467.transcript.json` — phát hiện model hỏi mã asset trong text nhưng **không gọi `clarify`** |
+| Multi-turn correction: hỏi staging rồi đổi sang production | lượt cuối gọi `check_service_status(..., production)` | v1 ưu tiên giá trị mới nhất | `transcripts/ui_v3_openrouter_20260914T194153266534.transcript.json` |
+| Ticket confirmation: yêu cầu ticket → `Có` | lượt 1 `clarify(yes_no)` với payload; lượt 2 mới `create_ticket(confirmed=true)` | v1/v3 ràng buộc xác nhận payload cuối | `transcripts/ui_v3_openrouter_20260914T194159881442.transcript.json`; ticket fixture đã được xóa, không commit |
+
+_Rehearsal chạy qua `ui.py` bằng Streamlit AppTest (headless UI session) với OpenRouter / `openai/gpt-4o-mini`, artifact `v3+p13855201a683+t3a094ea16a06`. AppTest được dùng vì môi trường automation không có browser surface; mọi lượt vẫn đi qua UI, `run_model_tool_loop`, provider và cơ chế ghi transcript thật._
 
 # PHẦN B — Chi tiết và evidence
 
@@ -88,7 +100,10 @@ _Owner: thành viên 4 (UI + transcript)._
 
 | Scenario/turn | Version | Tool calls + args | Transcript/run | Outcome |
 |---|---|---|---|---|
-|  |  |  |  |  |
+| Normal | v3 (`p13855201a683`, `t3a094ea16a06`) | `check_service_status(service=vpn, environment=production)`; `inspect_device(asset_id=LT-204, check=vpn)` | `transcripts/ui_v3_openrouter_20260914T194118782430.transcript.json` | `answered`; hai tool result không error. |
+| Missing ID | v3 | Không gọi tool | `transcripts/ui_v3_openrouter_20260914T194149775467.transcript.json` | Model hỏi mã asset trong final text, nhưng không gọi `clarify`; đây là trace không đạt guardrail/tool-trace mong đợi. |
+| Correction turn 1 → 2 | v3 | T1 `check_service_status(vpn, staging)`; T2 `check_service_status(vpn, production)` | `transcripts/ui_v3_openrouter_20260914T194153266534.transcript.json` | `answered` cả hai lượt; giá trị mới nhất thay staging bằng production. |
+| Ticket request → confirmation | v3 | T1 `clarify(response_type=yes_no)`; T2 `create_ticket(summary="VPN không kết nối được", priority=high, asset_id=LT-318, confirmed=true)` | `transcripts/ui_v3_openrouter_20260914T194159881442.transcript.json` | T1 `waiting_for_user`, T2 `answered`; ticket fixture sinh trong rehearsal đã xóa và không được commit. |
 
 ## B4a. Adversarial evidence
 
@@ -307,6 +322,17 @@ không dùng chính phần reflection làm bằng chứng duy nhất cho đóng 
   regression sớm hơn, chạy mỗi suite nhiều lần để đo độ ổn định thay vì dựa vào một run, và chạy
   extension cùng model với nhóm (có Tavily key) để kết quả so sánh được. Tôi cũng sẽ đề xuất sớm
   một deterministic test cho `create_ticket` với các dạng confirmation giả.
+
+### Nguyễn Nguyên Phong — 2A202602691
+
+- **Vai trò/phần việc được nhận:** UI chat + live evidence.
+- **Những gì tôi đã thay đổi trong repo chung:** Xây UI Streamlit cho agent, thêm dependency Streamlit, sửa UI tự ưu tiên provider có key trong `.env`, và cập nhật A1–A4/B4 bằng transcript rehearsal thật.
+- **File hoặc artifact liên quan:** `starter_v0/ui.py`, `starter_v0/requirements.txt`, `starter_v0/artifacts/REPORT.md`.
+- **Commit hash hoặc pull request:** `c0acb22900438282989694b61747953ff58acc0d` — `feat(ui): add auditable Streamlit helpdesk chat`; `b044a32173b02fc16cc22d37ed7d52fe4bdf6d03` — `fix(ui): select configured provider by default`.
+- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:** UI gọi trực tiếp `run_model_tool_loop` từ `chat.py` thay vì tạo agent loop khác. Vì vậy CLI và UI có cùng quy tắc dừng khi `clarify`, cách thực thi tool và cấu trúc `rounds`/`tool_events` trong transcript.
+- **Khó khăn tôi gặp và cách tôi xử lý:** UI mặc định chọn OpenAI trong khi môi trường chỉ cấu hình OpenRouter, làm lượt test đầu provider error. Tôi sửa default theo provider có key, dùng Streamlit AppTest khi automation không có browser surface, rồi chỉ giữ transcript OpenRouter thành công. Scenario thiếu ID cũng lộ rõ model trả lời text mà bỏ `clarify`.
+- **Điều tôi học được từ phần việc này:** UI cho agent có tool cần ưu tiên trace kiểm toán (args, result/error, round và hash artifact) hơn giao diện đơn thuần để người review tái hiện được hành vi.
+- **Nếu làm lại, tôi sẽ cải thiện điều gì:** Thêm guardrail/acceptance test để thiếu asset ID bắt buộc tạo `clarify`, thêm screenshot cho từng scenario và kiểm tra riêng confirmation trước khi demo ticket.
 
 ## C3. Final checkout
 
