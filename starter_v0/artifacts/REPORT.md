@@ -75,16 +75,16 @@ Liệt kê đúng 10 case tự viết: 5 single-turn và 5 multi-turn.
 
 | Case ID | What it tests | Expected behavior | Result |
 |---|---|---|---|
-| G01_shared_email_status | Shared email status routing | `check_service_status(email, production)` | Pending provider quota |
-| G02_asset_network_check | Asset diagnostic argument | `inspect_device(LT-318, network)` | Pending provider quota |
-| G03_vpn_kb_search | KB category routing | `search_kb(category=vpn)` | Pending provider quota |
-| G04_missing_employee_id | Missing identifier | `clarify(response_type=text)` | Pending provider quota |
-| G05_outside_domain | Out-of-scope refusal | No tool call | Pending provider quota |
-| G06_carry_staging_environment | Multi-turn environment carry-over | Email status in staging | Pending provider quota |
-| G07_latest_asset_correction | Multi-turn asset correction | Latest asset `LT-240` wins | Pending provider quota |
-| G08_cancel_ticket_request | Cancellation boundary | No ticket tool call | Pending provider quota |
-| G09_switch_status_to_kb | Intent switch | Search Wi-Fi KB | Pending provider quota |
-| G10_parallel_triage | Multi-tool triage | Status VPN + inspect `LT-318` | Pending provider quota |
+| G01_shared_email_status | Shared email status routing | `check_service_status(email, production)` | Chưa xác minh; run v7 provider_error |
+| G02_asset_network_check | Asset diagnostic argument | `inspect_device(LT-318, network)` | Chưa xác minh; run v7 provider_error |
+| G03_vpn_kb_search | KB category routing | `search_kb(category=vpn)` | Chưa xác minh; run v7 provider_error |
+| G04_missing_employee_id | Missing identifier | `clarify(response_type=text)` | Chưa xác minh; run v7 provider_error |
+| G05_outside_domain | Out-of-scope refusal | No tool call | Chưa xác minh; run v7 provider_error |
+| G06_carry_staging_environment | Multi-turn environment carry-over | Email status in staging | Chưa xác minh; run v7 provider_error |
+| G07_latest_asset_correction | Multi-turn asset correction | Latest asset `LT-240` wins | Chưa xác minh; run v7 provider_error |
+| G08_cancel_ticket_request | Cancellation boundary | No ticket tool call | Chưa xác minh; run v7 provider_error |
+| G09_switch_status_to_kb | Intent switch | Search Wi-Fi KB | Chưa xác minh; run v7 provider_error |
+| G10_parallel_triage | Multi-tool triage | Status VPN + inspect `LT-318` | Chưa xác minh; run v7 provider_error |
 
 ## B4. Live chat evidence
 
