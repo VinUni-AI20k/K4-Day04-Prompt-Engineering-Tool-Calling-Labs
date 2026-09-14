@@ -58,7 +58,7 @@ Hypothesis goi y: "Neu prompt chi dinh ro `clarify` yes_no la buoc bat buoc truo
 1. `create_ticket`: bo/doi cach viet de khong goi y goi tool voi `confirmed=false` de xin xac nhan; ghi ro "Chua co xac nhan → goi `clarify` yes_no, KHONG goi tool nay". (H12, M05)
 2. `clarify`: them vi du `choice` cho environment mo ho, `options: [production, staging]`. (H19)
 3. `lookup_user.employee_id`: format dang ghi `EMP-NNN` nhung du lieu that la `EMP-NNNN` (vd `EMP-1003`) — sua lai de tranh model clarify nham.
-4. `inspect_device.asset_id`: du lieu con prefix `KK-` va `MP-` chua duoc liet ke trong pattern `LT|DT|MB|PR|RM`.
+4. ~~`inspect_device.asset_id`: du lieu con prefix `KK-` va `MP-`~~ — **dinh chinh**: ghi chu nay sai. `helpdesk_data/assets.json` chi co `DT, LT, MB, PR, RM` (9 asset), khop voi pattern hien tai va regex trong `create_ticket` / `search_device_info`. Khong can sua.
 
 ## Phat hien them sau khi chay lai (tren `main` 104ba19, artifact van la v1)
 
