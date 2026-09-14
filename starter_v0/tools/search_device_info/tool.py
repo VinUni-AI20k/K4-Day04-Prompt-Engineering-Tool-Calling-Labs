@@ -11,10 +11,27 @@ from tools._shared import TIMEOUT, err
 
 
 VENDOR_DOMAINS = {
+    "apple": ["support.apple.com"],
+    "logitech": ["logitech.com", "prosupport.logi.com"],
     "lenovo": ["support.lenovo.com", "psref.lenovo.com"],
     "dell": ["dell.com"],
     "hp": ["support.hp.com"],
     "hewlett-packard": ["support.hp.com"],
+}
+# Reviewed public identities only. Never build this catalog dynamically from
+# asset records, user input, retrieved text, or model output.
+PUBLIC_PRODUCTS = {
+    "Lenovo": ("ThinkPad T14 Gen 4", "ThinkPad P1 Gen 6"),
+    "Dell": ("Latitude 7440", "OptiPlex 7010 Plus"),
+    "HP": ("EliteDesk 800 G9", "Color LaserJet Enterprise M555dn"),
+    "Apple": ("MacBook Pro 14-inch M3", "iPhone 15"),
+    "Logitech": ("Rally Bar",),
+}
+PUBLIC_IDENTITIES = {
+    (vendor.casefold(), alias.casefold()): (vendor, product)
+    for vendor, products in PUBLIC_PRODUCTS.items()
+    for product in products
+    for alias in (product, f"{vendor} {product}")
 }
 QUERY_LABELS = {
     "specs": "technical specifications",
@@ -23,6 +40,18 @@ QUERY_LABELS = {
     "compatibility": "hardware and operating system compatibility",
 }
 INTERNAL_IDENTIFIER = re.compile(r"\b(?:LT|DT|MB|PR|RM|EMP)-\d+\b", re.IGNORECASE)
+RESTRICTED_EXTERNAL_DATA = re.compile(
+    r"(?:\b(?:hostname|host\s*name|serial(?:\s*number)?|assigned\s*user|location|"
+    r"diagnostic(?:\s*log)?|ip(?:\s*address)?|password|passwd|token|api[ _-]?key|"
+    r"mfa|otp|recovery[ _-]?code)\b)|"
+    r"(?:\b(?:mật\s*khẩu|mat\s*khau|mã\s*otp|ma\s*otp)\b)|"
+    r"(?:\b(?:\d{1,3}\.){3}\d{1,3}\b)",
+    re.IGNORECASE,
+)
+INSTRUCTION_LIKE_INPUT = re.compile(
+    r"(?:system:|assistant:|developer:|ignore\s+(?:all\s+)?previous|tool_calls_json)",
+    re.IGNORECASE,
+)
 
 
 def _domain(url: str) -> str:
@@ -62,14 +91,33 @@ def search_device_info(
         return {"tool": "search_device_info", "error": "missing_public_product_identity"}
     if len(manufacturer_value) > 80 or len(model_value) > 160:
         return {"tool": "search_device_info", "error": "public_product_identity_too_long"}
-    if INTERNAL_IDENTIFIER.search(f"{manufacturer_value} {model_value}"):
+    public_identity = f"{manufacturer_value} {model_value}"
+    if INTERNAL_IDENTIFIER.search(public_identity) or RESTRICTED_EXTERNAL_DATA.search(public_identity):
         return {
             "tool": "search_device_info",
-            "error": "restricted_internal_identifier",
-            "message": "Remove asset and employee identifiers before external search.",
+            "error": "restricted_external_data",
+            "message": "Remove internal identifiers, diagnostics, network data, and credentials before external search.",
+        }
+    if "\n" in public_identity or "\r" in public_identity or INSTRUCTION_LIKE_INPUT.search(public_identity):
+        return {
+            "tool": "search_device_info",
+            "error": "invalid_public_product_identity",
+            "message": "Use only a public manufacturer and model name for external search.",
         }
     if query_type_value not in QUERY_LABELS:
-        return {"tool": "search_device_info", "error": "invalid_query_type", "query_type": query_type_value}
+        return {"tool": "search_device_info", "error": "invalid_query_type"}
+    vendor_lookup = manufacturer_value.casefold()
+    if vendor_lookup == "hewlett-packard":
+        vendor_lookup = "hp"
+    identity = PUBLIC_IDENTITIES.get((vendor_lookup, model_value.casefold()))
+    if identity is None:
+        return {
+            "tool": "search_device_info",
+            "error": "unapproved_public_product_identity",
+            "message": "Use a reviewed public manufacturer/model pair. Unknown products require catalog review before external search.",
+        }
+    # Only catalog constants, never the caller's raw text, enter the request.
+    manufacturer_value, model_value = identity
 
     key = os.getenv("TAVILY_API_KEY")
     if not key:
@@ -81,7 +129,7 @@ def search_device_info(
 
     try:
         vendor_key = manufacturer_value.casefold().replace(" ", "-")
-        official_domains = VENDOR_DOMAINS.get(vendor_key, [])
+        official_domains = VENDOR_DOMAINS[vendor_key]
         query = f"{manufacturer_value} {model_value} {QUERY_LABELS[query_type_value]} official"
         limit = min(5, max(1, int(max_results or 3)))
         body: dict[str, Any] = {

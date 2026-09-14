@@ -1,0 +1,22 @@
+{
+  "catalog_version": "2026-09-01",
+  "data_classification": "fictional_anonymized_training_data",
+  "tickets": [
+    {
+      "ticket_id": "LAB-1A2B3C4D",
+      "status": "in_progress",
+      "priority": "high",
+      "asset_id": "LT-204",
+      "updated_at": "2026-09-01T09:30:00Z",
+      "summary": "VPN authentication timeout"
+    },
+    {
+      "ticket_id": "LAB-5E6F7A8B",
+      "status": "resolved",
+      "priority": "medium",
+      "asset_id": "LT-240",
+      "updated_at": "2026-09-02T14:15:00Z",
+      "summary": "Wi-Fi reconnect issue"
+    }
+  ]
+}
