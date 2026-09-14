@@ -5,11 +5,12 @@ kind: local_inventory
 provider: mock_device_inventory
 requires_env: []
 inputs: [asset_id, check]
-outputs: [device, diagnostics]
+outputs: [tool, asset_id, check, device, diagnostics, snapshot_at]
 side_effect: false
 ---
 # inspect_device
 
 Looks up one company asset and returns its stored diagnostic snapshot. A valid
-asset ID is required. Supported checks are all, network, vpn, security,
-hardware, and software.
+asset ID is required. Supported checks are `all`, `network`, `vpn`, `security`,
+`hardware`, and `software`. An unknown asset returns `error: asset_not_found`.
+This is internal, read-only inventory data and is not shared-service status.
