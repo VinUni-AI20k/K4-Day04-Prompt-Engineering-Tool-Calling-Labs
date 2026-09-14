@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { TriangleAlert, User } from "lucide-react"
+import { Check, Copy, RefreshCw, TriangleAlert, User } from "lucide-react"
 import { AgentTrace } from "@/components/ui/agent-trace"
 import { JsonViewer } from "@/components/json-viewer"
 import { ToolEventList } from "@/components/tool-event-list"
@@ -16,6 +16,8 @@ export interface Turn {
   response?: ChatResponse
   /** Set when the request itself failed, as opposed to the run failing. */
   transportError?: string
+  /** Set when the reader stopped the request on purpose. */
+  cancelled?: boolean
 }
 
 const STATUS_STYLE: Record<RunStatus, string> = {
@@ -25,15 +27,36 @@ const STATUS_STYLE: Record<RunStatus, string> = {
   provider_error: "border-destructive/50 text-destructive",
 }
 
-export function TurnCard({ turn }: { turn: Turn }) {
+interface TurnCardProps {
+  turn: Turn
+  /** Re-sends this turn's message. Present on every outcome that can be retried. */
+  onRetry: (turn: Turn) => void
+  busy: boolean
+}
+
+export function TurnCard({ turn, onRetry, busy }: TurnCardProps) {
   return (
     <article className="space-y-3">
       <UserMessage text={turn.user} />
 
-      {turn.transportError ? (
-        <FailureNotice title="Could not reach the agent" detail={turn.transportError} />
+      {turn.cancelled ? (
+        <Outcome
+          tone="neutral"
+          title="Stopped"
+          detail="You stopped this turn before the agent finished."
+          onRetry={() => onRetry(turn)}
+          busy={busy}
+        />
+      ) : turn.transportError ? (
+        <Outcome
+          tone="error"
+          title="Could not reach the agent"
+          detail={turn.transportError}
+          onRetry={() => onRetry(turn)}
+          busy={busy}
+        />
       ) : turn.response ? (
-        <AgentAnswer turn={turn} response={turn.response} />
+        <AgentAnswer turn={turn} response={turn.response} onRetry={onRetry} busy={busy} />
       ) : (
         <PendingAnswer />
       )}
@@ -54,12 +77,25 @@ function UserMessage({ text }: { text: string }) {
   )
 }
 
-function AgentAnswer({ turn, response }: { turn: Turn; response: ChatResponse }) {
+function AgentAnswer({
+  turn,
+  response,
+  onRetry,
+  busy,
+}: {
+  turn: Turn
+  response: ChatResponse
+  onRetry: (turn: Turn) => void
+  busy: boolean
+}) {
   const rounds = response.rounds?.length ?? 0
   // The envelope is only worth showing when it carried something the reply did
   // not, which is exactly when a grader wants to see it.
   const showEnvelope =
     response.structured_output != null && response.assistant_text !== response.reply
+  // A failed run is the one outcome worth offering again: the others are real
+  // answers, and re-running them would just spend quota.
+  const retryable = response.status === "provider_error"
 
   return (
     <div className="border-border bg-card space-y-3 rounded-xl border p-3 sm:p-4">
@@ -79,19 +115,37 @@ function AgentAnswer({ turn, response }: { turn: Turn; response: ChatResponse })
           {(response.duration_ms / 1000).toFixed(2)}s
         </span>
         {response.retries > 0 && (
-          <span className="text-muted-foreground font-mono text-[11px]">
+          <span
+            title="The provider rate limited this turn and it was retried automatically."
+            className="text-muted-foreground font-mono text-[11px]"
+          >
             {response.retries} retr{response.retries === 1 ? "y" : "ies"}
           </span>
         )}
+
+        {response.reply && <CopyButton text={response.reply} />}
       </div>
 
       {response.error && (
-        <FailureNotice title="The run did not finish" detail={response.error} />
+        <Outcome
+          tone="error"
+          title="The run did not finish"
+          detail={response.error}
+          onRetry={retryable ? () => onRetry(turn) : undefined}
+          busy={busy}
+        />
       )}
 
       {response.reply && (
         <p className="text-foreground text-sm leading-relaxed whitespace-pre-wrap">
           {response.reply}
+        </p>
+      )}
+
+      {response.status === "waiting_for_user" && (
+        <p className="border-border text-muted-foreground rounded-lg border border-dashed px-3 py-2 text-xs">
+          The agent paused to ask you something. Answer in the box below and it will carry on
+          from here.
         </p>
       )}
 
@@ -102,7 +156,7 @@ function AgentAnswer({ turn, response }: { turn: Turn; response: ChatResponse })
           runId={`turn_${turn.index}`}
           model={response.model}
           autoPlay={false}
-          // A finished run is the useful resting state here: this is evidence to
+          // A finished run is the useful resting state: this is evidence to
           // read, not a loop to watch, so the playhead starts at the end.
           defaultTime={response.duration_ms}
           rowHeight={32}
@@ -119,8 +173,8 @@ function AgentAnswer({ turn, response }: { turn: Turn; response: ChatResponse })
       )}
 
       {showEnvelope && (
-        <details className="group/env">
-          <summary className="text-muted-foreground hover:text-foreground focus-visible:ring-ring marker:content-[''] inline-flex cursor-pointer rounded font-mono text-[11px] underline underline-offset-2 outline-none focus-visible:ring-2">
+        <details>
+          <summary className="text-muted-foreground hover:text-foreground focus-visible:ring-ring inline-flex cursor-pointer rounded font-mono text-[11px] underline underline-offset-2 outline-none focus-visible:ring-2">
             Raw model output
           </summary>
           <div className="mt-2">
@@ -129,6 +183,38 @@ function AgentAnswer({ turn, response }: { turn: Turn; response: ChatResponse })
         </details>
       )}
     </div>
+  )
+}
+
+function CopyButton({ text }: { text: string }) {
+  const [copied, setCopied] = React.useState(false)
+  return (
+    <button
+      type="button"
+      onClick={async () => {
+        try {
+          await navigator.clipboard.writeText(text)
+          setCopied(true)
+          setTimeout(() => setCopied(false), 1400)
+        } catch {
+          // Clipboard is blocked over plain http in some browsers. The reply is
+          // selectable regardless, so there is nothing to recover from.
+        }
+      }}
+      className="text-muted-foreground hover:text-foreground focus-visible:ring-ring ml-auto inline-flex items-center gap-1 rounded px-1 font-mono text-[11px] outline-none focus-visible:ring-2"
+    >
+      {copied ? (
+        <>
+          <Check aria-hidden="true" className="text-primary size-3" />
+          copied
+        </>
+      ) : (
+        <>
+          <Copy aria-hidden="true" className="size-3" />
+          copy reply
+        </>
+      )}
+    </button>
   )
 }
 
@@ -159,14 +245,49 @@ function PendingAnswer() {
   )
 }
 
-function FailureNotice({ title, detail }: { title: string; detail: string }) {
+/** Any outcome that is not a plain answer, always carrying a way forward. */
+function Outcome({
+  tone,
+  title,
+  detail,
+  onRetry,
+  busy,
+}: {
+  tone: "error" | "neutral"
+  title: string
+  detail: string
+  onRetry?: () => void
+  busy: boolean
+}) {
+  const error = tone === "error"
   return (
-    <div className="border-destructive/40 bg-destructive/5 flex items-start gap-2.5 rounded-lg border p-3">
-      <TriangleAlert aria-hidden="true" className="text-destructive mt-0.5 size-4 shrink-0" />
-      <div className="min-w-0">
-        <p className="text-destructive text-xs font-medium">{title}</p>
+    <div
+      className={cn(
+        "flex flex-wrap items-start gap-2.5 rounded-lg border p-3",
+        error ? "border-destructive/40 bg-destructive/5" : "border-border"
+      )}
+    >
+      {error && (
+        <TriangleAlert aria-hidden="true" className="text-destructive mt-0.5 size-4 shrink-0" />
+      )}
+      <div className="min-w-0 flex-1">
+        <p className={cn("text-xs font-medium", error ? "text-destructive" : "text-foreground")}>
+          {title}
+        </p>
         <p className="text-foreground/80 mt-1 text-xs leading-relaxed">{detail}</p>
       </div>
+      {onRetry && (
+        <button
+          type="button"
+          onClick={onRetry}
+          disabled={busy}
+          title={busy ? "Wait for the current turn to finish" : "Send this message again"}
+          className="border-border text-foreground hover:bg-muted focus-visible:ring-ring inline-flex shrink-0 items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs font-medium outline-none focus-visible:ring-2 disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          <RefreshCw aria-hidden="true" className="size-3.5" />
+          Try again
+        </button>
+      )}
     </div>
   )
 }

@@ -1,40 +1,75 @@
 "use client"
 
-import { Download, Hash } from "lucide-react"
+import { Download, Hash, RotateCcw } from "lucide-react"
 import type { ArtifactVersion } from "@/lib/api"
+import { cn } from "@/lib/utils"
+
+export type ConnectionState = "checking" | "online" | "offline"
 
 interface RunHeaderProps {
   artifact: ArtifactVersion | null
   model: string
   provider: string
+  connection: ConnectionState
   turnCount: number
+  busy: boolean
   onDownload: () => void
+  onClear: () => void
+}
+
+const CONNECTION_COPY: Record<ConnectionState, { dot: string; label: string }> = {
+  checking: { dot: "bg-muted-foreground", label: "Connecting to the agent" },
+  online: { dot: "bg-primary", label: "Agent reachable" },
+  offline: { dot: "bg-destructive", label: "Agent unreachable" },
 }
 
 /**
  * What is running, and which artifacts produced it.
  *
  * The version and both hashes are computed server-side from the files on disk,
- * so this cannot claim a version the deployment is not actually running. That
- * is the whole point of showing them: a screenshot of a result is only evidence
- * if it names the prompt and tool declarations that produced it.
+ * so this cannot claim a version the deployment is not running. That is the
+ * point of showing them: a screenshot of a result is only evidence if it names
+ * the prompt and tool declarations that produced it.
  */
-export function RunHeader({ artifact, model, provider, turnCount, onDownload }: RunHeaderProps) {
+export function RunHeader({
+  artifact,
+  model,
+  provider,
+  connection,
+  turnCount,
+  busy,
+  onDownload,
+  onClear,
+}: RunHeaderProps) {
+  const status = CONNECTION_COPY[connection]
+
   return (
-    <header className="border-border bg-card/60 sticky top-0 z-10 border-b backdrop-blur">
+    <header className="border-border bg-card/80 sticky top-0 z-20 border-b backdrop-blur">
       <div className="mx-auto flex w-full max-w-5xl flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3">
-        <div className="min-w-0">
-          <h1 className="text-foreground text-sm leading-tight font-medium">
-            IT Helpdesk Agent
-          </h1>
-          <p className="text-muted-foreground font-mono text-[11px] leading-tight">
-            {provider ? `${provider} / ` : ""}
-            {model || "not connected"}
-          </p>
+        <div className="flex min-w-0 items-center gap-2.5">
+          {/* Real state, not decoration: this is the only signal that the Python
+              side is actually answering before you spend a turn finding out. */}
+          <span
+            aria-hidden="true"
+            className={cn("size-1.5 shrink-0 rounded-full", status.dot)}
+          />
+          <div className="min-w-0">
+            <h1 className="text-foreground text-sm leading-tight font-medium">
+              IT Helpdesk Agent
+            </h1>
+            <p className="text-muted-foreground font-mono text-[11px] leading-tight">
+              <span className="sr-only">{status.label}. </span>
+              {connection === "offline"
+                ? "agent unreachable"
+                : model
+                  ? `${provider} / ${model}`
+                  : "connecting"}
+            </p>
+          </div>
         </div>
 
         <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1.5 sm:ml-auto">
-          {artifact ? (
+          {artifact && (
             <>
               <span className="border-border text-foreground/85 rounded-md border px-2 py-1 font-mono text-[11px] whitespace-nowrap">
                 {artifact.artifact_version}
@@ -42,21 +77,43 @@ export function RunHeader({ artifact, model, provider, turnCount, onDownload }: 
               <HashChip label="prompt" value={artifact.prompt_hash} />
               <HashChip label="tools" value={artifact.tools_hash} />
             </>
-          ) : (
-            <span className="text-muted-foreground font-mono text-[11px]">
-              artifact version unavailable
-            </span>
           )}
 
-          <button
-            type="button"
-            onClick={onDownload}
-            disabled={turnCount === 0}
-            className="border-border text-foreground hover:bg-muted focus-visible:ring-ring inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs font-medium whitespace-nowrap outline-none focus-visible:ring-2 disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            <Download aria-hidden="true" className="size-3.5" />
-            Transcript
-          </button>
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={onClear}
+              disabled={turnCount === 0 || busy}
+              title={
+                busy
+                  ? "Wait for the current turn to finish"
+                  : turnCount === 0
+                    ? "Nothing to clear yet"
+                    : "Clear this conversation"
+              }
+              className="border-border text-foreground hover:bg-muted focus-visible:ring-ring inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs font-medium whitespace-nowrap outline-none focus-visible:ring-2 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <RotateCcw aria-hidden="true" className="size-3.5" />
+              Clear
+            </button>
+
+            <button
+              type="button"
+              onClick={onDownload}
+              disabled={turnCount === 0}
+              // Disabled controls explain themselves. A dead button with no
+              // reason is the thing that makes software feel unfinished.
+              title={
+                turnCount === 0
+                  ? "Send a message first, then the transcript can be downloaded"
+                  : "Download this conversation as lab evidence"
+              }
+              className="border-border text-foreground hover:bg-muted focus-visible:ring-ring inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs font-medium whitespace-nowrap outline-none focus-visible:ring-2 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <Download aria-hidden="true" className="size-3.5" />
+              Transcript
+            </button>
+          </div>
         </div>
       </div>
     </header>
@@ -68,9 +125,9 @@ function HashChip({ label, value }: { label: string; value: string }) {
   return (
     <span
       // The full hash is what gets pasted into a report, so it stays reachable
-      // on hover even though only the first 12 characters are shown.
+      // even though only the first 12 characters are shown.
       title={`${label}: ${value}`}
-      className="text-muted-foreground inline-flex items-center gap-1 font-mono text-[11px] whitespace-nowrap"
+      className="text-muted-foreground hidden items-center gap-1 font-mono text-[11px] whitespace-nowrap sm:inline-flex"
     >
       <Hash aria-hidden="true" className="size-3" />
       {label} {value.slice(0, 12)}

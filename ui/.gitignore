@@ -46,3 +46,6 @@ next-env.d.ts
 
 # Scratch brief handed to the offloaded worker, not a lab deliverable.
 .agy-brief.md
+
+.vercel
+.env*

@@ -61,9 +61,14 @@ from versioning import artifact_version_dict, build_artifact_version  # noqa: E4
 # Vercel, so point the tool at a writable directory without touching the graded
 # implementation. Locally this leaves the repo's own tickets/ folder alone.
 if os.getenv("VERCEL"):
-    import tools.create_ticket.tool as _ticket_tool
-
-    _ticket_tool.TICKET_DIR = Path("/tmp/tickets")
+    # Taken from sys.modules rather than imported by dotted path: `from tools
+    # import ...` above has already loaded this module, and inside the Vercel
+    # bundle the dotted form resolves `create_ticket` as a top-level namespace
+    # package and raises. Looking it up cannot fail, and if it were ever absent
+    # the tool would simply report a write error instead of breaking startup.
+    _ticket_tool = sys.modules.get("tools.create_ticket.tool")
+    if _ticket_tool is not None:
+        _ticket_tool.TICKET_DIR = Path("/tmp/tickets")
 
 ARTIFACTS = LAB_ROOT / "artifacts"
 DEFAULT_MODEL = os.getenv("LAB_MODEL", "gemini-3.1-flash-lite")

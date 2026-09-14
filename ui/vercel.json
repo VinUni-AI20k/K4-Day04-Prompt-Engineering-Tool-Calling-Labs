@@ -1,5 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "nextjs",
   "installCommand": "node scripts/sync-lab.mjs && npm install",
   "functions": {
     "api/chat.py": {
