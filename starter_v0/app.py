@@ -192,7 +192,7 @@ def render_tool_trace(turns: list[dict[str, Any]]) -> None:
         calls = round_item.get("tool_calls") or []
         results = round_item.get("tool_results") or []
         title = f"Round {round_index}: {len(calls)} call(s)"
-        with st.expander(title, expanded=True):
+        with st.expander(title, expanded=False):
             assistant_text = round_item.get("assistant_text")
             if assistant_text:
                 st.caption("Assistant draft")
