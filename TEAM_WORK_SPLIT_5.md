@@ -81,7 +81,7 @@ Bang workflow tong:
 | 1 | Nguoi 1 - Eval/Evidence | Bat dau dau tien | Repo + `.env` provider | Run `v0`, failure summary, metric baseline |
 | 2 | Nguoi 2 - Prompt | Sau khi co failure summary `v0` | Failure summary cua Nguoi 1 | `system_prompt.md` v1/v2/v3 changes + hypothesis |
 | 3 | Nguoi 3 - Tools schema | Sau khi co failure summary `v0` | Failure summary + tool implementation | `tools.yaml` v1/v2/v3 changes + hypothesis |
-| 4 | Nguoi 4 - UI | Co the doc source som, implement sau khi loop ro | `chat.py`, artifact path, provider setup | `app.py`, UI demo transcript |
+| 4 | Nguoi 4 - UI | Sau khi Nguoi 1/2/3 hoan thanh implementation va integrate flow chinh | `chat.py`, artifact path, provider setup, artifacts da integrate | `app.py`, UI demo transcript |
 | 5 | Nguoi 5 - Report/QA | Bat dau skeleton som, finalize sau khi co runs | Runs, transcripts, metric, demo scenario | `REPORT.md`, `eval_group.json`, final checklist |
 
 ## 4. Phan cong chi tiet
@@ -292,7 +292,17 @@ Khong nen sua:
 
 ### Nguoi 4 - UI Owner
 
-Muc tieu: xay UI chat hoat dong va hien thi trace tool calls/args/results/artifact version.
+Muc tieu: tiep nhan code da duoc Nguoi 1/2/3 integrate, review lai flow tong the, hoan thien UI chat va tao transcript demo end-to-end.
+
+Nguoi 4 tap trung vao UI sau khi cac phan loi chinh da duoc xu ly:
+
+- Review lai flow tong the sau khi da integrate.
+- Nam ro chat loop trong `chat.py` va cach UI tuong tac voi flow nay.
+- Kiem tra artifact path de UI hien thi/truy cap dung artifact/output.
+- Hoan thien provider setup can thiet cho UI.
+- Implement va hoan thien giao dien trong `app.py`.
+- Chuan bi UI demo transcript minh hoa luong end-to-end.
+- Test UI voi toan bo flow da duoc Nguoi 1/2/3 tich hop.
 
 File so huu chinh:
 
@@ -306,21 +316,38 @@ Viec can lam:
 
 Start khi:
 
-- Co the bat dau doc source ngay tu dau.
-- Nen implement UI skeleton sau khi Nguoi 1 xong setup va biet provider nao se dung.
-- Nen merge UI sau khi `system_prompt.md` va `tools.yaml` da co version on dinh toi thieu `v1`.
+- Nguoi 1 da co run/evidence va version log toi thieu cho cac vong chinh.
+- Nguoi 2 da cap nhat `system_prompt.md`.
+- Nguoi 3 da cap nhat `tools.yaml`.
+- Cac thay doi prompt/tool da duoc merge vao branch chung de UI doc dung artifact moi nhat.
 
 Workflow:
 
 1. Tao branch `ui-streamlit`.
-2. Doc `starter_v0/chat.py`, dac biet:
+2. Pull branch chung moi nhat sau khi Nguoi 1/2/3 da integrate.
+3. Review nhanh flow tong the:
+   - `run_eval.py` tao run evidence nhu the nao.
+   - `agent.py` goi provider va execute tools trong eval ra sao.
+   - `chat.py` chay multi-turn loop va ghi transcript ra sao.
+   - `artifacts/system_prompt.md` va `artifacts/tools.yaml` dang la version nao.
+4. Doc ky `starter_v0/chat.py`, dac biet:
    - `run_model_tool_loop`
    - `write_transcript`
    - `build_artifact_version`
    - `load_tool_declarations`
    - `to_openai_tools`
-3. Tao file UI moi `starter_v0/app.py`.
-4. Lam UI chat dung chung runtime:
+5. Kiem tra artifact path:
+   - Mac dinh system prompt: `artifacts/system_prompt.md`
+   - Mac dinh tools: `artifacts/tools.yaml`
+   - Transcript output: `transcripts/`
+   - Run evidence tham chieu trong report: `runs/`
+6. Hoan thien provider setup trong UI:
+   - Cho chon provider: `openrouter`, `openai`, `anthropic`, `gemini`.
+   - Cho nhap model override neu can.
+   - Doc key tu `.env` thong qua runtime san co, khong hien thi key tren UI.
+   - Hien thi loi ro neu provider thieu key hoac package.
+7. Tao/hoan thien file UI `starter_v0/app.py`.
+8. Lam UI chat dung chung runtime:
    - Load provider/model tu input hoac sidebar.
    - Load `artifacts/system_prompt.md`.
    - Load `artifacts/tools.yaml`.
@@ -329,24 +356,43 @@ Workflow:
    - Hien thi tung round/tool call/tool args/tool result/error.
    - Hien thi artifact version, prompt hash, tools hash.
    - Ghi transcript path.
-5. Neu dung Streamlit, them vao `requirements.txt`:
+9. Neu dung Streamlit, them vao `requirements.txt`:
 
 ```text
 streamlit>=1.30.0
 ```
 
-6. Chay UI:
+10. Chay UI:
 
 ```powershell
 cd starter_v0
 streamlit run app.py
 ```
 
-7. Tao it nhat 3 transcript demo:
+Neu command `streamlit` khong co trong PATH, dung:
+
+```powershell
+python -m streamlit run app.py
+```
+
+11. Test UI voi flow da integrate:
+   - Meta/no-tool: "Ban la gi va co the ho tro viec nao?"
+   - Service status: "Dich vu VPN production hien co su co khong?"
+   - Missing info: "Kiem tra Wi-Fi tren laptop cua minh giup nhe."
+   - Multi-tool: "VPN tren LT-204 loi; kiem tra ca status VPN production va may do."
+   - Action boundary: "Tao ticket muc high cho loi VPN tren LT-204 giup minh."
+   - Confirmed action: "Toi xac nhan tao ticket: VPN loi AUTH_TIMEOUT tren LT-204, priority high."
+12. Tao it nhat 3 transcript demo final:
    - normal single-turn
    - missing-info/clarify
    - multi-turn/action confirmation boundary
-8. Ban giao transcript path va screenshot/demo note cho Nguoi 5.
+13. Neu gap loi integration, ghi ro:
+   - Loi o UI rendering.
+   - Loi artifact path.
+   - Loi provider setup/API key.
+   - Loi tool call/runtime.
+   - Loi transcript write.
+14. Ban giao transcript path va screenshot/demo note cho Nguoi 5.
 
 Output phai ban giao:
 
