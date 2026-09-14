@@ -233,7 +233,7 @@ người khác viết thay. Các commit có thể dùng làm evidence ban đầu
 | Git identity | Evidence quan sát được | Commit gợi ý |
 |---|---|---|
 | `quanganh6905` / `quanganhnguyenuet` | system prompt và final artifacts giúp pass được những test mà các ver trước chưa hoàn thiện | `6e7675e`, `b565645` |
-| Vũ Quốc Bảo | group eval và Streamlit UI | `cc078a2`, `6108da8` |
+| `byllkoy259` | group eval và Streamlit UI | `cc078a2`, `6108da8` |
 | `maitungdeptraiiiii` | tool declaration và version log | `18904e2` |
 | `chinh0110` | viết system prompt v1 v2  | `aa00ed52`, `834ecce` |
 
@@ -250,6 +250,17 @@ Mỗi thành viên sao chép và tự hoàn thành mẫu sau:
 - **Khó khăn tôi gặp và cách tôi xử lý:** Khó khăn lớn nhất là một thay đổi giúp adversarial cases có thể làm regression các base cases. 
 - **Điều tôi học được từ phần việc này:**Tôi học được rằng tool name, description và JSON schema đều là một phần của prompt. Điểm automatic PASS cũng chưa đủ để kết luận hệ thống hoạt động đúng, vì tool vẫn có thể trả lỗi hoặc tạo side effect ngoài ý muốn. Do đó cần kiểm tra cả metric, trace, tool results và filesystem.
 - **Nếu làm lại, tôi sẽ cải thiện điều gì:** Tôi sẽ thiết kế hypothesis cụ thể hơn cho từng version, chỉ thay đổi một nhóm quy tắc trong mỗi vòng và lưu đầy đủ run evidence ngay từ đầu. 
+
+### Vũ Quốc Bảo — 2A202602829
+
+- **Vai trò/phần việc được nhận:** Thiết kế eval_group.json và xây dựng giao diện Live Chat Streamlit
+- **Những gì tôi đã thay đổi trong repo chung:** Viết 10 case eval nhóm (5 single + 5 multi-turn); xây `app.py` dùng chung `run_model_tool_loop` với CLI/eval; bổ sung transcript evidence.
+- **File hoặc artifact liên quan:** `data/eval_group.json`, `starter_v0/app.py`, `starter_v0/.streamlit/config.toml`, `starter_v0/transcripts/ui-test_openai_20260914T235916689384.transcript.json`
+- **Commit hash hoặc pull request:** `6108da8`, `ee36f60`
+- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:** Tách mỗi case eval để kiểm tra đúng một kỹ năng; UI dùng chung agent loop với CLI để hành vi nhất quán.
+- **Khó khăn tôi gặp và cách tôi xử lý:** UI hiện nguyên JSON thay vì câu trả lời tự nhiên — sửa bằng cách parse field `reply` để hiển thị; phát hiện model không gọi tool `clarify` khi cần xác nhận, dùng lỗi đó viết thêm case G05/G09.
+- **Điều tôi học được từ phần việc này:** Case eval hợp lý trên giấy vẫn có thể lộ lỗi thật khi chạy qua UI thực tế; transcript là bằng chứng cần thiết bên cạnh điểm số tự động.
+- **Nếu làm lại, tôi sẽ cải thiện điều gì:** Thêm chế độ chọn case từ file eval ngay trong UI, tự hiện `expect.tool_calls` để đối chiếu nhanh hơn.
 
 ## C3. Final checkout
 
