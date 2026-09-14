@@ -3,8 +3,8 @@
 ## Team
 
 - Team: SV
-- Members:
-- Provider/model:
+- Members: 5
+- Provider/model: 
 
 # PHẦN A — Giới thiệu agent
 
@@ -12,7 +12,7 @@
 
 > Viết 1–2 câu mô tả capability và giới hạn của agent.
 
-**Link dùng thử:**
+**Link dùng thử:** 
 
 > URL: 
 
