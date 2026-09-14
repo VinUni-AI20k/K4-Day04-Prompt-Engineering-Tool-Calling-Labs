@@ -1,0 +1,7 @@
+# Keep artifact bytes identical on every OS so prompt/tools hashes match version_log.csv
+*.md text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.json text eol=lf
+*.csv text eol=lf
+*.py text eol=lf

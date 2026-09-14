@@ -3,7 +3,7 @@
 ## Team
 
 - Team: _TODO tên nhóm_ (repo: https://github.com/vuhuyng04/K4-Day04-2A202602662)
-- Members: xem `TEAMMATES.md` — Nguyễn Vũ Huy (vuhuyng04, nhóm trưởng), thiendao, _TODO thành viên 3_, Nguyễn Nguyên Phong (Heargreaves)
+- Members: xem `TEAMMATES.md` — Nguyễn Vũ Huy (vuhuyng04, nhóm trưởng), Đào Ngọc Bình Thiên (thiendao103), Đỗ Thái Sơn (tsun165), Nguyễn Nguyên Phong (Heargreaves1)
 - Provider/model: openai / gpt-4o-mini (temperature 0)
 
 > Phân công điền report: **Huy** — B1, B2, B7, C1, C3. **Thành viên 2 (thiendao)** — B3.
@@ -87,12 +87,28 @@ Chi tiết từng vòng, hash và bài học: `artifacts/analysis_notes.md`. B�
 
 ## B3. Team eval cases
 
-_Owner: thành viên 2 (thiendao)._ Liệt kê đúng 10 case tự viết: 5 single-turn và 5 multi-turn.
-File: `data/eval_group.json`. Nhóm trưởng chạy `python run_eval.py --version v3 --provider openai --suite group --eval-cases data/eval_group.json` và push run JSON.
+Case do thành viên 2 (Đào Ngọc Bình Thiên) viết trong `data/eval_group.json`: 10 case,
+5 single-turn (G01–G05) + 5 multi-turn (G06–G10). Nhóm trưởng chạy trên artifact v3
+(`v3+p113d255554a0+t54500e7b08c6`, openai/gpt-4o-mini):
+`runs/v3_B_group_openai_20260914T195901036502.json` — 10/10 measured, 0 provider error,
+**case_accuracy 0.90**, multiturn 1.0, 0 ticket được ghi.
 
 | Case ID | What it tests | Expected behavior | Result |
 |---|---|---|---|
-|  |  |  |  |
+| G01_ambiguous_vpn_request | Ý định mơ hồ: "VPN của mình không vào được" — dịch vụ hay thiết bị? | `clarify(choice, [device, service])` | **FAIL** — gọi `check_service_status(vpn)`; model mặc định hiểu là shared service. Failure thật: prompt v3 chỉ bắt clarify khi thiếu ID/environment, chưa có rule cho "service vs device" mơ hồ. |
+| G02_missing_asset_id | Thiếu asset ID ("laptop của tôi") | `clarify(text)` | PASS — hỏi mã asset, không gọi inventory với placeholder |
+| G03_format_existing_findings_only | Format-only: không tra cứu lại | `format_incident_report(handoff, "Printer incident")` | PASS — chỉ 1 call, không refetch |
+| G04_public_model_boundary | External search với model công khai | `search_device_info(Dell, Latitude 5440, compatibility)` | PASS — args đúng, không có identifier nội bộ |
+| G05_cancelled_ticket_request | Cancellation ngay trong 1 lượt | no tool | PASS |
+| G06_corrected_asset_and_check | Correction mã asset ở lượt sau, giữ `check` | `inspect_device(LT-412, network)` | PASS — dùng giá trị mới nhất |
+| G07_cancel_stale_action | Hủy ticket rồi "xác nhận" sau đó | no tool | PASS — không tạo ticket sau khi đã hủy |
+| G08_stale_ticket_confirmation | Xác nhận cũ vô hiệu khi đổi priority | `clarify(yes_no)` | PASS — hỏi lại với payload mới (priority high) |
+| G09_latest_intent_replaces_status | Ý định mới thay ý định cũ | `search_kb(category=email)` | PASS — không gọi thêm `check_service_status` |
+| G10_carry_staging_environment | Carry-over environment qua nhiều lượt | `check_service_status(email, staging)` | PASS — giữ staging từ lượt 1 |
+
+G01 là case duy nhất fail và là finding mới không có trong base suite: base chỉ kiểm tra
+thiếu ID/environment, team eval phát hiện agent chưa hỏi lại khi không rõ vấn đề thuộc
+dịch vụ hay thiết bị. Đưa vào hướng vòng sau (B7).
 
 ## B4. Live chat evidence
 
@@ -339,13 +355,15 @@ không dùng chính phần reflection làm bằng chứng duy nhất cho đóng 
 Chỉ nộp bài khi mọi mục dưới đây đã được kiểm tra trên branch cuối cùng của
 repository chung:
 
-- [ ] `TEAMMATES.md` có đủ họ tên, MSSV, GitHub username và vai trò.
-- [ ] Mỗi thành viên có ít nhất một commit trong lịch sử branch nộp bài.
+- [x] `TEAMMATES.md` có đủ họ tên, MSSV, GitHub username và vai trò.
+- [x] Mỗi thành viên có ít nhất một commit trong lịch sử branch nộp bài
+      (`git log --format="%h | %an <%ae> | %s"` trên `main`: vuhuyng04, ThienDao/ThienDao103, tsun165/Do Thai Son, Nguyễn Nguyên Phong).
 - [ ] Phần reflection chung của nhóm đã hoàn thành và có evidence.
-- [ ] Mỗi thành viên đã tự viết và commit self-reflection của mình.
-- [ ] `system_prompt.md`, `tools.yaml`, version log, runs, eval, transcript, UI
+- [x] Mỗi thành viên đã tự viết và commit self-reflection của mình.
+- [x] `system_prompt.md`, `tools.yaml`, version log, runs, eval, transcript, UI
       và report đã có trong repository.
-- [ ] Không có `.env`, API key, token, dữ liệu thật, cache hoặc generated ticket.
+- [x] Không có `.env`, API key, token, dữ liệu thật, cache hoặc generated ticket
+      (kiểm tra bằng `git ls-files | grep -iE "\.env$|tickets/|\.venv"` → rỗng).
 - [ ] Nhóm trưởng và mọi thành viên đã thống nhất đúng một URL repository chung.
 - [ ] Nhóm trưởng và mọi thành viên sẽ nộp cùng URL đó trên VLearn.
 
