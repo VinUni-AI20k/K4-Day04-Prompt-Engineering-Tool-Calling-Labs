@@ -8,7 +8,7 @@
 tools:
   # ---------------- Core tools ----------------
   - name: clarify
-    description: "Gửi một câu hỏi cho người dùng."
+    description: "Hỏi lại user để làm rõ yêu cầu của người dùng."
     parameters:
       type: object
       properties:
@@ -18,17 +18,17 @@ tools:
       required: [question]
 
   - name: search_kb
-    description: "Tìm hướng dẫn hỗ trợ kỹ thuật."
+    description: "Find technical instructions and troubleshooting articles in the local KB, not live service health or asset diagnostics."
     parameters:
       type: object
       properties:
         query: {type: string, default: "", description: "Nội dung cần tìm"}
         category: {type: string, enum: [all, vpn, email, wifi, printing, account, security, hardware, software, meeting_room], default: "all", description: "Nhóm hướng dẫn"}
         top_k: {type: integer, default: 3, description: "Số kết quả"}
-      required: [query]
+      required: []
 
   - name: check_service_status
-    description: "Kiểm tra trạng thái một dịch vụ."
+    description: "Read shared service health, not diagnostics of an individual device or troubleshooting instructions."
     parameters:
       type: object
       properties:
@@ -37,16 +37,16 @@ tools:
       required: [service]
 
   - name: inspect_device
-    description: "Kiểm tra thông tin và chẩn đoán thiết bị."
+    description: "Read inventory and diagnostics for a specific asset, not employee account data, assigned-device lists or shared service health."
     parameters:
       type: object
       properties:
         asset_id: {type: string, description: "Mã tài sản"}
         check: {type: string, enum: [all, network, vpn, security, hardware, software], default: "all", description: "Nhóm kiểm tra"}
-      required: [asset_id]
+      required: [asset_id, check]
 
   - name: lookup_user
-    description: "Tra cứu người dùng trong danh bạ hỗ trợ."
+    description: "Look up an employee account and assigned-device list by employee ID. One call returns both. An assignment-list request does not require inspect_device."
     parameters:
       type: object
       properties:
