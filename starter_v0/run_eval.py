@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import csv
 import json
 import re
 from datetime import datetime
@@ -27,6 +28,94 @@ ALLOWED_CASE_FAILURE_TYPES = {
     "out_of_scope",
     "missing_info",
 }
+
+VERSION_LOG_FIELDS = [
+    "version",
+    "author",
+    "changed_artifact",
+    "artifact_version",
+    "prompt_hash",
+    "tools_hash",
+    "reason",
+    "hypothesis",
+    "metric_name",
+    "metric_before",
+    "metric_after",
+    "run_file",
+]
+
+
+def read_version_log(path: Path) -> list[dict[str, str]]:
+    if not path.exists() or path.stat().st_size == 0:
+        return []
+    with path.open("r", encoding="utf-8-sig", newline="") as handle:
+        reader = csv.DictReader(handle)
+        if reader.fieldnames != VERSION_LOG_FIELDS:
+            raise ValueError(
+                f"Unexpected columns in {path}. Expected: {', '.join(VERSION_LOG_FIELDS)}"
+            )
+        return [dict(row) for row in reader]
+
+
+def relative_run_path(path: Path) -> str:
+    try:
+        return path.resolve().relative_to(ROOT.resolve()).as_posix()
+    except ValueError:
+        return str(path.resolve())
+
+
+def update_version_log(
+    path: Path,
+    *,
+    version: str,
+    author: str,
+    changed_artifact: str,
+    artifact_version: Any,
+    reason: str,
+    hypothesis: str,
+    metric_name: str,
+    metric_after: Any,
+    run_path: Path,
+) -> None:
+    rows = read_version_log(path)
+    existing_index = next(
+        (index for index, row in enumerate(rows) if row.get("version") == version),
+        None,
+    )
+
+    if existing_index is not None:
+        metric_before = rows[existing_index].get("metric_before", "")
+    else:
+        metric_before = next(
+            (row.get("metric_after", "") for row in reversed(rows) if row.get("metric_after")),
+            "",
+        )
+
+    row = {
+        "version": version,
+        "author": author,
+        "changed_artifact": changed_artifact,
+        "artifact_version": artifact_version.artifact_version,
+        "prompt_hash": artifact_version.prompt_hash,
+        "tools_hash": artifact_version.tools_hash,
+        "reason": reason,
+        "hypothesis": hypothesis,
+        "metric_name": metric_name,
+        "metric_before": metric_before,
+        "metric_after": str(metric_after),
+        "run_file": relative_run_path(run_path),
+    }
+
+    if existing_index is None:
+        rows.append(row)
+    else:
+        rows[existing_index] = row
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=VERSION_LOG_FIELDS, lineterminator="\n")
+        writer.writeheader()
+        writer.writerows(rows)
 
 
 def load_cases(path: Path, phase: str) -> list[dict[str, Any]]:
@@ -270,7 +359,32 @@ def main() -> None:
     parser.add_argument("--tools", type=Path, default=ARTIFACTS_DIR / "tools.yaml")
     parser.add_argument("--eval-cases", type=Path, default=DATA_DIR / "eval_base.json")
     parser.add_argument("--runs-dir", type=Path, default=ROOT / "runs")
+    parser.add_argument("--version-log", type=Path, default=ARTIFACTS_DIR / "version_log.csv")
+    parser.add_argument("--author", default=None, help="Author/team recorded for a base-suite version.")
+    parser.add_argument("--changed-artifact", default=None, help="Artifact changed since the previous base version.")
+    parser.add_argument("--reason", default=None, help="Evidence-based reason for the version change.")
+    parser.add_argument("--hypothesis", default=None, help="Expected measurable effect of the version change.")
+    parser.add_argument("--metric-name", default="case_accuracy", help="Numeric summary metric written to version_log.csv.")
+    parser.add_argument("--no-version-log", action="store_true", help="Do not update version_log.csv for this base run.")
     args = parser.parse_args()
+
+    if args.suite == "base" and not args.no_version_log and args.version != "v0":
+        missing_metadata = [
+            flag
+            for flag, value in [
+                ("--author", args.author),
+                ("--changed-artifact", args.changed_artifact),
+                ("--reason", args.reason),
+                ("--hypothesis", args.hypothesis),
+            ]
+            if not value
+        ]
+        if missing_metadata:
+            parser.error(
+                "base runs after v0 require version-log metadata: "
+                + ", ".join(missing_metadata)
+                + ". Use --no-version-log only for an exploratory run."
+            )
 
     system_prompt = args.system_prompt.read_text(encoding="utf-8")
     artifact_version = build_artifact_version(args.version, args.system_prompt, args.tools)
@@ -323,6 +437,11 @@ def main() -> None:
         })
 
     summary = summarize(results)
+    if args.metric_name not in summary or not isinstance(summary[args.metric_name], (int, float)):
+        raise SystemExit(
+            f"Metric {args.metric_name!r} is not a numeric summary field. "
+            f"Available fields: {', '.join(summary)}"
+        )
     args.runs_dir.mkdir(parents=True, exist_ok=True)
     now = datetime.now()
     generated_at = now.isoformat(timespec="seconds")
@@ -353,9 +472,39 @@ def main() -> None:
 
     out_path = args.runs_dir / f"{run_id}.json"
     out_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2, default=str), encoding="utf-8")
+
+    version_log_status: str | None = None
+    if args.suite == "base" and not args.no_version_log:
+        evidence_is_valid = (
+            summary["provider_error_cases"] == 0
+            and summary["measured_cases"] == summary["total_cases"]
+        )
+        if evidence_is_valid:
+            update_version_log(
+                args.version_log,
+                version=args.version,
+                author=args.author or "team",
+                changed_artifact=args.changed_artifact or "baseline",
+                artifact_version=artifact_version,
+                reason=args.reason or "Starter baseline before optimization",
+                hypothesis=args.hypothesis or "Measure initial behavior before artifact changes",
+                metric_name=args.metric_name,
+                metric_after=summary[args.metric_name],
+                run_path=out_path,
+            )
+            version_log_status = f"Updated: {args.version_log}"
+        else:
+            version_log_status = (
+                "Skipped version log: evidence is invalid "
+                f"(provider_error_cases={summary['provider_error_cases']}, "
+                f"measured_cases={summary['measured_cases']}, total_cases={summary['total_cases']})"
+            )
+
     print_table(results, summary)
     print(f"\nArtifact version: {artifact_version.artifact_version}")
     print(f"\nSaved: {out_path}")
+    if version_log_status:
+        print(f"\n{version_log_status}")
 
 
 if __name__ == "__main__":
