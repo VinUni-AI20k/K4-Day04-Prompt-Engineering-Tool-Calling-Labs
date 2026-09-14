@@ -12,13 +12,13 @@
 |---|---|---|---|
 | **A** | **Prompt Engineer** | `starter_v0/artifacts/system_prompt.md` | Commit cải tiến system prompt v0 $\to$ v3; Giả thuyết & metric prompt |
 | **B** | **Tool Schema Lead** | `starter_v0/artifacts/tools.yaml` | Commit hoàn thiện descriptions & schema; Ranh giới tool & conventions |
-| **C** | **Eval Author (G01 $\to$ G10)**<br>👉 **Phụ trách: `@vukhai248`**<br>*(Branch: `contrib/vukhai248`)* | `starter_v0/data/eval_group.json`<br>`starter_v0/artifacts/REPORT.md` (mục B3) | Commit 10 case original (5 single + 5 multi); Kết quả chạy eval group; Bảng B3 trong REPORT.md |
+| **C** | **Eval Author (G01 $\to$ G10)**<br>👉 **Vũ Gia Khải (MSSV: 2A202602786)**<br>*(GitHub: `@vukhai248` / Branch: `contrib/vukhai248`)* | `starter_v0/data/eval_group.json`<br>`starter_v0/artifacts/REPORT.md` (mục B3) | Commit 10 case original (5 single + 5 multi); Kết quả chạy eval group; Bảng B3 trong REPORT.md |
 | **D** | **UI & Report Lead** | `starter_v0/app.py`<br>`starter_v0/artifacts/REPORT.md` (Phần A, C1) | Commit code giao diện Streamlit; Kịch bản demo & tổng hợp báo cáo |
 | **E** | **Security & Bonus Tool** | `starter_v0/tools/<bonus_tool>/`<br>`starter_v0/artifacts/REPORT.md` (B4a, B5, B6) | Commit code Bonus Tool mới; Audit rò rỉ dữ liệu Tavily & ticket rác |
 
 ---
 
-## 🎯 Kế Hoạch Chi Tiết Dành Riêng Cho Thành Viên C (`@vukhai248`)
+## 🎯 Kế Hoạch Chi Tiết Dành Riêng Cho Thành Viên C: Vũ Gia Khải - MSSV: 2A202602786 (`@vukhai248`)
 
 ### 📋 Phạm vi công việc:
 Tác giả bộ dữ liệu đánh giá của nhóm (**Team Eval**) tại tệp `starter_v0/data/eval_group.json` và bảng tổng kết mục **B3** trong `starter_v0/artifacts/REPORT.md`.

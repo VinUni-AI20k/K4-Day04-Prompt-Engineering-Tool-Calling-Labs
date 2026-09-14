@@ -3,7 +3,7 @@
 ## Team
 
 - Team:
-- Members:
+- Members: Vũ Gia Khải (MSSV: 2A202602786 - @vukhai248)
 - Provider/model:
 
 # PHẦN A — Giới thiệu agent
@@ -144,7 +144,7 @@ có thể đối chiếu đóng góp.
 
 Sao chép mẫu dưới đây cho từng thành viên:
 
-### Vũ Khải — MSSV: [Điền MSSV tại đây] (GitHub: @vukhai248)
+### Vũ Gia Khải — MSSV: 2A202602786 (GitHub: @vukhai248)
 
 - **Vai trò/phần việc được nhận:** Thành viên C — Eval Author (Chịu trách nhiệm thiết kế bộ kiểm thử 10 test case của nhóm: `eval_group.json` G01 $\to$ G10 và bảng B3).
 - **Những gì tôi đã thay đổi trong repo chung:** 
