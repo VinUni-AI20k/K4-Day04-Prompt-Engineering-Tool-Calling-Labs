@@ -10,8 +10,8 @@
    - **Vai trò:** Prompt Architect / Lead & Tool Schema Engineer (Chủ trì thiết kế System Prompt, quản lý versioning hash, chuẩn hóa `tools.yaml` và báo cáo tổng hợp).
 
 2. **Nguyễn Khắc Giáp**
-   - **MSSV:** 2A202602378
-   - **GitHub Username:** `NguyenKhacGiap`
+   - **MSSV:** 2A202602950
+   - **GitHub Username:** `nguyengiapnfif`
    - **Vai trò:** Tool Developer & Integration Engineer (Xây dựng Bonus Tool `lookup_ticket_status`, tích hợp fixture dữ liệu ticket và kết nối runtime).
 
 3. **Cao Văn Cường**
