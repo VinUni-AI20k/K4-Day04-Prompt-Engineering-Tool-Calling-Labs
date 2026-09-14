@@ -209,7 +209,19 @@ Failure còn lại là G03, G05 và G09 trong group eval, tương ứng với mi
 
 ### Vũ Gia Khải — MSSV: 2A202602786 (GitHub: @vukhai248)
 
-
+- **Vai trò/phần việc được nhận:** Phụ trách Test Cases / Eval Author (Role C).
+- **Những gì tôi đã thay đổi trong repo chung:** 
+  - Soạn thảo và kiểm chuẩn 10 test case nguyên bản (5 single-turn, 5 multi-turn) trong `starter_v0/data/eval_group.json` bao phủ 10 failure modes theo `LAB-GUIDE.md`.
+  - Hoàn thiện bảng tổng kết B3 trong `starter_v0/artifacts/REPORT.md`.
+  - Thiết lập và cập nhật tài liệu điều phối dự án `TASK_TRACING.md`.
+- **File hoặc artifact liên quan:** `starter_v0/data/eval_group.json`, `starter_v0/artifacts/REPORT.md`, `TASK_TRACING.md`.
+- **Commit hash hoặc pull request:** Commit `1874f01` (Branch: `contrib/vukhai248`).
+- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:** 
+  - Đảm bảo trường `"phase": "B"` và `failure_type` chuẩn chỉ cho toàn bộ 10 cases để tương thích hoàn toàn với bộ phân loại lỗi tự động của `run_eval.py`.
+  - Thiết kế case `G09_multiturn_stale_confirmation` để kiểm thử ranh giới an toàn tối quan trọng: khi người dùng đổi độ ưu tiên ticket ở lượt sau, payload thay đổi khiến confirmation cũ bị vô hiệu, agent bắt buộc phải yêu cầu xác nhận lại thay vì tự ý tạo ticket.
+- **Khó khăn tôi gặp và cách tôi xử lý:** Cần phải hiểu rõ cấu trúc mock data (`assets.json`, `users.json`, `service_status.json`) để thiết kế các case query vừa tự nhiên, vừa phản ánh đúng các tình huống thực tế của IT Helpdesk mà không bị mâu thuẫn với schema định nghĩa trong `tools.yaml`.
+- **Điều tôi học được từ phần việc này:** Hiểu sâu về cách thức đánh giá tự động (automated evaluation) cho LLM Agent; cách phân loại lỗi (routing, arguments, context carry-over, safety boundary); và tầm quan trọng của việc xây dựng test suite đa dạng trước khi tối ưu prompt.
+- **Nếu làm lại, tôi sẽ cải thiện điều gì:** Mở rộng thêm các kịch bản test kết hợp giữa lỗi mạng và phần cứng trên cùng một thiết bị, hoặc kiểm thử tương thích với Bonus Tool mới do nhóm phát triển.
 
 ### Thân Tiến Đạt — MSSV: 2A202603023 (GitHub: @Datbadboiz11)
 
