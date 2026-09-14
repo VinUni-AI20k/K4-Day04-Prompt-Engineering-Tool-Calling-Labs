@@ -19,3 +19,17 @@ def lookup_user(employee_id: str = "") -> dict[str, Any]:
         return {"tool": "lookup_user", "employee": employee, "snapshot_at": data["snapshot_at"]}
     except Exception as exc:
         return err("lookup_user", exc)
+SCHEMA = {
+    "name": "lookup_user",
+    "description": "Tra cứu thông tin của một nhân viên CNTT dựa trên employee_id.",
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "employee_id": {
+                "type": "string",
+                "description": "ID của nhân viên CNTT cần tra cứu."
+            },
+        },
+        "required": ["employee_id"],
+    }
+}

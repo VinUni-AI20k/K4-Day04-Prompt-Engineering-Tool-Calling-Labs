@@ -79,3 +79,27 @@ def search_kb(query: str = "", category: str = "all", top_k: int = 3) -> dict[st
         }
     except Exception as exc:
         return err("search_kb", exc)
+SCHEMA = {
+    "name": "search_kb",
+    "description": "Tìm kiếm các bài viết trong cơ sở tri thức CNTT dựa trên truy vấn và danh mục. Trả về các bài viết phù hợp với nội dung đã được lọc.",
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "query": {
+                "type": "string",
+                "description": "Truy vấn tìm kiếm để khớp với tiêu đề, danh mục, thẻ, và nội dung của các bài viết trong cơ sở tri thức."
+            },
+            "category": {
+                "type": "string",
+                "default": "all",
+                "description": "Danh mục của các bài viết cần tìm kiếm: 'all' (mặc định) hoặc tên danh mục cụ thể."
+            },
+            "top_k": {
+                "type": "integer",
+                "default": 3,
+                "description": "Số lượng kết quả tối đa để trả về (tối đa 5)."
+            },
+        },
+        "required": ["query"],
+    }
+}

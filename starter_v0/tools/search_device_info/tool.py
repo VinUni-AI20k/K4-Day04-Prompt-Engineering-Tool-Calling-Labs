@@ -130,3 +130,32 @@ def search_device_info(
         }
     except Exception as exc:
         return err("search_device_info", exc)
+SCHEMA = {
+    "name": "search_device_info",
+    "description": "Tìm kiếm thông tin chính thức về một thiết bị CNTT dựa trên nhà sản xuất và model. Có thể chọn loại thông tin: 'support', 'drivers', hoặc 'specs'.",
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "manufacturer": {
+                "type": "string",
+                "description": "Tên nhà sản xuất của thiết bị CNTT (ví dụ: 'Lenovo', 'Dell', 'HP')."
+            },
+            "model": {
+                "type": "string",
+                "description": "Model hoặc số hiệu của thiết bị CNTT (ví dụ: 'ThinkPad X1 Carbon', 'Latitude 7420')."
+            },
+            "query_type": {
+                "type": "string",
+                "enum": ["support", "drivers", "specs"],
+                "default": "support",
+                "description": "Loại thông tin cần tìm kiếm: 'support' (mặc định), 'drivers', hoặc 'specs'."
+            },
+            "max_results": {
+                "type": "integer",
+                "default": 3,
+                "description": "Số lượng kết quả tối đa để trả về (tối đa 5)."
+            },
+        },
+        "required": ["manufacturer", "model"],
+    }
+}

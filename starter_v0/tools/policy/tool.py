@@ -107,3 +107,27 @@ def search_company_policy(query: str = "", policy_area: str = "all", top_k: int 
         }
     except Exception as exc:
         return err("search_company_policy", exc)
+SCHEMA = {
+    "name": "search_company_policy",
+    "description": "Tìm kiếm các chính sách CNTT của công ty dựa trên truy vấn và lĩnh vực chính sách. Trả về các phần liên quan từ tài liệu Markdown.",
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "query": {
+                "type": "string",
+                "description": "Truy vấn tìm kiếm để khớp với các chính sách CNTT."
+            },
+            "policy_area": {
+                "type": "string",
+                "default": "all",
+                "description": "Lĩnh vực chính sách để lọc kết quả: 'all' (mặc định) hoặc tên lĩnh vực cụ thể."
+            },
+            "top_k": {
+                "type": "integer",
+                "default": 3,
+                "description": "Số lượng kết quả hàng đầu cần trả về (mặc định là 3)."
+            },
+        },
+        "required": ["query"],
+    }
+}
