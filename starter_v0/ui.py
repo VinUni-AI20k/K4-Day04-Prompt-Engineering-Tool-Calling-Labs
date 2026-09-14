@@ -8,6 +8,7 @@ same tool behaviour as a live chat session.
 from __future__ import annotations
 
 from datetime import datetime
+import os
 from pathlib import Path
 from typing import Any
 
@@ -34,6 +35,20 @@ DEFAULT_MODELS = {
     "anthropic": "claude-3-5-haiku-latest",
     "gemini": "gemini-2.0-flash",
 }
+
+
+def configured_provider_default() -> str:
+    """Prefer a provider for which this session actually has a configured key."""
+    key_by_provider = {
+        "openrouter": "OPENROUTER_API_KEY",
+        "openai": "OPENAI_API_KEY",
+        "anthropic": "ANTHROPIC_API_KEY",
+        "gemini": "GEMINI_API_KEY",
+    }
+    for provider_name, env_name in key_by_provider.items():
+        if os.getenv(env_name):
+            return provider_name
+    return "openai"
 
 
 def make_transcript(
@@ -207,7 +222,12 @@ def main() -> None:
 
     with st.sidebar:
         st.header("Session settings")
-        provider_name = st.selectbox("Provider", list(DEFAULT_MODELS), index=0)
+        provider_options = list(DEFAULT_MODELS)
+        provider_name = st.selectbox(
+            "Provider",
+            provider_options,
+            index=provider_options.index(configured_provider_default()),
+        )
         model = st.text_input("Model", value=DEFAULT_MODELS[provider_name]).strip()
         version = st.text_input("Artifact version", value="v3").strip() or "v3"
         history_window = st.slider("History window (pairs)", min_value=1, max_value=10, value=5)
