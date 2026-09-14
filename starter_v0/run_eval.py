@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import time
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -287,6 +288,7 @@ def main() -> None:
 
     results: list[dict[str, Any]] = []
     for case in cases:
+        time.sleep(1.2)
         print(f"Running {case['id']}...", flush=True)
         agent = HelpdeskAgent(provider, system_prompt=system_prompt, tools=openai_tools, model=args.model)
         try:

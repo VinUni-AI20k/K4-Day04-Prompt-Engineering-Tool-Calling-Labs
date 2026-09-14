@@ -1,7 +1,291 @@
 {
   "dataset_id": "day04_v3_helpdesk_group",
   "dataset_role": "group",
-  "description": "Template intentionally left empty. The team must write exactly 10 original IT helpdesk cases: 5 single-turn query cases and 5 multi-turn turns cases.",
-  "allowed_failure_types": ["wrong_tool", "wrong_arg_value", "wrong_boundary", "unnecessary_tool", "out_of_scope", "missing_info"],
-  "cases": []
+  "description": "Team IT Helpdesk evaluation dataset with 10 original test cases: 5 single-turn cases and 5 multi-turn cases.",
+  "allowed_failure_types": [
+    "wrong_tool",
+    "wrong_arg_value",
+    "wrong_boundary",
+    "unnecessary_tool",
+    "out_of_scope",
+    "missing_info"
+  ],
+  "cases": [
+    {
+      "id": "G01_sso_status_routing",
+      "phase": "B",
+      "suite": "group",
+      "query": "Dịch vụ đăng nhập một lần (SSO) production hiện tại có bình thường không?",
+      "failure_type": "wrong_tool",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "check_service_status",
+            "args": {
+              "service": "sso",
+              "environment": "production"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "route_service_status",
+        "difficulty": "easy",
+        "what_it_tests": "Trạng thái hệ thống SSO production phải gọi check_service_status với đúng environment."
+      }
+    },
+    {
+      "id": "G02_inspect_device_hardware",
+      "phase": "B",
+      "suite": "group",
+      "query": "Kiểm tra tình trạng pin và ổ cứng phần cứng của máy LT-240.",
+      "failure_type": "wrong_arg_value",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "inspect_device",
+            "args": {
+              "asset_id": "LT-240",
+              "check": "hardware"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "device_hardware_diagnostic",
+        "difficulty": "medium",
+        "what_it_tests": "Trích xuất đúng asset_id LT-240 và check=hardware cho câu hỏi về pin/ổ cứng."
+      }
+    },
+    {
+      "id": "G03_lookup_user_bangkok",
+      "phase": "B",
+      "suite": "group",
+      "query": "Tra cứu thông tin tài khoản và thiết bị được cấp cho nhân sự mã EMP-1002.",
+      "failure_type": "wrong_tool",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "lookup_user",
+            "args": {
+              "employee_id": "EMP-1002"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "user_directory_lookup",
+        "difficulty": "easy",
+        "what_it_tests": "Tra cứu thông tin theo mã nhân viên phải định tuyến tới lookup_user."
+      }
+    },
+    {
+      "id": "G04_out_of_scope_movie",
+      "phase": "B",
+      "suite": "group",
+      "query": "Gợi ý cho mình danh sách rạp chiếu phim và lịch chiếu phim mới cuối tuần này tại Hà Nội.",
+      "failure_type": "out_of_scope",
+      "expect": {
+        "no_tool": true,
+        "behavior": "refuse"
+      },
+      "metadata": {
+        "skill": "out_of_scope_guard",
+        "difficulty": "easy",
+        "what_it_tests": "Yêu cầu giải trí không thuộc phạm vi IT service desk, tuyệt đối không gọi tool."
+      }
+    },
+    {
+      "id": "G05_missing_employee_id",
+      "phase": "B",
+      "suite": "group",
+      "query": "Tài khoản của mình bị khóa rồi, mở khóa hoặc kiểm tra giúp mình với.",
+      "failure_type": "missing_info",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "clarify",
+            "args": {
+              "response_type": "text"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "clarify_missing_employee_id",
+        "difficulty": "medium",
+        "what_it_tests": "Thiếu mã nhân viên employee_id phải gọi clarify để hỏi lại, không được đoán mò."
+      }
+    },
+    {
+      "id": "G06_multiturn_clarify_then_status",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Kiểm tra hệ thống mạng giúp mình với."
+        },
+        {
+          "role": "assistant",
+          "content": "Bạn muốn kiểm tra dịch vụ VPN hay WiFi, và ở môi trường production hay staging?"
+        },
+        {
+          "role": "user",
+          "content": "Kiểm tra kết nối WiFi ở môi trường production nhé."
+        }
+      ],
+      "failure_type": "wrong_tool",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "check_service_status",
+            "args": {
+              "service": "wifi",
+              "environment": "production"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "multiturn_resolve_service",
+        "difficulty": "medium",
+        "what_it_tests": "Sau lượt làm rõ, nhận diện đúng dịch vụ wifi và environment production."
+      }
+    },
+    {
+      "id": "G07_multiturn_switch_device_to_kb",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Laptop LT-204 của mình không in tài liệu ra máy in tầng 3 được."
+        },
+        {
+          "role": "user",
+          "content": "Thôi không cần kiểm tra thiết bị nữa, tìm giúp mình tài liệu hướng dẫn in ấn văn phòng."
+        }
+      ],
+      "failure_type": "wrong_tool",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "search_kb",
+            "args": {
+              "category": "printing"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "multiturn_switch_intent",
+        "difficulty": "hard",
+        "what_it_tests": "Chuyển hướng từ inspect device sang search_kb printing khi người dùng đổi ý."
+      }
+    },
+    {
+      "id": "G08_multiturn_ticket_confirmation_boundary",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Tạo ticket sự cố Wi-Fi tầng 4 mức critical cho máy LT-240."
+        },
+        {
+          "role": "user",
+          "content": "Đổi mức ưu tiên xuống medium giúp mình."
+        },
+        {
+          "role": "user",
+          "content": "Kiểm tra lại thông tin và xác nhận giúp mình trước khi tạo ticket."
+        }
+      ],
+      "failure_type": "wrong_boundary",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "clarify",
+            "args": {
+              "response_type": "yes_no"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "multiturn_ticket_confirmation_guard",
+        "difficulty": "hard",
+        "what_it_tests": "Thay đổi tham số ticket hoặc yêu cầu xem lại phải dừng lại ở ranh giới xác nhận qua clarify yes_no."
+      }
+    },
+    {
+      "id": "G09_multiturn_policy_check",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Mình muốn cài phần mềm Notion và Miro lên máy công ty để quản lý dự án."
+        },
+        {
+          "role": "user",
+          "content": "Cho mình biết chính sách IT công ty về việc sử dụng các công cụ bên ngoài ra sao?"
+        }
+      ],
+      "failure_type": "wrong_tool",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "policy",
+            "args": {
+              "policy_area": "external_tools"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "multiturn_policy_routing",
+        "difficulty": "medium",
+        "what_it_tests": "Nhận diện câu hỏi về chính sách sử dụng công cụ bên ngoài để tra cứu policy area external_tools."
+      }
+    },
+    {
+      "id": "G10_multiturn_confirmed_ticket_creation",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Tạo ticket hỏng phím laptop LT-204 mức low."
+        },
+        {
+          "role": "assistant",
+          "content": "Bạn có chắc chắn muốn gửi ticket hỗ trợ 'Hỏng phím laptop LT-204' với độ ưu tiên low cho tài sản LT-204 không?"
+        },
+        {
+          "role": "user",
+          "content": "Đúng rồi, tôi đồng ý tạo ticket này."
+        }
+      ],
+      "failure_type": "wrong_boundary",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "create_ticket",
+            "args": {
+              "asset_id": "LT-204",
+              "priority": "low",
+              "confirmed": true
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "multiturn_confirmed_ticket_creation",
+        "difficulty": "hard",
+        "what_it_tests": "Chỉ tạo ticket khi người dùng đã có lời khẳng định đồng ý rõ ràng (confirmed=true)."
+      }
+    }
+  ]
 }
