@@ -150,7 +150,7 @@ Mỗi thành viên phải tự commit phần self-reflection của mình bằng 
 tương ứng. Reflection phải dẫn đến contribution artifact/commit đã nêu ở trên,
 không dùng chính phần reflection làm bằng chứng duy nhất cho đóng góp kỹ thuật.
 
-### Nguyễn Đình Khang — 2A202602584
+### Họ tên 2 — MSSV
 
 - **Vai trò/phần việc được nhận:** 
 - **Những gì tôi đã thay đổi trong repo chung:**
