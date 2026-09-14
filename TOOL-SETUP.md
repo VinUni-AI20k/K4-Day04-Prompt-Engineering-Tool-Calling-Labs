@@ -41,8 +41,8 @@ Không ghi đè `.env` đang có. Không commit hoặc chia sẻ file `.env`.
 Chọn một provider và điền key tương ứng trong `starter_v0/.env`:
 
 ```text
-# OpenRouter
-OPENROUTER_API_KEY=...
+# openai
+openai_API_KEY=...
 
 # Hoặc OpenAI
 OPENAI_API_KEY=...
@@ -57,10 +57,10 @@ GEMINI_API_KEY=...
 Chạy preflight với đúng provider:
 
 ```powershell
-python scripts/preflight_provider.py --provider openrouter
+python scripts/preflight_provider.py --provider openai
 ```
 
-Có thể thay `openrouter` bằng `openai`, `anthropic` hoặc `gemini`.
+Có thể thay `openai` bằng `openai`, `anthropic` hoặc `gemini`.
 
 Preflight PASS khi provider trả structured tool call. Nó không chấm toàn bộ
 routing accuracy.
@@ -199,7 +199,7 @@ Sau đó chạy các smoke command ở phần 5–7 cho những tool nhóm sẽ 
 dùng model thật, chạy lại provider preflight:
 
 ```powershell
-python scripts/preflight_provider.py --provider openrouter
+python scripts/preflight_provider.py --provider openai
 ```
 
 Compile và local smoke checks không cần provider key. Preflight cần key của
@@ -211,25 +211,25 @@ có `TAVILY_API_KEY` vì lời gọi này có thể tiêu quota Tavily.
 Base:
 
 ```powershell
-python run_eval.py --provider openrouter --version v0 --suite base --eval-cases data/eval_base.json
+python run_eval.py --provider openai --version v0 --suite base --eval-cases data/eval_base.json
 ```
 
 Group:
 
 ```powershell
-python run_eval.py --provider openrouter --version v3 --suite group --eval-cases data/eval_group.json
+python run_eval.py --provider openai --version v3 --suite group --eval-cases data/eval_group.json
 ```
 
 Extension:
 
 ```powershell
-python run_eval.py --provider openrouter --version v3 --suite extension --eval-cases data/eval_helpdesk_extension.json
+python run_eval.py --provider openai --version v3 --suite extension --eval-cases data/eval_helpdesk_extension.json
 ```
 
 Adversarial:
 
 ```powershell
-python run_eval.py --provider openrouter --version v3 --suite adversarial --eval-cases data/eval_adversarial.json
+python run_eval.py --provider openai --version v3 --suite adversarial --eval-cases data/eval_adversarial.json
 ```
 
 Extension có thể gọi Tavily và tạo ticket local ở confirmed-action cases. Kiểm

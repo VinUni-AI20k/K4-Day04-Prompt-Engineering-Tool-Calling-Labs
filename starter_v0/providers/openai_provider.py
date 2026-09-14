@@ -39,7 +39,14 @@ class OpenAIProvider:
         if not api_key:
             raise RuntimeError(f"Missing API key env var: {self.api_key_env}")
 
-        client = OpenAI(api_key=api_key, base_url=self.base_url)
+        # Avoid advertising Brotli here. Some lab/Conda environments provide a
+        # Brotli decoder whose API is incompatible with the HTTP transport,
+        # which makes an otherwise valid provider response fail while decoding.
+        client = OpenAI(
+            api_key=api_key,
+            base_url=self.base_url,
+            default_headers={"Accept-Encoding": "gzip, deflate"},
+        )
         kwargs: dict[str, Any] = {
             "model": model or self.default_model,
             "messages": messages,
