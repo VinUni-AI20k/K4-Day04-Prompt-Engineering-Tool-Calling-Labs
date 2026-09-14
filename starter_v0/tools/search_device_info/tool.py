@@ -1,13 +1,15 @@
 from __future__ import annotations
 
+import json
 import os
 import re
+from functools import lru_cache
 from typing import Any
 from urllib.parse import urlparse
 
 import requests
 
-from tools._shared import TIMEOUT, err
+from tools._shared import ROOT, TIMEOUT, err
 
 
 VENDOR_DOMAINS = {
@@ -23,6 +25,29 @@ QUERY_LABELS = {
     "compatibility": "hardware and operating system compatibility",
 }
 INTERNAL_IDENTIFIER = re.compile(r"\b(?:LT|DT|MB|PR|RM|EMP)-\d+\b", re.IGNORECASE)
+EMAIL_PATTERN = re.compile(r"[\w.+-]+@[\w-]+\.[a-z]{2,}", re.IGNORECASE)
+# Long digit runs (serial-like) are not part of any real model name in the mock catalog
+# (longest legitimate run is 4 digits, e.g. "7440"); 6+ digits is a safe heuristic.
+SERIAL_LIKE = re.compile(r"\b\d{6,}\b|\b(?:serial(?:\s*(?:number|no\.?))?|s/n)\s*[:#=]?\s*\S+", re.IGNORECASE)
+INTERNAL_HOSTNAME = re.compile(r"\b[\w-]+(?:\.[\w-]+)*\.(?:local|corp|internal|lan|intra)\b", re.IGNORECASE)
+ASSETS_PATH = ROOT / "helpdesk_data" / "assets.json"
+
+
+@lru_cache(maxsize=1)
+def _known_locations() -> tuple[str, ...]:
+    try:
+        assets = json.loads(ASSETS_PATH.read_text(encoding="utf-8"))
+        return tuple(sorted({a["location"] for a in assets.get("assets", []) if a.get("location")}, key=len, reverse=True))
+    except Exception:
+        return ()
+
+
+def _contains_restricted_data(text: str) -> bool:
+    patterns = (INTERNAL_IDENTIFIER, EMAIL_PATTERN, SERIAL_LIKE, INTERNAL_HOSTNAME)
+    if any(pattern.search(text) for pattern in patterns):
+        return True
+    folded = text.casefold()
+    return any(location.casefold() in folded for location in _known_locations())
 
 
 def _domain(url: str) -> str:
@@ -62,7 +87,7 @@ def search_device_info(
         return {"tool": "search_device_info", "error": "missing_public_product_identity"}
     if len(manufacturer_value) > 80 or len(model_value) > 160:
         return {"tool": "search_device_info", "error": "public_product_identity_too_long"}
-    if INTERNAL_IDENTIFIER.search(f"{manufacturer_value} {model_value}"):
+    if _contains_restricted_data(f"{manufacturer_value} {model_value}"):
         return {
             "tool": "search_device_info",
             "error": "restricted_internal_identifier",
