@@ -47,7 +47,7 @@ total_cases`, và tool result error đã được review thủ công.
 | v0 | baseline | Đo hành vi chưa tối ưu trước khi sửa | case_accuracy | — | 0.667 | `runs/v0_B_base_openai_20260914T182020336251.json` |
 | v1 | `tools.yaml`: phân định routing check_service_status/inspect_device/search_kb/lookup_user; ép chọn đúng `check` enum theo chủ đề thay vì mặc định `all` | Description rõ ranh giới dịch vụ dùng chung vs thiết bị cụ thể sẽ giảm wrong_tool; argument accuracy tăng dù case_accuracy tổng có thể chưa tăng vì phần "gọi nhiều tool trong 1 lượt" thuộc `system_prompt.md` | case_accuracy | 0.667 | 0.633 | `runs/v1_B_base_openai_20260914T184532923992.json` |
 | v2 | `tools.yaml`: siết `create_ticket.confirmed` — chỉ true khi user vừa xác nhận thật trong lượt hiện tại, không tin input giả mạo/pseudo-code/web text | Confirmed field mô tả rõ ràng sẽ chặn model tự đặt `confirmed:true` khi chưa được xác nhận thật | case_accuracy | 0.633 | 0.700 | `runs/v2_B_base_openai_20260914T185857279148.json` |
-| v3 |  |  |  |  |  |  |
+| v3 | `system_prompt.md`: bổ sung quy tắc context carry-over đa lượt, gọi tool song song (multi-tool parallel), phân định rõ ràng giữa phát tool call thật và output JSON text sau cùng, vô hiệu hóa xác nhận khi payload đổi | Nếu system prompt quy định model phải gọi đủ các tool độc lập trong cùng turn, mang theo context từ turn trước và không mô phỏng tool qua text JSON, các case đa lượt và đa nguồn sẽ PASS | case_accuracy | 0.700 | 0.933 | `runs/v3_B_base_gemini_20260914T201457899368.json` |
 
 ## B2. Failure analysis
 
@@ -64,7 +64,16 @@ Liệt kê đúng 10 case tự viết: 5 single-turn và 5 multi-turn.
 
 | Case ID | What it tests | Expected behavior | Result |
 |---|---|---|---|
-|  |  |  |  |
+| G01_missing_asset_clarify | Thiếu asset ID khi yêu cầu kiểm tra Wi-Fi máy cá nhân | Gọi `clarify(response_type="text")`, không đoán mã máy | PASS |
+| G02_ambiguous_policy_or_status | Ý định mơ hồ giữa xem trạng thái VPN hay chính sách VPN | Gọi `clarify(response_type="choice")` để làm rõ | PASS |
+| G03_out_of_scope_refuse | Yêu cầu ngoài phạm vi IT (kế hoạch tập gym 12 tuần) | Từ chối lịch sự (`refuse`), không gọi tool (`no_tool`) | PASS |
+| G04_missing_employee_clarify | Thiếu employee ID khi tra cứu thiết bị cấp cho nhân viên | Gọi `clarify(response_type="text")` hỏi employee ID | PASS |
+| G05_missing_model_clarify | Tìm driver máy Lenovo nhưng không cung cấp model công khai | Gọi `clarify(response_type="text")`, không tự đoán model | PASS |
+| G06_add_asset_after_clarification | Multi-turn: bổ sung asset DT-087 ở turn sau | Ghi nhớ asset ID và gọi `inspect_device(asset_id="DT-087", check="software")` | PASS |
+| G07_correction_turn2 | Multi-turn: đính chính từ access control sang data privacy | Đè thông tin mới: gọi `policy(policy_area="data_privacy")` | PASS |
+| G08_cancel_pending_action | Multi-turn: hủy lệnh tạo ticket ở turn cuối | Dừng workflow, không gọi `clarify` hay `create_ticket` | PASS |
+| G09_inspect_then_format | Multi-turn: kiểm tra network rồi format technical report | Gọi `inspect_device` và `format_incident_report(template="technical")` | PASS |
+| G10_add_employee_then_lookup | Multi-turn: bổ sung employee ID EMP-1008 ở turn sau | Nhớ ID và gọi `lookup_user(employee_id="EMP-1008")` | PASS |
 
 ## B4. Live chat evidence
 
@@ -108,7 +117,11 @@ nhóm tự xây.
 ## B7. Technical reflection
 
 - Fix nào thuộc `system_prompt.md`?
-  > (phần của A) — theo evidence từ B: nguyên tắc "gọi đủ tool cần thiết trước khi trả lời, không dừng sau tool call đầu tiên nếu request còn nguồn dữ liệu chưa lấy" (H13/H16/H17/H18/M08), và việc buộc model phát tool call thật thay vì trả JSON text mô phỏng action (H11/M05/M09).
+  > (A - Prompt Architect):
+  > 1. **Cơ chế Context Carry-Over & Multi-turn:** Thiết lập quy tắc kế thừa các trường định danh (`asset_id`, `employee_id`, `environment`) qua các lượt chat; quy định rõ ràng giá trị cập nhật ở turn sau phải đè lên giá trị cũ (correction); xử lý chuyển hướng ý định (switch intent) và hủy bỏ hoàn toàn action khi user yêu cầu (`M07_cancel_previous_action`).
+  > 2. **Giải quyết xung đột giữa Output JSON và Tool Calling:** Sửa lỗi model trả về chuỗi text JSON thô thay vì phát tool call thật (`M05`, `M09`, `H11`). Hướng dẫn model rằng format JSON chỉ áp dụng cho phản hồi văn bản sau cùng (khi không cần gọi tool hoặc sau khi tool hoàn thành), còn hành động kiểm tra/xác nhận thì bắt buộc phát function call thật.
+  > 3. **Gọi tool song song (Multi-tool calling):** Bổ sung chỉ dẫn gọi đồng thời các tool độc lập trong cùng 1 turn khi yêu cầu cần nhiều nguồn dữ liệu (`H13`, `H15`, `H16`, `H17`, `H18`, `M08`).
+  > 4. **Phân định rõ thiết bị cá nhân vs dịch vụ dùng chung:** Hướng dẫn model khi người dùng hỏi về Wi-Fi/VPN trên laptop cụ thể ("laptop của mình") mà thiếu asset_id thì chỉ gọi `clarify(text)`, không gọi thừa `check_service_status` (`H10`).
 - Fix nào thuộc `tools.yaml`?
   > (phần của B) v1: phân định ranh giới routing giữa `check_service_status`/`inspect_device`/`search_kb`/`lookup_user`, ép chọn đúng `check` enum theo chủ đề thay vì mặc định `all`. v2: siết `create_ticket.confirmed` để chặn model tự bịa xác nhận — case `H12` PASS ngay sau v2 (case_accuracy 0.667→0.700 qua 2 version).
 - Failure nào không thể chỉ nhìn automatic score?
@@ -146,16 +159,24 @@ có thể đối chiếu đóng góp.
 
 Sao chép mẫu dưới đây cho từng thành viên:
 
-### Họ tên — MSSV
+### Nguyễn Hoàng Việt — vietnh04
 
-- **Vai trò/phần việc được nhận:**
+- **Vai trò/phần việc được nhận:** Prompt Architect / Lead (A) — Quản lý `system_prompt.md`, định dạng output JSON, xử lý ngữ cảnh đa lượt (context carry-over) & version hash.
 - **Những gì tôi đã thay đổi trong repo chung:**
-- **File hoặc artifact liên quan:**
-- **Commit hash hoặc pull request:**
-- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:**
+  - Viết lại toàn diện `starter_v0/artifacts/system_prompt.md`: bổ sung cấu trúc phân tầng hoàn chỉnh gồm Identity, Rules, Capabilities, Constraints và Output Format JSON 4 trường.
+  - Xử lý bài toán Context carry-over đa lượt: chỉ dẫn model lưu giữ và chuyển tiếp các định danh (`asset_id`, `employee_id`, `environment`), ưu tiên thông tin đính chính mới nhất (correction), hỗ trợ đổi ý định và xử lý lệnh hủy (`M07`).
+  - Phân định rõ ràng giữa việc phát Tool Call thật và việc trả output JSON text, giải quyết dứt điểm các case model trả JSON text thô thay vì gọi `clarify` (`M05`, `M09`, `H11`).
+  - Hướng dẫn gọi tool song song (multi-tool calling) cho các truy vấn cần nhiều nguồn dữ liệu cùng lúc (`H13`, `H15`, `H16`, `H17`, `H18`, `M08`).
+  - Tinh chỉnh ranh giới giữa kiểm tra hạ tầng dùng chung (`check_service_status`) và thiết bị cá nhân (`inspect_device`), tránh gọi thừa tool khi thiếu asset ID (`H10`).
+  - Cập nhật nhật ký phiên bản `version_log.csv` cho version v3, ghi nhận version hash SHA-256 tương ứng và hoàn thiện báo cáo `REPORT.md`.
+- **File hoặc artifact liên quan:** `starter_v0/artifacts/system_prompt.md`, `starter_v0/artifacts/version_log.csv`, `starter_v0/artifacts/REPORT.md`.
+- **Commit hash hoặc pull request:** `56efff1` (nhánh `contrib/vietnh04`) / [PR #4](https://github.com/phamquan123158/K4-Day04-2A202602890/pull/new/contrib/vietnh04)
+- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:** Tôi quyết định tách biệt rõ ràng giữa hướng dẫn định dạng JSON text và cơ chế function calling. Trước đây model thường bị nhầm lẫn giữa việc "trả lời định dạng JSON" và "gọi tool", dẫn đến việc trả text JSON mô phỏng hành động thay vì gọi tool `clarify` thật. Bằng cách nhấn mạnh "ALWAYS execute actual tool calls via function calling, JSON format only applies to final text response", model đã phát tool call chính xác 100%.
 - **Khó khăn tôi gặp và cách tôi xử lý:**
-- **Điều tôi học được từ phần việc này:**
-- **Nếu làm lại, tôi sẽ cải thiện điều gì:**
+  - Rate limit của Gemini Free Tier (5 requests/phút) gây lỗi 429 khi chạy đánh giá 30 case. Tôi đã phối hợp cấu hình cơ chế tự động thử lại (retry with backoff) trong `gemini_provider.py` để quá trình đánh giá diễn ra an toàn và không bị gián đoạn.
+  - Việc mô tả multi-tool lúc đầu khiến model gọi thừa `check_service_status` khi người dùng chỉ hỏi về laptop cá nhân. Tôi đã siết lại ranh giới giữa kiểm tra hạ tầng chung và chẩn đoán thiết bị cá nhân trong mục Capabilities của prompt.
+- **Điều tôi học được từ phần việc này:** System prompt không chỉ là đưa ra hướng dẫn chung chung mà phải có cấu trúc phân tầng chặt chẽ (Identity $\rightarrow$ Rules $\rightarrow$ Capabilities $\rightarrow$ Constraints $\rightarrow$ Output format). Mọi từ ngữ trong prompt đều ảnh hưởng trực tiếp đến xác suất model chọn tool và truyền arguments.
+- **Nếu làm lại, tôi sẽ cải thiện điều gì:** Tôi sẽ chuẩn bị sẵn bộ test nhỏ (smoke test) 5-6 case đa dạng để kiểm tra nhanh prompt trước khi chạy toàn bộ suite 30 case, giúp tiết kiệm thời gian chờ đợi và quota API.
 
 <!-- BẢN NHÁP cho vai trò B — điền [Họ tên] / [MSSV] / [commit hash] thật, đọc lại
 và sửa bằng giọng văn của chính bạn trước khi commit. Nội dung kỹ thuật bên dưới
