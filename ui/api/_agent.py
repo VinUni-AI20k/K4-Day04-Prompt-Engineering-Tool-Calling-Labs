@@ -68,7 +68,10 @@ if os.getenv("VERCEL"):
 ARTIFACTS = LAB_ROOT / "artifacts"
 DEFAULT_MODEL = os.getenv("LAB_MODEL", "gemini-3.1-flash-lite")
 DEFAULT_PROVIDER = os.getenv("LAB_PROVIDER", "gemini")
-VERSION_LABEL = os.getenv("LAB_VERSION", "v0")
+# Bump this when artifacts/ changes, and add the matching row to
+# artifacts/version_log.csv. The hashes beside it are computed from the files
+# themselves, so a stale label here is visible rather than silent.
+VERSION_LABEL = os.getenv("LAB_VERSION", "v1")
 MAX_TOOL_ROUNDS = int(os.getenv("LAB_MAX_TOOL_ROUNDS", "4"))
 HISTORY_WINDOW = int(os.getenv("LAB_HISTORY_WINDOW", "5"))
 
