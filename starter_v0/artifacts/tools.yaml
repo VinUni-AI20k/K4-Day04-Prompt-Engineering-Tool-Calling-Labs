@@ -28,29 +28,33 @@ tools:
       required: [query]
 
   - name: check_service_status
-    description: "Kiểm tra trạng thái một dịch vụ."
+    description: "Kiểm tra trạng thái vận hành trực tuyến của các dịch vụ hạ tầng công nghệ thông tin dùng chung toàn công ty (VPN, Email, SSO, Wi-Fi, Printing). KHÔNG dùng để kiểm tra máy tính hay thiết bị cá nhân của người dùng."
     parameters:
       type: object
       properties:
         service: {type: string, enum: [vpn, email, sso, wifi, printing], description: "Tên dịch vụ"}
-        environment: {type: string, enum: [production, staging], default: "production", description: "Môi trường"}
+        environment: {type: string, enum: [production, staging], default: "production", description: "Môi trường triển khai: 'production' hoặc 'staging'. Mặc định là 'production'; chỉ dùng 'staging' khi người dùng chỉ định rõ."}
       required: [service]
 
   - name: inspect_device
-    description: "Kiểm tra thông tin và chẩn đoán thiết bị."
+    description: "Kiểm tra thông tin chi tiết và dữ liệu chẩn đoán snapshot của MỘT thiết bị cụ thể trong công ty theo mã tài sản asset_id (định dạng: LT-xxx, DT-xxx, MB-xxx, PR-xxx, RM-xxx). Chỉ nhận mã tài sản, KHÔNG nhận mã nhân viên. KHÔNG dùng cho dịch vụ dùng chung toàn hệ thống."
     parameters:
       type: object
       properties:
-        asset_id: {type: string, description: "Mã tài sản"}
-        check: {type: string, enum: [all, network, vpn, security, hardware, software], default: "all", description: "Nhóm kiểm tra"}
+        asset_id: {type: string, description: "Mã tài sản thiết bị (ví dụ: 'LT-204', 'DT-087'). Không nhận mã nhân viên EMP-xxxx"}
+        check:
+          type: string
+          enum: [all, network, vpn, security, hardware, software]
+          default: "all"
+          description: "Hạng mục chẩn đoán cần kiểm tra: 'all', 'network', 'vpn', 'security', 'hardware', 'software'. BẮT BUỘC chọn đúng nhóm tương ứng khi người dùng nêu triệu chứng cụ thể (ví dụ: sự cố VPN thì phải chọn 'vpn'). Giá trị 'all' CHỈ DÙNG khi người dùng không nêu triệu chứng nào hoặc yêu cầu kiểm tra tổng thể."
       required: [asset_id]
 
   - name: lookup_user
-    description: "Tra cứu người dùng trong danh bạ hỗ trợ."
+    description: "Tra cứu hồ sơ tài khoản nhân viên và danh sách thiết bị được cấp phát (assigned_assets) trong danh bạ nội bộ công ty theo mã nhân viên employee_id (định dạng: EMP-xxxx). Tool này ĐÃ BAO GỒM danh sách thiết bị được cấp, KHÔNG CẦN gọi thêm inspect_device nếu người dùng chỉ muốn biết nhân viên được cấp những thiết bị nào."
     parameters:
       type: object
       properties:
-        employee_id: {type: string, description: "Mã nhân viên"}
+        employee_id: {type: string, description: "Mã định danh nhân viên (định dạng: EMP-xxxx, ví dụ: 'EMP-1003')"}
       required: [employee_id]
 
   - name: format_incident_report
