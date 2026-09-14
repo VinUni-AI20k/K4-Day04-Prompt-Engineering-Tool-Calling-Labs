@@ -1,0 +1,65 @@
+{
+  "snapshot_at": "2026-09-14T09:00:00+07:00",
+  "tickets": [
+    {
+      "ticket_id": "INC-1042",
+      "summary": "Intermittent authentication failures for some Windows clients on VPN",
+      "status": "in_progress",
+      "priority": "high",
+      "asset_id": "LT-204",
+      "requester_id": "EMP-1001",
+      "assigned_to": "TECH-401 (Alex Chen)",
+      "created_at": "2026-09-14T07:35:00+07:00",
+      "updated_at": "2026-09-14T08:50:00+07:00",
+      "resolution_notes": "Identified clock drift issue. Workaround: synchronize device clock. Permanent fix: deploying VPN patch v5.2.2."
+    },
+    {
+      "ticket_id": "INC-1045",
+      "summary": "Access points on floor 4 are unavailable",
+      "status": "in_progress",
+      "priority": "high",
+      "asset_id": "LT-240",
+      "requester_id": "EMP-1002",
+      "assigned_to": "TECH-402 (Sarah Connor)",
+      "created_at": "2026-09-14T08:12:00+07:00",
+      "updated_at": "2026-09-14T08:55:00+07:00",
+      "resolution_notes": "Core switch on floor 4 rebooting. Affected users moved temporarily to floor 3 or wired network."
+    },
+    {
+      "ticket_id": "CHG-221",
+      "summary": "Planned connector upgrade for staging email environment",
+      "status": "scheduled",
+      "priority": "medium",
+      "asset_id": null,
+      "requester_id": "EMP-1003",
+      "assigned_to": "TECH-403 (David Kim)",
+      "created_at": "2026-09-14T08:00:00+07:00",
+      "updated_at": "2026-09-14T08:40:00+07:00",
+      "resolution_notes": "Maintenance window active until 11:00 AM. Production email unaffected."
+    },
+    {
+      "ticket_id": "TCK-1001",
+      "summary": "Disk SMART warning on EliteDesk desktop DT-031",
+      "status": "assigned",
+      "priority": "medium",
+      "asset_id": "DT-031",
+      "requester_id": "EMP-1003",
+      "assigned_to": "TECH-401 (Alex Chen)",
+      "created_at": "2026-09-13T14:20:00+07:00",
+      "updated_at": "2026-09-14T08:15:00+07:00",
+      "resolution_notes": "Replacement SSD ordered under warranty. Backups confirmed complete."
+    },
+    {
+      "ticket_id": "TCK-1002",
+      "summary": "BitLocker PIN lock after BIOS firmware update on LT-318",
+      "status": "resolved",
+      "priority": "high",
+      "asset_id": "LT-318",
+      "requester_id": "EMP-1004",
+      "assigned_to": "TECH-404 (Emma Watson)",
+      "created_at": "2026-09-12T10:05:00+07:00",
+      "updated_at": "2026-09-12T11:30:00+07:00",
+      "resolution_notes": "Provided recovery key from internal vault. TPM measurements resealed successfully."
+    }
+  ]
+}
