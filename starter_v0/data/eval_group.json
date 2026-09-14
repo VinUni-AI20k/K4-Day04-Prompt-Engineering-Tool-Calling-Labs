@@ -3,5 +3,63 @@
   "dataset_role": "group",
   "description": "Template intentionally left empty. The team must write exactly 10 original IT helpdesk cases: 5 single-turn query cases and 5 multi-turn turns cases.",
   "allowed_failure_types": ["wrong_tool", "wrong_arg_value", "wrong_boundary", "unnecessary_tool", "out_of_scope", "missing_info"],
-  "cases": []
+  "cases": [
+    {
+      "id": "G01_lookup_ticket_status",
+      "phase": "B",
+      "suite": "group",
+      "query": "Kiểm tra giúp tôi tiến độ xử lý của ticket LAB-9B1D2E4F.",
+      "failure_type": "wrong_tool",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "lookup_ticket_status",
+            "args": {
+              "ticket_id": "LAB-9B1D2E4F"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "bonus_tool",
+        "difficulty": "standard",
+        "what_it_tests": "Gọi đúng tool lookup_ticket_status với ticket_id chuẩn."
+      }
+    },
+    {
+      "id": "G02_create_then_lookup_ticket",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Tạo ticket lỗi bàn phím máy LT-318, tôi xác nhận."
+        },
+        {
+          "role": "assistant",
+          "content": "Đã tạo ticket LAB-A1B2C3D4 cho bạn."
+        },
+        {
+          "role": "user",
+          "content": "Tra cứu lại trạng thái của ticket LAB-A1B2C3D4 vừa tạo."
+        }
+      ],
+      "failure_type": "wrong_tool",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "lookup_ticket_status",
+            "args": {
+              "ticket_id": "LAB-A1B2C3D4"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "bonus_tool_multiturn",
+        "difficulty": "multi_turn",
+        "what_it_tests": "Nhận diện mã ticket trong ngữ cảnh hội thoại trước để tra cứu trạng thái."
+      }
+    }
+  ]
 }
