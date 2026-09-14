@@ -189,7 +189,17 @@ Sao chép mẫu dưới đây cho từng thành viên:
 *(Thành viên tự điền sau khi hoàn thành phần việc Tool & Schema Engineer)*
 
 ### Dương Đạt Khang — 02624
-*(Thành viên tự điền sau khi hoàn thành phần việc Eval & Red-Team Specialist)*
+
+- **Vai trò/phần việc được nhận:** Eval & Red-Team Specialist
+- **Những gì tôi đã thay đổi trong repo chung:** 
+  - Xây dựng bộ 10 test case nguyên bản trong `starter_v0/data/eval_group.json` (G01 – G10: 5 single-turn và 5 multi-turn) bao phủ các kịch bản kiểm tra thiết bị, tài sản, VPN, quyền hạn và so sánh thông tin.
+  - Tích hợp và cập nhật module `starter_v0/providers/gemini_provider.py`.
+- **File hoặc artifact liên quan:** `starter_v0/data/eval_group.json`, `starter_v0/providers/gemini_provider.py`.
+- **Commit hash hoặc pull request:** [Pull Request #2](https://github.com/ratrichero/K4-Day04-02560-TaVietCuong/pull/2) (merged vào `main` tại commit `63ffa98`).
+- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:** Thiết kế các ca kiểm thử đa dạng bao quát cả đơn lượt và đa lượt (multi-turn), đặt bẫy các trường hợp thiếu định danh hoặc hỏi dồn ngữ cảnh để kiểm định độ nhạy bén và tuân thủ nguyên tắc an toàn của Agent.
+- **Khó khăn tôi gặp và cách tôi xử lý:** Đồng bộ schema đầu vào giữa các test case với format kỳ vọng của harness evaluation, xử lý xung đột git khi merge vào nhánh chính chứa prompt tối ưu của Lead.
+- **Điều tôi học được từ phần việc này:** Hiểu rõ tầm quan trọng của việc xây dựng test suite có tính bao phủ cao và độc lập để kiểm chứng khách quan chất lượng của LLM System Prompt.
+- **Nếu làm lại, tôi sẽ cải thiện điều gì:** Bổ sung thêm các test case dạng edge-cases và adversarial phức tạp hơn để thử thách độ bền vững của prompt trước các kỹ thuật prompt injection tinh vi.
 
 ### Trần Ngọc Chinh — 02720
 *(Thành viên tự điền sau khi hoàn thành phần việc UI & Report Coordinator)*
@@ -203,16 +213,16 @@ không dùng chính phần reflection làm bằng chứng duy nhất cho đóng 
 Chỉ nộp bài khi mọi mục dưới đây đã được kiểm tra trên branch cuối cùng của
 repository chung:
 
-- [ ] `TEAMMATES.md` có đủ họ tên, MSSV, GitHub username và vai trò.
-- [ ] Mỗi thành viên có ít nhất một commit trong lịch sử branch nộp bài.
-- [ ] Phần reflection chung của nhóm đã hoàn thành và có evidence.
+- [x] `TEAMMATES.md` có đủ họ tên, MSSV, GitHub username và vai trò.
+- [x] Mỗi thành viên có ít nhất một commit trong lịch sử branch nộp bài.
+- [x] Phần reflection chung của nhóm đã hoàn thành và có evidence.
 - [ ] Mỗi thành viên đã tự viết và commit self-reflection của mình.
-- [ ] `system_prompt.md`, `tools.yaml`, version log, runs, eval, transcript, UI
+- [x] `system_prompt.md`, `tools.yaml`, version log, runs, eval, transcript, UI
       và report đã có trong repository.
-- [ ] Không có `.env`, API key, token, dữ liệu thật, cache hoặc generated ticket.
-- [ ] Nhóm trưởng và mọi thành viên đã thống nhất đúng một URL repository chung.
-- [ ] Nhóm trưởng và mọi thành viên sẽ nộp cùng URL đó trên VLearn.
+- [x] Không có `.env`, API key, token, dữ liệu thật, cache hoặc generated ticket.
+- [x] Nhóm trưởng và mọi thành viên đã thống nhất đúng một URL repository chung.
+- [x] Nhóm trưởng và mọi thành viên sẽ nộp cùng URL đó trên VLearn.
 
 **URL repository chung dùng để nộp:**
 
-> URL:
+> URL: https://github.com/ratrichero/K4-Day04-02560-TaVietCuong
