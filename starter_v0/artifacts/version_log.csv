@@ -1,1 +1,2 @@
 version,author,changed_artifact,artifact_version,prompt_hash,tools_hash,reason,hypothesis,metric_name,metric_before,metric_after,run_file
+v0,Đỗ Ngọc Phi (A),baseline,v0+p27467914bc4d+t86e19195220e,27467914bc4d,86e19195220e,Baseline starter artifacts chưa chỉnh sửa,Đo hành vi chưa tối ưu trước khi sửa,case_accuracy_base,,0.70,runs/v0_B_base_openai_20260914T182533618328.json
