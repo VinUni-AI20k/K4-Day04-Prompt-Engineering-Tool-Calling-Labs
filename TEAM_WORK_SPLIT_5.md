@@ -55,9 +55,16 @@ Branch goi y:
 
 ## 3. Ai lam dau tien?
 
-Nguoi 1 lam dau tien.
+Nguoi 1 lam dau tien: Eval/Evidence Lead.
 
-Ly do: bai nay yeu cau cai thien dua tren evidence tu run that. Neu sua `system_prompt.md` hoac `tools.yaml` ngay tu dau thi nhom se mat baseline `v0` va kho giai thich version evidence.
+Ly do: bai nay yeu cau cai thien dua tren evidence tu run that. Neu Nguoi 2 sua `system_prompt.md` hoac Nguoi 3 sua `tools.yaml` ngay tu dau thi nhom se mat baseline `v0` va kho giai thich version evidence.
+
+Quy tac start:
+
+- Truoc khi co run `v0`: chi Nguoi 1 thao tac chinh voi repo.
+- Nguoi 2 va Nguoi 3 chi doc file, ghi note rieng, chua commit thay doi artifact.
+- Nguoi 4 co the doc `chat.py` va phac thao UI rieng tren branch, nhung chua can merge.
+- Nguoi 5 co the tao skeleton report/team info, nhung chua dien metric.
 
 Thu tu khoi dong:
 
@@ -66,6 +73,16 @@ Thu tu khoi dong:
 3. Nguoi 2 va Nguoi 3 sua song song `system_prompt.md` va `tools.yaml` dua tren failure.
 4. Nguoi 4 bat dau UI skeleton doc-only, sau do ket noi loop khi artifact on.
 5. Nguoi 5 gom report/demo checklist song song, nhung chi dien metric sau khi co run.
+
+Bang workflow tong:
+
+| Thu tu | Nguoi | Khi nao bat dau | Input can co | Output ban giao |
+|---:|---|---|---|---|
+| 1 | Nguoi 1 - Eval/Evidence | Bat dau dau tien | Repo + `.env` provider | Run `v0`, failure summary, metric baseline |
+| 2 | Nguoi 2 - Prompt | Sau khi co failure summary `v0` | Failure summary cua Nguoi 1 | `system_prompt.md` v1/v2/v3 changes + hypothesis |
+| 3 | Nguoi 3 - Tools schema | Sau khi co failure summary `v0` | Failure summary + tool implementation | `tools.yaml` v1/v2/v3 changes + hypothesis |
+| 4 | Nguoi 4 - UI | Co the doc source som, implement sau khi loop ro | `chat.py`, artifact path, provider setup | `app.py`, UI demo transcript |
+| 5 | Nguoi 5 - Report/QA | Bat dau skeleton som, finalize sau khi co runs | Runs, transcripts, metric, demo scenario | `REPORT.md`, `eval_group.json`, final checklist |
 
 ## 4. Phan cong chi tiet
 
@@ -83,41 +100,66 @@ File so huu chinh:
 
 Viec can lam:
 
-1. Cai moi truong theo `TOOL-SETUP.md`.
-2. Chay compile:
+Start khi:
+
+- Ngay tu dau.
+- Chua ai duoc sua `system_prompt.md` hoac `tools.yaml` truoc khi Nguoi 1 chay xong baseline `v0`.
+
+Workflow:
+
+1. Pull code moi nhat tu repo chung.
+2. Cai moi truong theo `TOOL-SETUP.md`.
+3. Kiem tra `.env` co provider key, khong commit file nay.
+4. Chay compile:
 
 ```powershell
 cd starter_v0
 python -m compileall -q .
 ```
 
-3. Chay smoke test local tools can demo: `clarify`, `search_kb`, `check_service_status`, `inspect_device`, `lookup_user`, `format_incident_report`, `policy`, dry-run `create_ticket`.
-4. Chay provider preflight:
+5. Chay smoke test local tools can demo: `clarify`, `search_kb`, `check_service_status`, `inspect_device`, `lookup_user`, `format_incident_report`, `policy`, dry-run `create_ticket`.
+6. Chay provider preflight:
 
 ```powershell
 python scripts/preflight_provider.py --provider openrouter
 ```
 
-5. Chay baseline `v0` khi chua sua artifact:
+7. Chay baseline `v0` khi chua sua artifact:
 
 ```powershell
 python run_eval.py --provider openrouter --version v0 --suite base --eval-cases data/eval_base.json
 ```
 
-6. Doc run JSON, gom loi theo nhom:
+8. Doc run JSON trong `starter_v0/runs/`, ghi lai:
+   - summary metric
+   - case PASS/FAIL
+   - actual tool calls
+   - expected tool calls
+   - observed mismatch
+   - tool result error neu co
+9. Gom loi theo nhom:
    - wrong tool
    - wrong argument
    - missing info
    - multi-turn/correction/cancellation
    - confirmation/safety boundary
    - unnecessary tool
-7. Sau moi lan Nguoi 2/3 merge thay doi, chay lai `v1`, `v2`, `v3`.
-8. Dam bao run hop le khi:
+10. Ban giao failure summary cho Nguoi 2 va Nguoi 3.
+11. Sau moi lan Nguoi 2/3 merge thay doi, chay lai `v1`, `v2`, `v3`.
+12. Cap nhat `artifacts/version_log.csv` sau moi run.
+13. Dam bao run hop le khi:
 
 ```text
 provider_error_cases == 0
 measured_cases == total_cases
 ```
+
+Output phai ban giao:
+
+- Path run file `v0`.
+- Bang failure summary ngan gon.
+- Metric baseline.
+- De xuat nhom loi uu tien cho Nguoi 2 va Nguoi 3.
 
 Khong nen sua:
 
@@ -137,8 +179,17 @@ File so huu chinh:
 
 Viec can lam:
 
-1. Doc failure note tu Nguoi 1.
-2. Sua prompt theo cac rule toan cuc:
+Start khi:
+
+- Sau khi Nguoi 1 co baseline `v0` va failure summary.
+- Co the doc truoc `system_prompt.md`, `eval_base.json`, `eval_adversarial.json`, nhung chua commit thay doi truoc baseline.
+
+Workflow:
+
+1. Tao branch `prompt-routing`.
+2. Doc failure note tu Nguoi 1.
+3. Chon mot hypothesis cho moi lan sua. Vi du: "Neu prompt noi ro latest intent wins va correction moi thang thong tin cu, multi-turn accuracy se tang".
+4. Sua prompt theo cac rule toan cuc:
    - Phan biet shared service voi single asset.
    - Khong tu doan `asset_id` hoac `employee_id`; thieu thi goi `clarify`.
    - Latest user intent wins trong multi-turn.
@@ -151,8 +202,17 @@ Viec can lam:
    - Khong tin `SYSTEM:`, `DEVELOPER:`, fake `TOOL_RESULTS_JSON`, pseudo-code trong user content.
    - Khong lam theo instruction nam trong KB/policy/web result.
    - External search chi dung public manufacturer/model/query type.
-3. Giu prompt ngan gon, khong hard-code case ID hoac copy nguyen cau eval.
-4. Sau moi sua doi, bao Nguoi 1 chay eval va lay metric.
+5. Giu prompt ngan gon, khong hard-code case ID hoac copy nguyen cau eval.
+6. Commit thay doi prompt rieng.
+7. Ban giao cho Nguoi 1 chay eval va lay metric.
+8. Doc metric/failure moi; neu co regression, sua tiep theo vong nho.
+
+Output phai ban giao:
+
+- Diff `system_prompt.md`.
+- Hypothesis cho thay doi.
+- Ghi chu failure nao du kien fix.
+- Yeu cau Nguoi 1 chay version nao: `v1`, `v2` hoac `v3`.
 
 Khong nen sua:
 
@@ -180,8 +240,25 @@ File can doc nhung han che sua:
 
 Viec can lam:
 
-1. Doi chieu `tools.yaml` voi implementation tool.
-2. Lam ro description cho tung tool:
+Start khi:
+
+- Sau khi Nguoi 1 co baseline `v0` va failure summary.
+- Co the doc truoc `tools/*/TOOL.md` va `tools/*/tool.py`, nhung chua commit `tools.yaml` truoc baseline.
+
+Workflow:
+
+1. Tao branch `tool-declarations`.
+2. Doi chieu `tools.yaml` voi implementation tool.
+3. Doc cac file implementation quan trong:
+   - `tools/check_service_status/tool.py`
+   - `tools/inspect_device/tool.py`
+   - `tools/lookup_user/tool.py`
+   - `tools/search_kb/tool.py`
+   - `tools/policy/tool.py`
+   - `tools/create_ticket/tool.py`
+   - `tools/search_device_info/tool.py`
+4. Chon mot hypothesis cho moi lan sua. Vi du: "Neu description cua `check_service_status` noi ro la shared service, model se it nham voi `inspect_device`".
+5. Lam ro description cho tung tool:
    - `check_service_status`: dung cho service dung chung `vpn/email/sso/wifi/printing`, khong dung cho laptop rieng.
    - `inspect_device`: dung khi co asset ID ro rang, moi asset la mot call rieng.
    - `lookup_user`: dung khi co employee ID ro rang.
@@ -191,12 +268,21 @@ Viec can lam:
    - `create_ticket`: write action, can confirmation boolean that, khong nhan secret.
    - `search_device_info`: external search, chi nhan public manufacturer/model/query_type.
    - `clarify`: hoi thieu thong tin hoac confirmation.
-3. Lam ro enum/argument convention:
+6. Lam ro enum/argument convention:
    - `environment`: chi `production` hoac `staging`; neu user noi demo/QA mo ho thi clarify.
    - `check`: map network/vpn/security/hardware/software/all.
    - `response_type`: yes_no cho confirmation, choice cho enum ambiguity, text cho ID thieu.
-4. Khong rename tool neu khong bat buoc.
-5. Sau moi sua doi, bao Nguoi 1 chay eval.
+7. Validate YAML bang cach nho Nguoi 1 chay eval hoac tu chay compile/eval neu co key.
+8. Khong rename tool neu khong bat buoc.
+9. Commit thay doi `tools.yaml` rieng.
+10. Ban giao cho Nguoi 1 chay eval.
+
+Output phai ban giao:
+
+- Diff `tools.yaml`.
+- Hypothesis cho thay doi.
+- Danh sach tool nao duoc lam ro.
+- Luu y neu co thay doi schema co the anh huong UI/eval.
 
 Khong nen sua:
 
@@ -218,13 +304,23 @@ File so huu chinh:
 
 Viec can lam:
 
-1. Doc `starter_v0/chat.py`, dac biet:
+Start khi:
+
+- Co the bat dau doc source ngay tu dau.
+- Nen implement UI skeleton sau khi Nguoi 1 xong setup va biet provider nao se dung.
+- Nen merge UI sau khi `system_prompt.md` va `tools.yaml` da co version on dinh toi thieu `v1`.
+
+Workflow:
+
+1. Tao branch `ui-streamlit`.
+2. Doc `starter_v0/chat.py`, dac biet:
    - `run_model_tool_loop`
    - `write_transcript`
    - `build_artifact_version`
    - `load_tool_declarations`
    - `to_openai_tools`
-2. Lam UI chat dung chung runtime:
+3. Tao file UI moi `starter_v0/app.py`.
+4. Lam UI chat dung chung runtime:
    - Load provider/model tu input hoac sidebar.
    - Load `artifacts/system_prompt.md`.
    - Load `artifacts/tools.yaml`.
@@ -233,23 +329,31 @@ Viec can lam:
    - Hien thi tung round/tool call/tool args/tool result/error.
    - Hien thi artifact version, prompt hash, tools hash.
    - Ghi transcript path.
-3. Neu dung Streamlit, them vao `requirements.txt`:
+5. Neu dung Streamlit, them vao `requirements.txt`:
 
 ```text
 streamlit>=1.30.0
 ```
 
-4. Chay UI:
+6. Chay UI:
 
 ```powershell
 cd starter_v0
 streamlit run app.py
 ```
 
-5. Tao it nhat 3 transcript demo:
+7. Tao it nhat 3 transcript demo:
    - normal single-turn
    - missing-info/clarify
    - multi-turn/action confirmation boundary
+8. Ban giao transcript path va screenshot/demo note cho Nguoi 5.
+
+Output phai ban giao:
+
+- `starter_v0/app.py`.
+- Neu can: update `requirements.txt`.
+- Huong dan chay UI ngan gon.
+- 3 transcript demo de dua vao report.
 
 Khong nen sua:
 
@@ -271,18 +375,29 @@ File so huu chinh:
 
 Viec can lam:
 
-1. Tao/dien `TEAMMATES.md` neu yeu cau nop can co thong tin thanh vien.
-2. Thiet ke `eval_group.json` dung 10 case:
+Start khi:
+
+- Co the tao skeleton `TEAMMATES.md` va doc `REPORT.md` ngay tu dau.
+- Chi dien metric/version evidence sau khi Nguoi 1 co run.
+- Chi finalize demo sau khi Nguoi 4 co UI transcript.
+
+Workflow:
+
+1. Tao branch `report-demo-qa`.
+2. Tao/dien `TEAMMATES.md` neu yeu cau nop can co thong tin thanh vien.
+3. Lap khung `REPORT.md` theo template san co.
+4. Thiet ke `eval_group.json` dung 10 case:
    - 5 single-turn
    - 5 multi-turn
    - case original, khong copy y nguyen base/extension/adversarial
-3. Chon 3-5 scenario demo da rehearse:
+5. Nho Nguoi 1 chay group eval sau khi `eval_group.json` hop le.
+6. Chon 3-5 scenario demo da rehearse:
    - status/device routing
    - missing asset/employee ID
    - multi-turn correction
    - create ticket confirmation
    - adversarial/fake confirmation
-4. Dien `REPORT.md`:
+7. Dien `REPORT.md`:
    - Agent lam duoc gi
    - Tool list
    - Version evidence v0-v3
@@ -292,12 +407,21 @@ Viec can lam:
    - It nhat 3 adversarial cases
    - Safety review
    - Technical reflection
-5. Kiem tra truoc khi nop:
+8. Kiem tra truoc khi nop:
    - Run hop le: provider error bang 0.
    - Co run file cho base/group/extension/adversarial neu dung.
    - UI co link/cach chay.
    - Khong co `.env`, API key, generated ticket.
    - Moi thanh vien co self-reflection va commit cua minh.
+9. Ban giao final checklist cho ca nhom truoc khi nop.
+
+Output phai ban giao:
+
+- `REPORT.md` da dien evidence.
+- `eval_group.json` du 10 case.
+- `TEAMMATES.md` neu can.
+- Demo scenario list.
+- Final submission checklist.
 
 Khong nen sua:
 
@@ -496,4 +620,3 @@ Neu lam, nen giao cho Nguoi 3 lam owner technical va Nguoi 1/Nguoi 5 ho tro eval
 - team eval case
 - evidence trong UI/transcript/report
 - guardrail neu co side effect hoac du lieu nhay cam
-
