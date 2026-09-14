@@ -1,9 +1,9 @@
 # Day 04 Lab v3 Report — IT Helpdesk Agent
 
-> V1 đã có evidence: xem [V1-REVIEW.md](V1-REVIEW.md). Bản đã đo đạt base 30/30,
-> adversarial 10/12, còn A04/A10. Sau đó đã hoàn lại Case 6 cho bạn B;
-> schema hiện tại chưa chạy lại model eval. Các phần v2/v3 bên dưới
-> vẫn là template, chưa được thực hiện trong thay đổi này.
+> Phạm vi hiện tại: **v1 — Routing**, xem [VERSION-SCOPE.md](VERSION-SCOPE.md).
+> V2 Arguments và V3 Context & Clarify chờ yêu cầu riêng. Các kết quả cũ trong
+> [V1-REVIEW.md](V1-REVIEW.md) thuộc bản trộn phạm vi, không phải điểm v1 Routing.
+> Bản routing hiện tại chưa chạy model eval; các mục v2/v3 bên dưới còn là template.
 
 ## Team
 

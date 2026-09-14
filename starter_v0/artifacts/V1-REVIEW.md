@@ -1,5 +1,9 @@
 # V1 — routing, missing information and confirmation
 
+> HISTORICAL MIXED-SCOPE REVIEW: superseded by the user's version grouping.
+> See [VERSION-SCOPE.md](VERSION-SCOPE.md). The current artifacts implement
+> routing only. None of the scores below measure the current routing-only v1.
+
 > Scope correction after evaluation: Case 6 (changes to inspect_device.check in
 > tools.yaml) also belongs to contributor B. Its check declaration and required
 > list have been restored to baseline in the active schema. Case 7's query
