@@ -1,7 +1,114 @@
 {
   "dataset_id": "day04_v3_helpdesk_group",
   "dataset_role": "group",
-  "description": "Template intentionally left empty. The team must write exactly 10 original IT helpdesk cases: 5 single-turn query cases and 5 multi-turn turns cases.",
+  "description": "10 original IT helpdesk cases by the team: 5 single-turn and 5 multi-turn.",
   "allowed_failure_types": ["wrong_tool", "wrong_arg_value", "wrong_boundary", "unnecessary_tool", "out_of_scope", "missing_info"],
-  "cases": []
+  "cases": [
+    {
+      "id": "G01_ambiguous_service_name",
+      "phase": "B", "suite": "group",
+      "query": "Hệ thống đăng nhập tập trung đang gặp vấn đề gì không?",
+      "failure_type": "wrong_tool",
+      "expect": {"tool_calls": [{"name": "check_service_status", "args": {"service": "sso", "environment": "production"}}]},
+      "metadata": {"what_it_tests": "Nhận diện SSO từ mô tả 'đăng nhập tập trung' thay vì tên dịch vụ trực tiếp."}
+    },
+    {
+      "id": "G02_multi_device_same_check",
+      "phase": "B", "suite": "group",
+      "query": "Kiểm tra kết nối VPN trên cả LT-204 và LT-318.",
+      "failure_type": "wrong_tool",
+      "expect": {"tool_calls": [
+        {"name": "inspect_device", "args": {"asset_id": "LT-204", "check": "vpn"}},
+        {"name": "inspect_device", "args": {"asset_id": "LT-318", "check": "vpn"}}
+      ]},
+      "metadata": {"what_it_tests": "Cùng một tool gọi hai lần với asset_id khác nhau."}
+    },
+    {
+      "id": "G03_policy_plus_kb",
+      "phase": "B", "suite": "group",
+      "query": "Tìm hướng dẫn reset password trong KB và tra policy về quy trình đổi password.",
+      "failure_type": "wrong_tool",
+      "expect": {"tool_calls": [
+        {"name": "search_kb", "args": {"category": "account"}},
+        {"name": "policy", "args": {"policy_area": "access_control"}}
+      ]},
+      "metadata": {"what_it_tests": "KB hướng dẫn kỹ thuật và policy quy trình là hai nguồn khác nhau."}
+    },
+    {
+      "id": "G04_near_scope_but_outside",
+      "phase": "B", "suite": "group",
+      "query": "Giúp mình viết email xin nghỉ phép gửi sếp.",
+      "failure_type": "out_of_scope",
+      "expect": {"no_tool": true, "behavior": "refuse"},
+      "metadata": {"what_it_tests": "Yêu cầu liên quan email nhưng không phải IT support, phải từ chối."}
+    },
+    {
+      "id": "G05_missing_service_name",
+      "phase": "B", "suite": "group",
+      "query": "Dịch vụ bên mình đang bị lỗi, kiểm tra giúp nhé.",
+      "failure_type": "missing_info",
+      "expect": {"tool_calls": [{"name": "clarify", "args": {"response_type": "text"}}]},
+      "metadata": {"what_it_tests": "User không nêu rõ dịch vụ nào, phải hỏi clarify thay vì đoán."}
+    },
+    {
+      "id": "G06_multi_correct_service",
+      "phase": "B", "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Kiểm tra VPN production."},
+        {"role": "user", "content": "Không phải VPN, mình muốn xem SSO."},
+        {"role": "user", "content": "Đúng rồi, kiểm tra SSO production."}
+      ],
+      "failure_type": "wrong_tool",
+      "expect": {"tool_calls": [{"name": "check_service_status", "args": {"service": "sso", "environment": "production"}}]},
+      "metadata": {"what_it_tests": "User sửa dịch vụ giữa chừng, intent mới phải thắng."}
+    },
+    {
+      "id": "G07_multi_add_info_gradually",
+      "phase": "B", "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Kiểm tra máy giúp mình."},
+        {"role": "user", "content": "Mã máy là DT-087."},
+        {"role": "user", "content": "Chỉ kiểm tra phần software."}
+      ],
+      "failure_type": "missing_info",
+      "expect": {"tool_calls": [{"name": "inspect_device", "args": {"asset_id": "DT-087", "check": "software"}}]},
+      "metadata": {"what_it_tests": "User cung cấp asset ID và check type dần dần qua nhiều turn."}
+    },
+    {
+      "id": "G08_multi_cancel_then_new",
+      "phase": "B", "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Tìm hướng dẫn cài VPN trên macOS."},
+        {"role": "user", "content": "Thôi không cần tìm hướng dẫn nữa."},
+        {"role": "user", "content": "Thay vào đó tra tài khoản EMP-1005 giúp mình."}
+      ],
+      "failure_type": "wrong_tool",
+      "expect": {"tool_calls": [{"name": "lookup_user", "args": {"employee_id": "EMP-1005"}}]},
+      "metadata": {"what_it_tests": "Hủy request cũ rồi chuyển sang tool hoàn toàn khác."}
+    },
+    {
+      "id": "G09_multi_ticket_priority_change_reconfirm",
+      "phase": "B", "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Tạo ticket lỗi Wi-Fi trên DT-031 mức low."},
+        {"role": "user", "content": "Tôi xác nhận tạo ticket."},
+        {"role": "user", "content": "Khoan, đổi priority thành medium, rồi tạo luôn."}
+      ],
+      "failure_type": "wrong_boundary",
+      "expect": {"tool_calls": [{"name": "clarify", "args": {"response_type": "yes_no"}}]},
+      "metadata": {"what_it_tests": "Confirmation cũ (turn 2) mất hiệu lực vì priority thay đổi (turn 3), dù user nói 'tạo luôn'."}
+    },
+    {
+      "id": "G10_multi_context_carry_asset_change_check",
+      "phase": "B", "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Kiểm tra network trên LT-411."},
+        {"role": "user", "content": "Giữ nguyên máy đó nhưng đổi sang kiểm tra security."},
+        {"role": "user", "content": "Đúng vậy, security trên LT-411."}
+      ],
+      "failure_type": "wrong_arg_value",
+      "expect": {"tool_calls": [{"name": "inspect_device", "args": {"asset_id": "LT-411", "check": "security"}}]},
+      "metadata": {"what_it_tests": "Giữ asset_id từ turn trước nhưng thay đổi check type."}
+    }
+  ]
 }
