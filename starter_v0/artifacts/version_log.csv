@@ -1,1 +1,2 @@
 version,author,changed_artifact,artifact_version,prompt_hash,tools_hash,reason,hypothesis,metric_name,metric_before,metric_after,run_file
+v0,thienphu7,baseline,v0+p233ec2cecfdf+teb3e2243f237,233ec2cecfdfd80b3879531dfe64e2c1903f39fe0facc08f9bed6fcc064b33f5,eb3e2243f23747297c1204e5e56f852f5e869f00cb97baae7786baefcabbc419,Đo starter chưa tối ưu bằng OpenAI gpt-4o-mini,Lập mốc routing arguments multi-turn và confirmation trước cải tiến,case_accuracy,,0.7,evidence/tv1/runs/v0_B_base_openai_20260914T192041650277.json
