@@ -6,9 +6,9 @@
   "cases": [
     {
       "id": "G01_lookup_user", "phase": "B",
-      "query": "Tra cứu thông tin của nhân viên EMP-502.",
+      "query": "Tra cứu thông tin của nhân viên EMP-1001.",
       "failure_type": "wrong_tool",
-      "expect": {"tool_calls": [{"name": "lookup_user", "args": {"employee_id": "EMP-502"}}]},
+      "expect": {"tool_calls": [{"name": "lookup_user", "args": {"employee_id": "EMP-1001"}}]},
       "metadata": {"what_it_tests": "Single-turn lookup_user."}
     },
     {
@@ -20,9 +20,9 @@
     },
     {
       "id": "G03_device_info", "phase": "B",
-      "query": "Tìm driver cho Lenovo ThinkPad T14 Gen 4.",
+      "query": "Tìm thông số cấu hình của MacBook Pro M2.",
       "failure_type": "wrong_tool",
-      "expect": {"tool_calls": [{"name": "search_device_info", "args": {"manufacturer": "Lenovo", "model": "ThinkPad T14 Gen 4", "query_type": "drivers"}}]},
+      "expect": {"tool_calls": [{"name": "search_device_info", "args": {"manufacturer": "Apple", "model": "MacBook Pro M2", "query_type": "specs"}}]},
       "metadata": {"what_it_tests": "Single-turn search_device_info external."}
     },
     {
@@ -34,7 +34,7 @@
     },
     {
       "id": "G05_clarify_yes_no", "phase": "B",
-      "query": "Tạo ticket high cho máy LT-999 bị hỏng pin.",
+      "query": "Tạo ticket high cho máy LT-411 bị hỏng pin.",
       "failure_type": "wrong_boundary",
       "expect": {"tool_calls": [{"name": "clarify", "args": {"response_type": "yes_no"}}]},
       "metadata": {"what_it_tests": "Single-turn clarify yes_no before creating ticket."}
@@ -57,18 +57,18 @@
         {"role": "user", "content": "Kiểm tra SSO trên môi trường dev giúp tôi."}
       ],
       "failure_type": "wrong_boundary",
-      "expect": {"tool_calls": [{"name": "clarify", "args": {"response_type": "choice"}}]},
+      "expect": {"tool_calls": [{"name": "clarify", "args": {"response_type": "choice", "options": ["production", "staging"]}}]},
       "metadata": {"what_it_tests": "Multi-turn clarify choice for invalid environment."}
     },
     {
       "id": "G08_create_ticket_confirmed", "phase": "B",
       "turns": [
-        {"role": "user", "content": "Tạo ticket báo lỗi mạng cho LT-123 mức low."},
-        {"role": "assistant", "content": "Bạn có chắc chắn muốn tạo ticket báo lỗi mạng cho LT-123 mức low không?"},
-        {"role": "user", "content": "Đúng, tôi xác nhận tạo ticket."}
+        {"role": "user", "content": "Tạo ticket báo lỗi mạng cho MB-012 mức low."},
+        {"role": "assistant", "content": "Bạn có chắc chắn muốn tạo ticket báo lỗi mạng cho MB-012 mức low không?"},
+        {"role": "user", "content": "Tiến hành ghi nhận sự cố này vào hệ thống giúp tôi."}
       ],
       "failure_type": "wrong_boundary",
-      "expect": {"tool_calls": [{"name": "create_ticket", "args": {"priority": "low", "asset_id": "LT-123", "confirmed": true}}]},
+      "expect": {"tool_calls": [{"name": "create_ticket", "args": {"priority": "low", "asset_id": "MB-012", "confirmed": true}}]},
       "metadata": {"what_it_tests": "Multi-turn confirmed ticket creation."}
     },
     {
@@ -85,12 +85,12 @@
     {
       "id": "G10_context_carryover", "phase": "B",
       "turns": [
-        {"role": "user", "content": "Nhân viên EMP-112 đang dùng máy nào?"},
-        {"role": "assistant", "content": "Nhân viên EMP-112 đang dùng máy LT-555."},
+        {"role": "user", "content": "Nhân viên EMP-1002 đang dùng máy nào?"},
+        {"role": "assistant", "content": "Nhân viên EMP-1002 đang dùng máy RM-501."},
         {"role": "user", "content": "Hãy kiểm tra phần mềm máy đó."}
       ],
       "failure_type": "missing_info",
-      "expect": {"tool_calls": [{"name": "inspect_device", "args": {"asset_id": "LT-555", "check": "software"}}]},
+      "expect": {"tool_calls": [{"name": "inspect_device", "args": {"asset_id": "RM-501", "check": "software"}}]},
       "metadata": {"what_it_tests": "Multi-turn context carryover for asset_id."}
     }
   ]
