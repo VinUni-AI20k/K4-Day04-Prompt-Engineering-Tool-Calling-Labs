@@ -189,7 +189,7 @@ prompt, declarations, eval/security và UI/report; mỗi phần có commit/run t
 
 Theo submission guide, mỗi thành viên phải tự viết, tự xác nhận tính chính xác và
 tự commit reflection bằng Git identity của mình. Các mục dưới đây chỉ ghi evidence
-đã quan sát được; ba thành viên còn thiếu phải bổ sung phần học được/khó khăn bằng
+đã quan sát được; hai thành viên còn thiếu phải bổ sung phần học được/khó khăn bằng
 lời của chính mình trước khi tick final checkout.
 
 ### Phạm Hồ Quang Dũng — 2A202602860
@@ -202,9 +202,17 @@ lời của chính mình trước khi tick final checkout.
 ### Nguyễn Hải Đăng — 2A202602963
 
 - **Vai trò/evidence:** System prompt routing/multi-turn/confirmation;
-  `artifacts/system_prompt.md`, commits `900dfac`, `17982c3`.
-- **Thành viên tự bổ sung và commit:** quyết định kỹ thuật, khó khăn, điều học được
-  và điều sẽ cải thiện.
+  `artifacts/system_prompt.md`, commits `900dfac`, `17982c3`, `3bd5e93`,
+  `53ca1fd` (Git identity: Aminix / Nguyen Hai Dang / TheDeepVoid).
+- **Quyết định kỹ thuật:** Giữ rule hội thoại và safety ở `system_prompt.md`,
+  không nhét schema tool vào prompt. Sửa theo hypothesis từ trace
+  (H03/H04/H10/H11/H12/H19, multi-turn/cancel), không hard-code case ID.
+  Ask-before-guess cho identifier; confirm-before-write cho `create_ticket`.
+- **Khó khăn/bài học:** Rule quá hẹp dễ làm regress case đã PASS. Prompt không
+  thay runtime authorization — A10 vẫn fail. `parse_runs.py` chỉ glob
+  `*.json` một cấp; truyền repo root cho 0 hàng, phải trỏ `starter_v0/runs`.
+- **Nếu làm lại:** Lập bảng hypothesis trước khi sửa prompt; regression ngay
+  sau mỗi thay đổi; thay Boolean `confirmed` bằng confirmation token/state.
 
 ### Ngô Gia Quốc — 2A202602757
 
@@ -242,8 +250,8 @@ lời của chính mình trước khi tick final checkout.
 - [x] Adversarial suite đã review thủ công tối thiểu 3 case.
 - [ ] Mỗi thành viên tự hoàn thiện và commit self-reflection bằng identity tương ứng.
 - [ ] Mỗi thành viên xác nhận có commit của mình trong branch nộp bài.
-- [ ] Chạy rehearsal để tạo `evidence/transcripts/rehearsal-v3.transcript.json`.
-- [ ] Xác nhận không còn `.env`, secret, cache hoặc generated ticket trong submission.
+- [x] Chạy rehearsal để tạo `evidence/transcripts/rehearsal-v3.transcript.json`.
+- [x] Xác nhận không còn `.env`, secret, cache hoặc generated ticket trong submission.
 - [ ] Tất cả thành viên nộp cùng URL trên VLearn.
 
 **URL repository chung:** <https://github.com/khanhtrankuri/K4A-Day04-SV>
