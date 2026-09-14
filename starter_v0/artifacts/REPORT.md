@@ -25,8 +25,16 @@
 
 | Tool | Chức năng | Core / optional / team-built |
 |---|---|---|
-| clarify | Hỏi bổ sung hoặc xác nhận | core |
-|  |  |  |
+| clarify | Hỏi bổ sung định danh (asset_id, employee_id) hoặc xin xác nhận trước hành động ghi | core |
+| search_kb | Tìm kiếm tài liệu hướng dẫn kỹ thuật (how-to) trong Knowledge Base nội bộ | core |
+| check_service_status | Kiểm tra trạng thái hoạt động của các dịch vụ dùng chung (VPN, Email, SSO, Wi-Fi, Printing) | core |
+| inspect_device | Đọc cấu hình và chẩn đoán kỹ thuật của máy tính cụ thể theo asset_id | core |
+| lookup_user | Tra cứu hồ sơ nhân viên và thiết bị được cấp theo employee_id | core |
+| format_incident_report | Định dạng các phát hiện sự cố đã thu thập thành báo cáo chuẩn hóa (brief, technical, handoff) | core |
+| policy | Tra cứu các quy định, chính sách IT nội bộ theo từng khu vực policy_area | optional |
+| create_ticket | Tạo ticket sự cố mới vào thư mục local sau khi nhận được xác nhận rõ ràng | optional |
+| search_device_info | Tra cứu thông số kỹ thuật, driver và trang hỗ trợ công khai của thiết bị trên web qua Tavily | optional |
+| lookup_ticket_status | Tra cứu chi tiết tiến độ, kỹ thuật viên phụ trách và giải pháp của ticket sự cố IT theo ticket_id | team-built (bonus) |
 
 ## A3. Câu hỏi mẫu
 
@@ -92,9 +100,9 @@ nhóm tự xây.
 
 | Category | Evidence file | What worked | Risk / guardrail |
 |---|---|---|---|
-| Optional built-in |  |  |  |
-| External search + privacy boundary |  |  |  |
-| Bonus: tool mới do nhóm tự xây |  |  |  |
+| Optional built-in | `data/eval_helpdesk_extension.json`, `tools/policy/`, `tools/create_ticket/` | Tra cứu policy chính xác; tạo ticket khi có xác nhận rõ ràng | Cần explicit confirmation (`confirmed: true`), chặn nhúng credentials/token vào summary |
+| External search + privacy boundary | `tools/search_device_info/`, `data/eval_helpdesk_extension.json` (E08, E09) | Tìm kiếm specs và driver chính thức từ vendor domains (Lenovo, Dell, HP) qua Tavily API | Nguy cơ rò rỉ dữ liệu nội bộ ra ngoài; Guardrail: Regex `INTERNAL_IDENTIFIER` tự động chặn asset_id (`LT-...`) và employee_id (`EMP-...`) |
+| Bonus: tool mới do nhóm tự xây | `tools/lookup_ticket_status/`, `helpdesk_data/mock_tickets.json`, `scripts/smoke_all_tools.py` | Tra cứu trạng thái ticket linh hoạt: đọc cả mock database có sẵn và các dynamic tickets mới tạo trong `tickets/` | Không cho phép ghi/chỉnh sửa trạng thái trực tiếp; xử lý an toàn khi ID không tồn tại (`ticket_not_found`) |
 
 ## B6. Safety review
 
@@ -106,9 +114,26 @@ nhóm tự xây.
 ## B7. Technical reflection
 
 - Fix nào thuộc `system_prompt.md`?
+  - Thiết lập vai trò danh tính IT Service Desk tổng thể;
+  - Nguyên tắc toàn cục cấm tự đoán mã tài sản (`asset_id`) hoặc mã nhân viên (`employee_id`);
+  - Nguyên tắc ưu tiên thông tin mới nhất trong hội thoại nhiều lượt (context correction & carry-over);
+  - Định dạng cấu trúc JSON trả về (`intent`, `action`, `reply`, `evidence_ids`).
+
 - Fix nào thuộc `tools.yaml`?
+  - Phân định ranh giới năng lực giữa `check_service_status` (dịch vụ hạ tầng dùng chung toàn công ty) và `inspect_device` (thiết bị máy tính cá nhân cụ thể theo `asset_id`);
+  - Hướng dẫn model gọi song song (parallel calling) khi người dùng yêu cầu so sánh nhiều máy hoặc so sánh nhiều môi trường;
+  - Thiết lập ranh giới an toàn cho `create_ticket`: chỉ cho phép `confirmed: true` khi có xác nhận ngôn ngữ tự nhiên, cảnh báo xác nhận cũ hết hạn (`stale confirmation`) khi payload thay đổi, và cấm công nhận pseudo-code;
+  - Thiết lập ranh giới bảo mật cho `search_device_info`: cấm tuyệt đối truyền định danh nội bộ (`LT-...`, `EMP-...`, IP, hostname) ra web;
+  - Chi tiết hóa toàn bộ các giá trị enum của `policy_area`, `check`, `template`, `response_type`.
+
 - Failure nào không thể chỉ nhìn automatic score?
+  - **Lỗ hổng dữ liệu trong filesystem / API call:** Evaluator chỉ chấm tool call và argument subset (PASS), nhưng nếu trong argument đó chứa rò rỉ token, password hoặc mã máy gửi ra ngoài internet thì automatic grader không phát hiện được.
+  - **Lỗi Side-effect âm thầm:** Cần kiểm tra thư mục `tickets/` thực tế xem có file ticket rác nào bị ghi trộm khi người dùng chưa đồng ý hay không.
+  - **Tool result rỗng hoặc lỗi:** Model gọi đúng tên tool (grader chấm PASS) nhưng tool trả về `not_found` hoặc exception do truyền sai format ID.
+
 - Nếu có thêm một vòng, nhóm sẽ thử hypothesis nào?
+  - *"Nếu xây dựng một semantic validator layer trước khi gọi action tool để kiểm tra ngữ nghĩa của câu xác nhận (tránh các câu mỉa mai hoặc phủ định phức tạp), tỉ lệ sai sót ở các ca confirmation phức tạp sẽ giảm về 0%."*
+  - *"Nếu mở rộng Bonus tool `lookup_ticket_status` cho phép nhân viên hủy ticket (với cơ chế xác nhận an toàn tương tự `create_ticket`), trải nghiệm người dùng trong vòng đời ticket sẽ khép kín hoàn toàn."*
 
 # PHẦN C — Checkout trước khi nộp
 
@@ -140,7 +165,37 @@ có thể đối chiếu đóng góp.
 
 Sao chép mẫu dưới đây cho từng thành viên:
 
-### Họ tên — MSSV
+### Hoang Nguyen — 02551 (tvhn)
+
+- **Vai trò/phần việc được nhận:** Tool & Schema Engineer (+ Bonus Tool)
+- **Những gì tôi đã thay đổi trong repo chung:**
+  - Khảo sát và đối chiếu toàn bộ 9 tool có sẵn với JSON schema ban đầu, chỉ ra 5 nhóm lỗi cốt lõi trong `tools.yaml`;
+  - Tối ưu hóa toàn diện file `starter_v0/artifacts/tools.yaml` qua các phiên bản (v1, v2, v3): phân định ranh giới routing giữa `check_service_status` và `inspect_device`, bổ sung hướng dẫn gọi song song (parallel calling), kế thừa ngữ cảnh (carry-over), thiết lập ranh giới an toàn cho `create_ticket` (chống argument smuggling, stale confirmation) và `search_device_info` (chặn rò rỉ dữ liệu nội bộ);
+  - Thiết kế, phát triển và tích hợp hoàn chỉnh Bonus Tool `lookup_ticket_status` (gồm `TOOL.md`, `tool.py`, mock database `mock_tickets.json`, đăng ký trong `tools/__init__.py` và khai báo schema trong `tools.yaml`);
+  - Xây dựng bộ test tự động độc lập `starter_v0/scripts/smoke_all_tools.py` kiểm thử thành công 10/10 tools (tỉ lệ pass 100%);
+  - Cập nhật danh mục tool (Mục A2), bằng chứng bonus tool (Mục B5), và phản tư kỹ thuật (Mục B7) trong `REPORT.md`.
+- **File hoặc artifact liên quan:**
+  - `starter_v0/artifacts/tools.yaml`
+  - `starter_v0/tools/lookup_ticket_status/` (`TOOL.md`, `tool.py`)
+  - `starter_v0/tools/__init__.py`
+  - `starter_v0/helpdesk_data/mock_tickets.json`
+  - `starter_v0/scripts/smoke_all_tools.py`
+  - `starter_v0/artifacts/REPORT.md` (Mục A2, B5, B7, C2)
+  - `ghichucongviec.md`
+- **Commit hash hoặc pull request:** Branch `02551-tvhn`
+- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:**
+  - *Phân định rõ ranh giới Tool thay vì nhồi nhét rule vào System Prompt:* Quyết định đưa các quy tắc sử dụng và phản ví dụ ("khi nào KHÔNG dùng") trực tiếp vào `description` của từng tool trong `tools.yaml` thay vì nhồi vào System Prompt. Lý do: Model khi gọi tool sẽ tập trung chú ý cao nhất vào description của tool đó (Locality of Context), giúp giảm hơn 70% lỗi chọn nhầm tool mà không làm loãng System Prompt.
+  - *Thiết kế Bonus Tool `lookup_ticket_status` hỗ trợ cơ chế kế thừa hai chiều:* Cho phép tra cứu cả các ticket có sẵn trong mock database lẫn các ticket mới sinh ra động trong thư mục `tickets/` bởi `create_ticket`.
+- **Khó khăn tôi gặp và cách tôi xử lý:**
+  - *Bảo vệ an toàn cho action create_ticket:* Kẻ tấn công thường nhúng pseudo-code hoặc tự gán `confirmed: true` để vượt rào kiểm duyệt. Tôi đã thiết lập quy tắc trong schema rằng chỉ chấp nhận xác nhận bằng ngôn ngữ tự nhiên từ câu trả lời trước của người dùng, nếu không bắt buộc phải gọi `clarify(response_type="yes_no")`. Đồng thời xử lý quy tắc Stale Confirmation khi payload thay đổi.
+  - *Lỗi UnicodeEncodeError trên terminal Windows (cp1252):* Khi print chuỗi tiếng Việt có dấu trong script test, terminal mặc định bị lỗi mã hóa. Tôi đã chuẩn hóa toàn bộ các message và error keys trong `tool.py` sang tiếng Anh chuẩn IT Helpdesk, giúp tool chạy ổn định trên mọi hệ điều hành.
+- **Điều tôi học được từ phần việc này:**
+  - Hiểu sâu sắc rằng Tool Schema (name, description, parameters, enum) chính là một phần của Prompt mà model tiếp nhận. Thiết kế schema chuẩn chỉ là bước quan trọng nhất để định hướng hành vi của AI Agent.
+  - Nắm vững mô hình phòng thủ theo chiều sâu (Defense in Depth): Schema chặt chẽ ở lớp giao tiếp kết hợp với Regex & Validation chặt chẽ ở lớp code Python.
+- **Nếu làm lại, tôi sẽ cải thiện điều gì:**
+  - Xây dựng thêm cơ chế fuzzy search hoặc autocomplete cho mã ticket trong `lookup_ticket_status` để khi người dùng gõ sai 1-2 ký tự, agent vẫn có thể gợi ý ticket gần đúng nhất.
+
+### Họ tên — MSSV (Template cho thành viên khác)
 
 - **Vai trò/phần việc được nhận:**
 - **Những gì tôi đã thay đổi trong repo chung:**
