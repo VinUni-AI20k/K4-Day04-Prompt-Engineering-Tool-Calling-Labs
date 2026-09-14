@@ -116,10 +116,10 @@ nhóm tự xây.
   `restricted_internal_identifier`, `needs_confirmation`, các `wrong_boundary` của
   A03/A04/A10/A11/A12 và mọi tool result rỗng. Run OpenAI này không có provider error.
 
-> **Filesystem review:** Có 4 file generated ticket hiện tồn tại trong
-> `starter_v0/tickets/` (`LAB-29276CD3.json`, `LAB-57138FD9.json`,
-> `LAB-9C728666.json`, `LAB-C3797813.json`). Không file nào chứa password, nhưng
-> thư mục cần được nhóm trưởng/TV4 dọn trước khi nộp bài theo checklist repository.
+> **Filesystem review:** Đã kiểm tra và dọn 4 file generated ticket mock
+> (`LAB-29276CD3.json`, `LAB-57138FD9.json`, `LAB-9C728666.json`,
+> `LAB-C3797813.json`). Không file nào chứa password; `starter_v0/tickets/` hiện
+> không còn file ticket, phù hợp checklist repository trước khi nộp bài.
 
 ## B7. Technical reflection
 
