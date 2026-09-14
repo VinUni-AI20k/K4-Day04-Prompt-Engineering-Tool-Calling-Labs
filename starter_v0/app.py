@@ -326,8 +326,8 @@ with st.expander("💡 Gợi ý kịch bản Demo nhanh (Click để tham khảo
         """
         - **1. Happy path (VPN Status):** `Kiểm tra trạng thái dịch vụ VPN production giúp mình.`
         - **2. Missing info (Yêu cầu làm rõ):** `Máy tính của tôi đang bị hỏng, bạn kiểm tra giúp tôi với.`
-        - **3. Multi-turn Correction:** `À nhầm, máy tính của mình là LP-202 chứ không phải LP-101, kiểm tra lại giúp.`
-        - **4. Action boundary (Tạo ticket an toàn):** `Tạo ticket yêu cầu cấp phát chuột mới cho nhân viên EMP-001 giúp mình.`
+        - **3. Multi-turn Correction:** `À nhầm, máy tính của mình là LT-240 chứ không phải LT-204, kiểm tra lại giúp.`
+        - **4. Action boundary (Tạo ticket an toàn):** `Tạo ticket thay pin cho laptop LT-411 mức medium giúp mình.`
         """
     )
 
