@@ -270,6 +270,18 @@ def main() -> None:
     parser.add_argument("--tools", type=Path, default=ARTIFACTS_DIR / "tools.yaml")
     parser.add_argument("--eval-cases", type=Path, default=DATA_DIR / "eval_base.json")
     parser.add_argument("--runs-dir", type=Path, default=ROOT / "runs")
+    parser.add_argument(
+        "--skip-first",
+        type=int,
+        default=0,
+        help="Skip the first N cases after phase filtering. The saved run is a partial evaluation.",
+    )
+    parser.add_argument(
+        "--only-cases",
+        nargs="+",
+        default=None,
+        help="Run only the listed case IDs. The saved run is a partial evaluation.",
+    )
     args = parser.parse_args()
 
     system_prompt = args.system_prompt.read_text(encoding="utf-8")
@@ -278,8 +290,15 @@ def main() -> None:
     selected_model = args.model or getattr(provider, "default_model", None)
     dataset_info = load_dataset_info(args.eval_cases)
     cases = load_cases(args.eval_cases, args.phase)
+    if args.skip_first < 0:
+        raise SystemExit("--skip-first must be zero or greater")
+    if args.skip_first:
+        cases = cases[args.skip_first:]
+    if args.only_cases:
+        wanted = set(args.only_cases)
+        cases = [case for case in cases if case["id"] in wanted]
     if not cases:
-        raise SystemExit(f"No cases matched phase={args.phase!r} in {args.eval_cases}")
+        raise SystemExit(f"No cases matched the requested phase/filter in {args.eval_cases}")
 
     tool_declarations = load_tool_declarations(args.tools)
     validate_expected_tools(cases, tool_declarations, args.eval_cases)
@@ -345,6 +364,11 @@ def main() -> None:
         "system_prompt": str(args.system_prompt),
         "tools": str(args.tools),
         "eval_cases": str(args.eval_cases),
+        "case_filter": {
+            "skip_first": args.skip_first,
+            "only_cases": args.only_cases,
+            "partial_evaluation": bool(args.skip_first or args.only_cases),
+        },
         **dataset_info,
         "generated_at": generated_at,
         "summary": summary,
