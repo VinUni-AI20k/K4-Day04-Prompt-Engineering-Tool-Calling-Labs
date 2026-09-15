@@ -273,6 +273,40 @@ Mỗi thành viên sao chép và tự hoàn thành mẫu sau:
 - **Điều tôi học được từ phần việc này:** Hiểu rõ tầm quan trọng của việc kiểm soát chặt chẽ từng câu chữ trong prompt (Prompt Engineering); một câu lệnh thừa có thể làm lệch hypothesis hoặc gây tác dụng phụ ngoài ý muốn lên các test cases khác.
 - **Nếu làm lại, tôi sẽ cải thiện điều gì:** Viết script test tự động, mỗi lần sửa `system_prompt.md`, hệ thống sẽ tự động chạy ngầm toàn bộ các eval suites và hiển thị kết quả để dễ dàng phát hiện regression sớm.
 
+- **Khó khăn tôi gặp và cách tôi xử lý:** Khó khăn lớn nhất là một thay đổi giúp adversarial cases có thể làm regression các base cases. 
+- **Điều tôi học được từ phần việc này:**Tôi học được rằng tool name, description và JSON schema đều là một phần của prompt. Điểm automatic PASS cũng chưa đủ để kết luận hệ thống hoạt động đúng, vì tool vẫn có thể trả lỗi hoặc tạo side effect ngoài ý muốn. Do đó cần kiểm tra cả metric, trace, tool results và filesystem.
+- **Nếu làm lại, tôi sẽ cải thiện điều gì:** Tôi sẽ thiết kế hypothesis cụ thể hơn cho từng version, chỉ thay đổi một nhóm quy tắc trong mỗi vòng và lưu đầy đủ run evidence ngay từ đầu. 
+
+### Vũ Quốc Bảo — 2A202602829
+
+- **Vai trò/phần việc được nhận:** Thiết kế eval_group.json và xây dựng giao diện Live Chat Streamlit
+- **Những gì tôi đã thay đổi trong repo chung:** Viết 10 case eval nhóm (5 single + 5 multi-turn); xây `app.py` dùng chung `run_model_tool_loop` với CLI/eval; bổ sung transcript evidence.
+- **File hoặc artifact liên quan:** `data/eval_group.json`, `starter_v0/app.py`, `starter_v0/.streamlit/config.toml`, `starter_v0/transcripts/ui-test_openai_20260914T235916689384.transcript.json`
+- **Commit hash hoặc pull request:** `6108da8`, `ee36f60`
+- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:** Tách mỗi case eval để kiểm tra đúng một kỹ năng; UI dùng chung agent loop với CLI để hành vi nhất quán.
+- **Khó khăn tôi gặp và cách tôi xử lý:** UI hiện nguyên JSON thay vì câu trả lời tự nhiên — sửa bằng cách parse field `reply` để hiển thị; phát hiện model không gọi tool `clarify` khi cần xác nhận, dùng lỗi đó viết thêm case G05/G09.
+- **Điều tôi học được từ phần việc này:** Case eval hợp lý trên giấy vẫn có thể lộ lỗi thật khi chạy qua UI thực tế; transcript là bằng chứng cần thiết bên cạnh điểm số tự động.
+- **Nếu làm lại, tôi sẽ cải thiện điều gì:** Thêm chế độ chọn case từ file eval ngay trong UI, tự hiện `expect.tool_calls` để đối chiếu nhanh hơn.
+
+### Mai Phan Anh Tùng Tùng — 2A202602980
+
+* **Vai trò/phần việc được nhận:** Hoàn thiện và cải thiện phần khai báo tool trong `tools.yaml`, đặc biệt là description, parameters, schema và các ràng buộc khi sử dụng tool.
+
+* **Những gì tôi đã thay đổi trong repo chung:** Chỉnh sửa `tools.yaml` qua nhiều version để làm rõ cách sử dụng từng tool, bổ sung các điều kiện về missing information, routing giữa các tool, cách truyền identifier và ranh giới giữa các tool read-only với các tool có side effect. Đặc biệt, tôi hoàn thiện các mô tả cho `clarify`, `inspect_device`, `lookup_user`, `search_device_info`, `policy` và `create_ticket` để model có đủ thông tin lựa chọn và gọi tool đúng ngữ cảnh.
+
+* **File hoặc artifact liên quan:** `starter_v0/artifacts/tools.yaml` và các version trung gian của `tools.yaml` (`tools_v1.yaml`, `tools_v2.yaml`, `tools_v3.yaml`).
+
+* **Commit hash hoặc pull request:** `69efdba`,`18904e2`— cập nhật tool declaration và version log.
+
+* **Một quyết định kỹ thuật tôi đã đưa ra và lý do:** Tôi quyết định đưa nhiều quy tắc xử lý trực tiếp vào `description` của từng tool thay vì chỉ dựa vào tên tool và JSON schema. Ví dụ, `inspect_device` phải có asset ID hợp lệ và không được dùng employee ID thay thế; nếu chỉ có employee ID thì phải gọi `lookup_user` trước. Với `create_ticket`, tôi bổ sung ràng buộc chỉ được thực hiện sau khi có confirmation hợp lệ cho đúng payload hiện tại. Cách này giúp model hiểu rõ hơn **khi nào được gọi tool, khi nào không được gọi và cần prerequisite nào trước đó**.
+
+* **Khó khăn tôi gặp và cách tôi xử lý:** Khó khăn lớn nhất là cân bằng giữa việc bổ sung đủ rule để xử lý các case adversarial và việc không làm description quá phức tạp khiến model hiểu sai hoặc ảnh hưởng đến các case bình thường. Tôi xử lý bằng cách chia rule theo từng tool, xác định rõ input bắt buộc, enum hợp lệ, trường hợp cần `clarify` và những trường hợp tuyệt đối không được gọi tool. Qua các version, các quy tắc được cụ thể hóa dần thay vì đưa toàn bộ logic vào một description chung.
+
+* **Điều tôi học được từ phần việc này:** Tôi học được rằng **tool declaration không chỉ là metadata**, mà thực tế là một phần quan trọng của instruction dành cho LLM. Description, parameter description, `required` và `enum` đều có thể ảnh hưởng trực tiếp đến quyết định tool calling. Vì vậy thiết kế tool cần quan tâm đồng thời đến schema, semantics và các boundary/rule khi sử dụng tool.
+
+* **Nếu làm lại, tôi sẽ cải thiện điều gì:** Tôi sẽ thiết kế versioning theo từng hypothesis rõ ràng hơn, mỗi version tập trung xử lý một nhóm failure cụ thể và ghi lại eval evidence tương ứng. Đồng thời, tôi sẽ kiểm tra sớm hơn sự tương thích giữa `tools.yaml`, implementation của tool và các eval case để tránh việc schema hoặc description thay đổi nhưng behavior thực tế chưa được kiểm chứng đầy đủ.
+
+
 ## C3. Final checkout
 
 - [x] `TEAMMATES.md` có đủ họ tên, MSSV, GitHub username và vai trò.
