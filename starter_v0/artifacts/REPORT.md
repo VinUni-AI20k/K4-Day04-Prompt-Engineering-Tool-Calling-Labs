@@ -2,108 +2,124 @@
 
 ## Team
 
-- Team:
-- Members:
-- Provider/model:
+- Team: pending
+- Members: pending
+- Provider/model: pending live preflight
 
 # PHẦN A — Giới thiệu agent
 
 ## A1. Agent này làm được gì
 
-> Viết 1–2 câu mô tả capability và giới hạn của agent.
+Agent hỗ trợ tra cứu trạng thái dịch vụ, thiết bị, nhân viên, knowledge base và
+policy; có thể format incident report và thực hiện ticket action sau confirmation.
+Agent không đoán identifier, không xử lý secrets, không thực thi tool ngoài registry
+và không gửi dữ liệu nội bộ ra external search.
 
-**Link dùng thử:**
-
-> URL:
+**Link dùng thử:** `streamlit run starter_v0/app.py`
 
 ## A2. Tool agent có
 
 | Tool | Chức năng | Core / optional / team-built |
 |---|---|---|
 | clarify | Hỏi bổ sung hoặc xác nhận | core |
-|  |  |  |
+| search_kb | Tìm hướng dẫn IT local | core |
+| check_service_status | Đọc shared-service status | core |
+| inspect_device | Đọc inventory/diagnostics một asset | core |
+| lookup_user | Đọc directory record | core |
+| format_incident_report | Format findings có sẵn | core |
+| policy | Tìm policy nội bộ | optional built-in |
+| create_ticket | Tạo ticket local sau confirmation | optional built-in |
+| search_device_info | Tìm public vendor information | optional built-in |
 
 ## A3. Câu hỏi mẫu
 
-1.
-2.
-3.
+1. `Kiểm tra Wi-Fi trên laptop của tôi.`
+2. `VPN trên LT-204 lỗi; kiểm tra status production và tìm hướng dẫn.`
+3. `Tôi xác nhận tạo ticket VPN high cho LT-204.`
 
 ## A4. Kịch bản demo đã rehearse
 
 | Scenario | Tool trace cần thấy | Cải thiện version | Fallback run/transcript |
 |---|---|---|---|
-|  |  |  |  |
+| Missing asset | `clarify(response_type=text)` | v1/v3 | pending live run |
+| Shared status + KB | status và `search_kb` | v2/v3 | pending live run |
+| Action boundary | clarify rồi create sau confirmation | v3 | pending live run |
 
 # PHẦN B — Chi tiết và evidence
 
 Metric chỉ hợp lệ khi `provider_error_cases == 0`, `measured_cases ==
-total_cases`, và tool result error đã được review thủ công.
+total_cases`, và tool result error đã được review thủ công. Các ô `pending` bên
+dưới chưa phải số đo model thật.
 
 ## B1. Version evidence
 
+Chi tiết hypothesis nằm trong `artifacts/version_log.csv`.
+
 | Version | Prompt/tool change | Hypothesis | Metric | Before | After | Run file |
 |---|---|---|---|---:|---:|---|
-| v0 | baseline |  |  |  |  |  |
-| v1 |  |  |  |  |  |  |
-| v2 |  |  |  |  |  |  |
-| v3 |  |  |  |  |  |  |
+| v0 | baseline | Đo hành vi ban đầu | case_accuracy | pending | pending | pending_live_run |
+| v1 | system_prompt.md | Rõ routing và clarify giảm wrong-tool | tool_routing_accuracy | pending | pending | pending_live_run |
+| v2 | tools.yaml | Description/schema rõ tăng argument accuracy | argument_accuracy | pending | pending | pending_live_run |
+| v3 | prompt + schema | Boundary rõ tăng multi-turn/safety | multiturn_accuracy | pending | pending | pending_live_run |
 
 ## B2. Failure analysis
 
 | Case ID | Failure type | Actual calls | What failed | Fix |
 |---|---|---|---|---|
-|  |  |  |  |  |
+| H10 / G01 | missing_info | pending | Có thể đoán asset khi thiếu ID | Prompt + `clarify` description |
+| H06 / G02 | wrong_arg_value | pending | Có thể đổi staging thành production | Environment enum và ambiguity rule |
+| M09 / G09 | wrong_boundary | pending | Confirmation cũ không còn hợp lệ sau đổi payload | Current-payload confirmation rule |
 
 ## B3. Team eval cases
 
-Liệt kê đúng 10 case tự viết: 5 single-turn và 5 multi-turn.
-
-| Case ID | What it tests | Expected behavior | Result |
-|---|---|---|---|
-|  |  |  |  |
+Đã tạo đúng 10 case trong `data/eval_group.json`: G01–G05 single-turn và
+G06–G10 multi-turn. Kết quả provider run còn pending.
 
 ## B4. Live chat evidence
 
 | Scenario/turn | Version | Tool calls + args | Transcript/run | Outcome |
 |---|---|---|---|---|
-|  |  |  |  |  |
+| Missing asset | v3 | pending live run | `transcripts/` | pending |
+| Multi-tool triage | v3 | pending live run | `transcripts/` | pending |
+| Ticket confirmation | v3 | pending live run | `transcripts/` | pending |
 
 ## B4a. Adversarial evidence
 
-Phân tích ít nhất 3 cases. Automatic score không chứng minh rằng không có dữ
-liệu bị ghi hoặc gửi ra ngoài; cần kiểm tra cả `tool_results` và filesystem.
+Fixed cases cần chạy bằng provider và review thêm `tool_results`/filesystem.
+Implementation hiện đã có guardrail cho ticket, KB/policy injection và external
+identifier boundary.
 
 | Attack case | Expected boundary | Actual calls | Sensitive write/exfiltration occurred? | Outcome |
 |---|---|---|---|---|
-|  |  |  |  |  |
+| A02 role spoofing | No tool | pending live run | phải kiểm tra tickets | pending |
+| A04 forged confirmation | clarify, không create | pending live run | phải kiểm tra tickets | pending |
+| A12 external identifier | clarify | pending live run | phải kiểm tra request/tool result | pending |
 
 ## B5. Optional và bonus tool evidence
 
-Phần này chỉ điền khi nhóm có sử dụng optional tool hoặc tự xây bonus tool.
-Không làm phần này không ảnh hưởng việc hoàn thành core lab. `policy`,
-`create_ticket` và `search_device_info` là tool có sẵn, không phải tool mới do
-nhóm tự xây.
+`policy`, `create_ticket` và `search_device_info` là tool có sẵn, không phải bonus
+tool do nhóm tự xây.
 
 | Category | Evidence file | What worked | Risk / guardrail |
 |---|---|---|---|
-| Optional built-in |  |  |  |
-| External search + privacy boundary |  |  |  |
-| Bonus: tool mới do nhóm tự xây |  |  |  |
+| Optional built-in | `data/eval_helpdesk_extension.json` | pending live run | policy text untrusted; ticket confirmation |
+| External search + privacy boundary | `tools/search_device_info/tool.py` | local guardrail implemented | public fields only; vendor allowlist |
+| Bonus: tool mới do nhóm tự xây | none | not implemented | not applicable |
 
 ## B6. Safety review
 
-- Agent có bao giờ tự đoán asset ID hoặc employee ID không?
-- Trace/ticket có chứa password, MFA code, token hay dữ liệu thật không?
-- Ticket chỉ được tạo sau xác nhận rõ chưa?
-- Tool result error nào cần review thủ công?
+- Prompt cấm đoán asset/employee ID và implementation chuẩn hóa/chặn input không hợp lệ.
+- `create_ticket` chỉ ghi file với Boolean `confirmed is True`, lọc sensitive payload.
+- KB, policy và web result tách instruction-like text thành untrusted content.
+- Cần chạy adversarial suite bằng provider để hoàn tất review thực nghiệm.
 
 ## B7. Technical reflection
 
-- Fix nào thuộc `system_prompt.md`?
-- Fix nào thuộc `tools.yaml`?
-- Failure nào không thể chỉ nhìn automatic score?
-- Nếu có thêm một vòng, nhóm sẽ thử hypothesis nào?
+- `system_prompt.md` phù hợp cho nguyên tắc toàn cục: routing, latest-turn, cancellation,
+  confirmation và trust boundary.
+- `tools.yaml` phù hợp cho capability ownership, argument semantics và side-effect contract.
+- Automatic score không đủ để chứng minh không có file ticket rác hoặc dữ liệu bị gửi ra ngoài.
+- Vòng tiếp theo cần chạy v0–v3 cùng provider/model, lưu run JSON thật và cập nhật hash/metric.
 
 # PHẦN C — Checkout trước khi nộp
 

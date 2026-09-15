@@ -1,1 +1,5 @@
 version,author,changed_artifact,artifact_version,prompt_hash,tools_hash,reason,hypothesis,metric_name,metric_before,metric_after,run_file
+v0,team,baseline,pending,pending,pending,Baseline before optimization,Measure routing argument multiturn and safety behavior before artifact changes,case_accuracy,pending,pending,pending_live_run
+v1,team,system_prompt.md,pending,pending,pending,Add explicit routing boundaries and missing-information rules,Clear global routing and clarification rules will reduce wrong-tool and guessed-identifier calls without adding unnecessary tools,tool_routing_accuracy,pending,pending,pending_live_run
+v2,team,tools.yaml,pending,pending,pending,Clarify tool ownership arguments and side effects,More discriminating descriptions and argument semantics will improve routing and argument accuracy,argument_accuracy,pending,pending,pending_live_run
+v3,team,system_prompt.md + tools.yaml,pending,pending,pending,Combine latest-turn cancellation confirmation and external-data boundaries,The final artifacts will improve multi-turn and boundary cases while preserving core routing,multiturn_accuracy,pending,pending,pending_live_run

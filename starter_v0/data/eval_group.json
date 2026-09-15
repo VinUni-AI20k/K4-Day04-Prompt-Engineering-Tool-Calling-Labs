@@ -3,5 +3,100 @@
   "dataset_role": "group",
   "description": "Template intentionally left empty. The team must write exactly 10 original IT helpdesk cases: 5 single-turn query cases and 5 multi-turn turns cases.",
   "allowed_failure_types": ["wrong_tool", "wrong_arg_value", "wrong_boundary", "unnecessary_tool", "out_of_scope", "missing_info"],
-  "cases": []
+  "cases": [
+    {
+      "id": "G01_missing_asset_clarify", "phase": "B", "suite": "group",
+      "query": "Kiểm tra riêng Wi-Fi trên laptop của tôi.",
+      "failure_type": "missing_info",
+      "expect": {"tool_calls": [{"name": "clarify", "args": {"response_type": "text"}}]},
+      "metadata": {"skill": "missing_identifier", "what_it_tests": "Không đoán asset ID khi người dùng chỉ nói laptop của tôi."}
+    },
+    {
+      "id": "G02_ambiguous_environment", "phase": "B", "suite": "group",
+      "query": "Kiểm tra email trong môi trường demo của nhóm QA.",
+      "failure_type": "missing_info",
+      "expect": {"tool_calls": [{"name": "clarify", "args": {"response_type": "choice", "options": ["production", "staging"]}}]},
+      "metadata": {"skill": "environment_clarification", "what_it_tests": "Không tự map demo sang production hoặc staging."}
+    },
+    {
+      "id": "G03_public_model_search", "phase": "B", "suite": "group",
+      "query": "Tìm trang hỗ trợ chính hãng cho Dell Latitude 7440.",
+      "failure_type": "wrong_tool",
+      "expect": {"tool_calls": [{"name": "search_device_info", "args": {"manufacturer": "Dell", "model": "Latitude 7440", "query_type": "support"}}]},
+      "metadata": {"skill": "public_external_search", "what_it_tests": "Model công khai dùng external search, không dùng inventory nội bộ."}
+    },
+    {
+      "id": "G04_format_only", "phase": "B", "suite": "group",
+      "query": "Chỉ format findings 'VPN degraded' và 'AUTH_TIMEOUT trên LT-204' thành technical report tên 'VPN triage', không kiểm tra lại.",
+      "failure_type": "unnecessary_tool",
+      "expect": {"tool_calls": [{"name": "format_incident_report", "args": {"template": "technical", "incident_title": "VPN triage"}}]},
+      "metadata": {"skill": "format_only", "what_it_tests": "Tôn trọng yêu cầu format-only và không gọi lại nguồn evidence."}
+    },
+    {
+      "id": "G05_out_of_scope_no_tool", "phase": "B", "suite": "group",
+      "query": "Viết giúp tôi một bài thơ về mùa thu.",
+      "failure_type": "out_of_scope",
+      "expect": {"no_tool": true, "behavior": "refuse"},
+      "metadata": {"skill": "scope_boundary", "what_it_tests": "Yêu cầu ngoài IT helpdesk không kích hoạt tool."}
+    },
+    {
+      "id": "G06_correction_turn2", "phase": "B", "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Kiểm tra security trên LT-204."},
+        {"role": "user", "content": "Xin lỗi, asset đúng là LT-240."},
+        {"role": "user", "content": "Giữ nguyên kiểm tra security trên máy đúng."}
+      ],
+      "failure_type": "wrong_arg_value",
+      "expect": {"tool_calls": [{"name": "inspect_device", "args": {"asset_id": "LT-240", "check": "security"}}]},
+      "metadata": {"skill": "latest_correction", "what_it_tests": "ID mới nhất thay thế ID cũ trong context."}
+    },
+    {
+      "id": "G07_cancel_pending_action", "phase": "B", "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Tạo ticket lỗi máy in PR-404."},
+        {"role": "user", "content": "Dừng lại, tôi không muốn tạo ticket nữa."},
+        {"role": "user", "content": "Chỉ xác nhận đã hủy yêu cầu."}
+      ],
+      "failure_type": "unnecessary_tool",
+      "expect": {"no_tool": true, "behavior": "answer_without_tool"},
+      "metadata": {"skill": "cancellation", "what_it_tests": "Cancellation mới nhất thắng action request cũ."}
+    },
+    {
+      "id": "G08_status_plus_kb", "phase": "B", "suite": "group",
+      "turns": [
+        {"role": "user", "content": "VPN Windows của tôi báo AUTH_TIMEOUT."},
+        {"role": "user", "content": "Hãy kiểm tra VPN production và tìm hướng dẫn xử lý Windows."}
+      ],
+      "failure_type": "wrong_tool",
+      "expect": {"tool_calls": [
+        {"name": "check_service_status", "args": {"service": "vpn", "environment": "production"}},
+        {"name": "search_kb", "args": {"category": "vpn"}}
+      ]},
+      "metadata": {"skill": "multi_source_triage", "what_it_tests": "Một intent cần cả shared status và KB guidance."}
+    },
+    {
+      "id": "G09_revision_needs_confirmation", "phase": "B", "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Soạn ticket Wi-Fi cho LT-240 mức medium."},
+        {"role": "user", "content": "Đổi mức ưu tiên thành high và thêm nghi mất dữ liệu."},
+        {"role": "user", "content": "Rà lại payload mới trước, chưa tạo ticket."}
+      ],
+      "failure_type": "wrong_boundary",
+      "expect": {"tool_calls": [{"name": "clarify", "args": {"response_type": "yes_no"}}]},
+      "metadata": {"skill": "stale_confirmation", "what_it_tests": "Payload thay đổi làm confirmation cũ mất hiệu lực."}
+    },
+    {
+      "id": "G10_user_and_asset", "phase": "B", "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Tra cứu EMP-1007 giúp tôi."},
+        {"role": "user", "content": "Đồng thời kiểm tra security của DT-087 được cấp cho người đó."}
+      ],
+      "failure_type": "wrong_tool",
+      "expect": {"tool_calls": [
+        {"name": "lookup_user", "args": {"employee_id": "EMP-1007"}},
+        {"name": "inspect_device", "args": {"asset_id": "DT-087", "check": "security"}}
+      ]},
+      "metadata": {"skill": "directory_and_device", "what_it_tests": "Tách directory lookup và device inspection thành hai calls."}
+    }
+  ]
 }
