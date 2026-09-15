@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import json
 import os
+import re
+import time
 from typing import Any
 
 from providers.base import ModelResponse, ToolCall
@@ -73,10 +75,33 @@ class GeminiProvider:
         self,
         *,
         api_key_env: str = "GEMINI_API_KEY",
-        default_model: str = "gemini-3.5-flash",
+        default_model: str = "gemini-3.5-flash-lite",
     ) -> None:
         self.api_key_env = api_key_env
         self.default_model = default_model
+
+    def _generate_with_retry(self, client: Any, *, model: str, contents: Any, config: Any) -> Any:
+        """Retry rate-limited (429) calls with backoff so a burst of eval cases does not
+        turn into provider_error rows. Honors the server's suggested retryDelay when present."""
+        attempts = int(os.getenv("GEMINI_MAX_RETRIES", "4"))
+        last_exc: Exception | None = None
+        for attempt in range(attempts):
+            try:
+                return client.models.generate_content(model=model, contents=contents, config=config)
+            except Exception as exc:  # google.genai.errors.ClientError carries status_code
+                status = getattr(exc, "status_code", None) or getattr(exc, "code", None)
+                # Retry rate limits, server errors and transport failures (no status); never retry other 4xx.
+                retryable = status == 429 or status is None or (isinstance(status, int) and status >= 500)
+                if not retryable or attempt == attempts - 1:
+                    raise
+                last_exc = exc
+                delay = 15.0 * (attempt + 1)
+                match = re.search(r"retryDelay['\"]?:\s*['\"]?(\d+)s", str(exc))
+                if match:
+                    delay = max(delay, float(match.group(1)) + 1)
+                print(f"[gemini] {type(exc).__name__} (status={status}); retry {attempt + 1}/{attempts - 1} in {delay:.0f}s", flush=True)
+                time.sleep(delay)
+        raise last_exc  # pragma: no cover
 
     def complete(
         self,
@@ -106,7 +131,8 @@ class GeminiProvider:
             config_kwargs["tools"] = [types.Tool(function_declarations=declarations)]
 
         client = genai.Client(api_key=api_key)
-        resp = client.models.generate_content(
+        resp = self._generate_with_retry(
+            client,
             model=model or self.default_model,
             contents=contents,
             config=types.GenerateContentConfig(**config_kwargs),
