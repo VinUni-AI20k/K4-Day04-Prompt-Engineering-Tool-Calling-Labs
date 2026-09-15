@@ -9,3 +9,8 @@ def clarify(question: str = "", response_type: str = "text", options: list[str] 
         "options": options or [],
         "awaiting_user": True,
     }
+
+
+# Backward compatibility alias
+ask_user = clarify
+
