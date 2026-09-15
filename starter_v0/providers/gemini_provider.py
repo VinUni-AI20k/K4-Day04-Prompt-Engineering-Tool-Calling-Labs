@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import time
 from typing import Any
 
 from providers.base import ModelResponse, ToolCall
@@ -66,6 +67,9 @@ def _function_call_args(call: Any) -> dict[str, Any]:
     return {}
 
 
+_last_request_time = 0.0
+
+
 class GeminiProvider:
     """Google Gemini API provider with normalized tool_calls output."""
 
@@ -97,6 +101,13 @@ class GeminiProvider:
         if not api_key:
             raise RuntimeError(f"Missing API key env var: {self.api_key_env}")
 
+        global _last_request_time
+        now = time.time()
+        elapsed = now - _last_request_time
+        if elapsed < 4.0:
+            time.sleep(4.0 - elapsed)
+        _last_request_time = time.time()
+
         system_instruction, contents = _to_gemini_contents(messages)
         declarations = _to_gemini_declarations(tools)
         config_kwargs: dict[str, Any] = {"temperature": temperature}
@@ -106,11 +117,23 @@ class GeminiProvider:
             config_kwargs["tools"] = [types.Tool(function_declarations=declarations)]
 
         client = genai.Client(api_key=api_key)
-        resp = client.models.generate_content(
-            model=model or self.default_model,
-            contents=contents,
-            config=types.GenerateContentConfig(**config_kwargs),
-        )
+        resp = None
+        for attempt in range(8):
+            try:
+                resp = client.models.generate_content(
+                    model=model or self.default_model,
+                    contents=contents,
+                    config=types.GenerateContentConfig(**config_kwargs),
+                )
+                break
+            except Exception as exc:
+                err_str = str(exc)
+                if ("429" in err_str or "RESOURCE_EXHAUSTED" in err_str) and attempt < 7:
+                    wait_time = 4.0 * (attempt + 1)
+                    time.sleep(wait_time)
+                    continue
+                raise
+        time.sleep(0.5)
 
         text_parts: list[str] = []
         calls: list[ToolCall] = []

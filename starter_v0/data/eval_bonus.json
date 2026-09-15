@@ -1,0 +1,29 @@
+{
+  "dataset_id": "day04_v3_helpdesk_bonus",
+  "dataset_role": "bonus",
+  "description": "A focused eval case for the read-only ticket status lookup bonus tool.",
+  "cases": [
+    {
+      "id": "B01_ticket_status_lookup",
+      "phase": "B",
+      "suite": "bonus",
+      "query": "Cho mình biết trạng thái ticket LAB-66AE3AF3 hiện tại.",
+      "failure_type": "wrong_tool",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "ticket_status_lookup",
+            "args": {
+              "ticket_id": "LAB-66AE3AF3"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "bonus_ticket_status_lookup",
+        "difficulty": "easy",
+        "what_it_tests": "Tra cứu ticket local bằng ID chính xác mà không tạo hoặc sửa ticket."
+      }
+    }
+  ]
+}
