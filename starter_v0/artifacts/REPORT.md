@@ -507,14 +507,73 @@ có thể đối chiếu đóng góp.
 
 ### Nguyễn Đình Phúc — 2A202602953
 
-- **Vai trò/phần việc được nhận:** Tool & Schema Engineer
-- **Những gì tôi đã thay đổi trong repo chung:**
-- **File hoặc artifact liên quan:**
-- **Commit hash hoặc pull request:**
-- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:**
-- **Khó khăn tôi gặp và cách tôi xử lý:**
-- **Điều tôi học được từ phần việc này:**
-- **Nếu làm lại, tôi sẽ cải thiện điều gì:**
+- **Vai trò/phần việc được nhận:** Tool & Schema Engineer (Role B). Tôi phụ trách
+  thiết kế và chuẩn hóa schema trong `starter_v0/artifacts/tools.yaml` (semantic
+  boundaries, output contracts, constraints trên parameters, enum values), phân
+  tích và xử lý các failure do ranh giới công cụ và thiếu/sai argument gây ra
+  (F7, F8, F9).
+
+- **Những gì tôi đã thay đổi trong repo chung:** Tôi thực hiện thay đổi cốt lõi
+  cho vòng v1 trong `tools.yaml`:
+  1. `lookup_user`: bổ sung rõ ràng hợp đồng dữ liệu đầu ra (output contract) rằng
+     kết quả tra cứu đã bao gồm danh sách thiết bị được cấp (`assigned_assets`),
+     chỉ định rõ không cần gọi thêm `inspect_device` nếu người dùng chỉ hỏi danh
+     sách máy. Khóa chặt định dạng `employee_id` theo chuẩn `EMP-xxxx` để ngăn
+     tên phòng ban bị nhét vào slot ID (sửa triệt để F7 ở case H04).
+  2. `inspect_device`: siết chặt `asset_id` chỉ chấp nhận mã thiết bị thật
+     (`LT-xxx`, `DT-xxx`), nghiêm cấm nhận mã nhân viên. Thu hẹp trường `check`
+     với yêu cầu bắt buộc chọn đúng nhóm triệu chứng (`vpn`, `network`, v.v.) khi
+     người dùng nêu sự cố cụ thể, chỉ dùng `all` khi kiểm tra tổng thể hoặc không
+     nêu triệu chứng (sửa F8 ở H13 và F9 ở H17).
+  3. `check_service_status`: phân định rõ ranh giới giữa dịch vụ hạ tầng dùng
+     chung toàn công ty và thiết bị cá nhân; chuẩn hóa enum `environment`
+     (`production`, `staging`) với default `production`.
+  4. Lập hypothesis trong `version_log.csv` và xây dựng probe test cô lập 3 case
+     (`data/eval_probe_3cases.json`) để xác minh tính đúng đắn của schema trước
+     khi đo toàn diện.
+
+- **File hoặc artifact liên quan:** `starter_v0/artifacts/tools.yaml`,
+  `starter_v0/artifacts/version_log.csv`,
+  `starter_v0/evidence/v0_failure_analysis.md` (mục F7, F8, F9),
+  `starter_v0/evidence/runs/v1_B_base_openai_20260914T191858066443.json`,
+  `starter_v0/evidence/v1_review.md`.
+
+- **Commit hash hoặc pull request:** `fcac9dd` (PR #1: `feat: fix v1 v2 f7, f8, f9`).
+
+- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:** Tôi quyết định giải quyết
+  lỗi gọi thừa tool (F7) và argument mặc định sai (F8, F9) **ngay tại tầng khai
+  báo schema (`tools.yaml`)** thay vì đưa thêm quy tắc vào `system_prompt.md`.
+  Lý do: trong cơ chế Tool Calling, thông tin mô tả cục bộ (localized context)
+  gắn liền với từng declaration có trọng số trực tiếp nhất lên xác suất sinh
+  token hàm của LLM. Khai báo rõ output contract ("đã bao gồm assigned_assets")
+  giúp model hiểu ranh giới cung cấp thông tin của tool mà không cần một luật cấm
+  toàn cục, đưa `case_accuracy` từ 0.70 lên 0.80 mà hoàn toàn không gây tác dụng
+  phụ (zero regression) cho các case khác (H16, H18).
+
+- **Khó khăn tôi gặp và cách tôi xử lý:** Khó khăn lớn nhất là rào cản quota và
+  rate limit khi chạy eval ở local. Máy tôi chỉ có API key Gemini miễn phí, khi
+  chạy batch 30 case liên tục thì gặp lỗi rate limit `429 RESOURCE_EXHAUSTED` và
+  `503 UNAVAILABLE`, khiến toàn bộ case bị `provider_error`. Để xử lý, tôi đã
+  trích xuất 3 case trọng tâm (H04, H13, H17) thành probe test suite riêng
+  (`eval_probe_3cases.json`) để kiểm chứng độc lập logic schema trước; sau đó
+  phối hợp với nhóm trưởng (Giang) để chạy eval chính thức trên OpenAI
+  `gpt-4o-mini`, đảm bảo toàn bộ benchmark v0 → v8 của nhóm nhất quán trên cùng
+  một provider/model.
+
+- **Điều tôi học được từ phần việc này:** Tôi nhận ra schema của tool chính là
+  "API contract" giữa lập trình viên và LLM. Một mô tả sơ sài ("Kiểm tra thiết
+  bị") sẽ khiến model phải tự ngoại suy và sinh ảo giác; ngược lại, một schema
+  được định nghĩa chặt chẽ về ngữ nghĩa, phạm vi đầu vào, kiểu định dạng và kết
+  quả trả về sẽ định hướng routing chính xác mà không làm phình to prompt chung.
+  Đồng thời, tôi hiểu sâu hơn về tầm quan trọng của việc đọc `tool_results` thực
+  tế thay vì chỉ nhìn nhãn PASS/FAIL.
+
+- **Nếu làm lại, tôi sẽ cải thiện điều gì:** Tôi sẽ thống nhất với nhóm việc chia
+  sẻ hoặc cấu hình chung một proxy endpoint OpenAI ngay từ đầu để mọi thành viên
+  đều có thể tự chạy full benchmark trên máy mình, tránh bị tắc nghẽn ở khâu đo
+  lường. Ngoài ra, tôi sẽ viết schema đi kèm các ví dụ cụ thể (few-shot
+  signatures trong description) cho các enum phức tạp ngay từ v1 để tiết kiệm số
+  vòng lặp sửa đổi.
 
 ### Nguyễn Ngọc Thái An — 2A202602462
 
