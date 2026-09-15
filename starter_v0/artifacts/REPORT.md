@@ -518,14 +518,14 @@ có thể đối chiếu đóng góp.
 
 ### Nguyễn Ngọc Thái An — 2A202602462
 
-- **Vai trò/phần việc được nhận:** Eval & Red-Team
-- **Những gì tôi đã thay đổi trong repo chung:**
-- **File hoặc artifact liên quan:**
-- **Commit hash hoặc pull request:**
-- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:**
-- **Khó khăn tôi gặp và cách tôi xử lý:**
-- **Điều tôi học được từ phần việc này:**
-- **Nếu làm lại, tôi sẽ cải thiện điều gì:**
+- **Vai trò/phần việc được nhận:** Eval & Red-Team. Tôi phụ trách viết các test case cho nhóm trong `eval_group.json` và chạy bộ kiểm tra `eval_adversarial.json` để đánh giá các adversarial attacks và ranh giới an toàn của agent.
+- **Những gì tôi đã thay đổi trong repo chung:** Tôi xây dựng 10 test case cho nhóm trong `eval_group.json`, gồm 5 single-turn và 5 multi-turn. Các case tập trung vào thiếu thông tin, ambiguity, confirmation boundary, cancel flow, chuỗi inspect device rồi format report, và giới hạn của tool. Tôi cũng chạy bộ adversarial suite trong `eval_adversarial.json` để kiểm tra prompt injection, forged confirmation, suy đoán identifier nội bộ, tạo ticket trái phép và nguy cơ gửi dữ liệu nhạy cảm ra ngoài. Sau đó, tôi review kết quả để phân biệt lỗi routing với lỗi safety và ghi lại evidence cho nhóm.
+- **File hoặc artifact liên quan:** `starter_v0/data/eval_group.json`, `starter_v0/data/eval_adversarial.json`, `starter_v0/evidence/runs/`, `starter_v0/evidence/v5_adversarial_review.md`, `starter_v0/evidence/v6_second_guardrail_layer.md`, `starter_v0/artifacts/REPORT.md`.
+- **Commit hash hoặc pull request:** `4fe72e6`
+- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:** Tôi thiết kế test case để đánh giá cả correctness và safety, thay vì chỉ kiểm tra model có gọi đúng tên tool hay không. Vì vậy, các case cũng kiểm tra việc agent có hỏi lại khi thiếu identifier, chờ explicit confirmation trước write action, giữ đúng context trong multi-turn và không gửi dữ liệu nội bộ ra external tool. Cách này giúp phát hiện những failure mà automatic score có thể bỏ sót.
+- **Khó khăn tôi gặp và cách tôi xử lý:** Khó khăn lớn nhất là phân biệt giữa trường hợp agent cần hỏi lại và trường hợp đã đủ thông tin để xử lý. Một số case có intent gần giống nhau nhưng khác nhau ở confirmation boundary hoặc quyền truy cập dữ liệu. Tôi đọc `LAB-GUIDE.md`, `README.md`, `eval_base.json` và `tools.yaml`, sau đó đối chiếu expected tool calls với `tool_results` và filesystem để kiểm tra hành vi thực tế.
+- **Điều tôi học được từ phần việc này:** Tôi học được rằng evaluation của tool-calling agent không thể chỉ dựa vào PASS/FAIL. Cần kiểm tra thêm `tool_results`, side effect và dữ liệu có rời khỏi hệ thống hay không. Một tool call có thể đúng về mặt cú pháp nhưng vẫn dẫn đến hành vi sai, chẳng hạn format report từ findings bịa hoặc tạo ticket khi confirmation đã hết hiệu lực.
+- **Nếu làm lại, tôi sẽ cải thiện điều gì:** Tôi sẽ chuẩn hóa template cho từng eval case ngay từ đầu, ghi rõ expected behavior, actual calls, failure mode và safety impact. Tôi cũng sẽ chạy adversarial suite sớm hơn và lưu evidence riêng cho từng case để dễ phát hiện regression sau mỗi lần thay đổi prompt hoặc tool implementation.
 
 ### Lê Tuấn Anh — 2A202602952
 
