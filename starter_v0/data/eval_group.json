@@ -1,7 +1,307 @@
 {
   "dataset_id": "day04_v3_helpdesk_group",
   "dataset_role": "group",
-  "description": "Template intentionally left empty. The team must write exactly 10 original IT helpdesk cases: 5 single-turn query cases and 5 multi-turn turns cases.",
-  "allowed_failure_types": ["wrong_tool", "wrong_arg_value", "wrong_boundary", "unnecessary_tool", "out_of_scope", "missing_info"],
-  "cases": []
+  "description": "Dataset 10 original IT helpdesk cases covering ambiguous intent, asset/intent correction, cancellation, KB search, and write-confirmation boundaries.",
+  "allowed_failure_types": [
+    "wrong_tool",
+    "wrong_arg_value",
+    "wrong_boundary",
+    "unnecessary_tool",
+    "out_of_scope",
+    "missing_info"
+  ],
+  "cases": [
+    {
+      "id": "H21_ambiguous_device_check",
+      "phase": "B",
+      "suite": "group",
+      "query": "Máy tính của mình dạo này chạy rất chậm, nhờ kiểm tra giúp.",
+      "failure_type": "missing_info",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "clarify",
+            "args": {
+              "response_type": "text"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "clarify_missing_asset",
+        "difficulty": "medium",
+        "what_it_tests": "Yêu cầu kiểm tra máy tính nhưng không cung cấp mã asset_id buộc Agent phải gọi clarify để hỏi thêm thông tin."
+      }
+    },
+    {
+      "id": "H22_kb_policy_routing",
+      "phase": "B",
+      "suite": "group",
+      "query": "Cho mình hỏi quy định và chính sách đổi mật khẩu tài khoản định kỳ của công ty như thế nào?",
+      "failure_type": "wrong_tool",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "search_kb",
+            "args": {
+              "category": "account"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "route_policy_kb",
+        "difficulty": "easy",
+        "what_it_tests": "Tra cứu quy định/chính sách tài khoản phải dùng search_kb với category phù hợp."
+      }
+    },
+    {
+      "id": "H23_device_security_check",
+      "phase": "B",
+      "suite": "group",
+      "query": "Quét kiểm tra trạng thái an toàn bảo mật trên máy PC-502.",
+      "failure_type": "wrong_arg_value",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "inspect_device",
+            "args": {
+              "asset_id": "PC-502",
+              "check": "security"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "device_security_arg",
+        "difficulty": "medium",
+        "what_it_tests": "Yêu cầu quét bảo mật trên thiết bị cụ thể phải trích xuất đúng asset_id và check=security."
+      }
+    },
+    {
+      "id": "H24_kb_search_and_ticket_confirm",
+      "phase": "B",
+      "suite": "group",
+      "query": "Tìm bài hướng dẫn xử lý sự cố Wi-Fi, nếu không được thì tạo ticket hỗ trợ mức high trên LT-105 giúp mình luôn.",
+      "failure_type": "wrong_boundary",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "search_kb",
+            "args": {
+              "category": "wifi"
+            }
+          },
+          {
+            "name": "clarify",
+            "args": {
+              "response_type": "yes_no"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "policy_then_confirm_ticket",
+        "difficulty": "hard",
+        "what_it_tests": "Tra cứu KB trước, đồng thời khi nhận yêu cầu tạo ticket phải dừng lại ở ranh giới xác nhận (yes_no)."
+      }
+    },
+    {
+      "id": "H25_ambiguous_environment_check",
+      "phase": "B",
+      "suite": "group",
+      "query": "Dịch vụ VPN hiện tại đang chạy ổn chứ?",
+      "failure_type": "missing_info",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "clarify",
+            "args": {
+              "options": [
+                "production",
+                "staging"
+              ],
+              "response_type": "choice"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "clarify_service_environment",
+        "difficulty": "medium",
+        "what_it_tests": "Yêu cầu check service VPN nhưng thiếu môi trường (production/staging) phải hỏi lựa chọn cụ thể."
+      }
+    },
+    {
+      "id": "M11_ambiguous_intent_to_inspect",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {
+          "content": "Nhờ IT hỗ trợ kiểm tra kết nối mạng giúp mình.",
+          "role": "user"
+        },
+        {
+          "content": "Máy mình dùng là laptop LT-309.",
+          "role": "user"
+        },
+        {
+          "content": "Chỉ kiểm tra network trên máy đó thôi nhé.",
+          "role": "user"
+        }
+      ],
+      "failure_type": "missing_info",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "inspect_device",
+            "args": {
+              "asset_id": "LT-309",
+              "check": "network"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "multiturn_clarify_and_inspect",
+        "difficulty": "hard",
+        "what_it_tests": "Bắt đầu với ý định mơ hồ, sau khi bổ sung mã máy và loại kiểm tra ở các lượt tiếp theo thì thực hiện inspect_device."
+      }
+    },
+    {
+      "id": "M12_correct_asset_code",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {
+          "content": "Kiểm tra phần cứng máy LT-101.",
+          "role": "user"
+        },
+        {
+          "content": "À mình gõ nhầm mã, mã đúng trên tem là LT-108.",
+          "role": "user"
+        },
+        {
+          "content": "Tiến hành kiểm tra hardware cho đúng máy này.",
+          "role": "user"
+        }
+      ],
+      "failure_type": "wrong_arg_value",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "inspect_device",
+            "args": {
+              "asset_id": "LT-108",
+              "check": "hardware"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "multiturn_asset_correction",
+        "difficulty": "hard",
+        "what_it_tests": "Người dùng đính chính mã thiết bị ở lượt sau, Agent phải ghi nhận mã mới nhất (LT-108)."
+      }
+    },
+    {
+      "id": "M13_cancel_ticket_creation",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {
+          "content": "Tạo giúp mình ticket báo lỗi email trên máy LT-505.",
+          "role": "user"
+        },
+        {
+          "content": "À thôi, bên mình tự khắc phục được rồi, không tạo ticket nữa.",
+          "role": "user"
+        },
+        {
+          "content": "Xác nhận hủy yêu cầu này giúp mình.",
+          "role": "user"
+        }
+      ],
+      "failure_type": "unnecessary_tool",
+      "expect": {
+        "behavior": "answer_without_tool",
+        "no_tool": true
+      },
+      "metadata": {
+        "skill": "multiturn_cancellation",
+        "difficulty": "hard",
+        "what_it_tests": "Yêu cầu hủy thao tác ở lượt sau phải hủy toàn bộ việc tạo ticket và không gọi tool."
+      }
+    },
+    {
+      "id": "M14_switch_intent_from_status_to_kb",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {
+          "content": "Kiểm tra hệ thống VPN production có sập không?",
+          "role": "user"
+        },
+        {
+          "content": "Thay vì kiểm tra trạng thái, tìm giúp mình bài viết hướng dẫn kết nối VPN cho nhân viên mới.",
+          "role": "user"
+        },
+        {
+          "content": "Tìm bài trong danh mục VPN nhé.",
+          "role": "user"
+        }
+      ],
+      "failure_type": "wrong_tool",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "search_kb",
+            "args": {
+              "category": "vpn"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "multiturn_switch_intent",
+        "difficulty": "hard",
+        "what_it_tests": "Thay đổi quyết định từ kiểm tra status sang tra cứu Knowledge Base."
+      }
+    },
+    {
+      "id": "M15_policy_lookup_then_create_ticket",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {
+          "content": "Tìm chính sách hỗ trợ cấp phát lại thiết bị hỏng.",
+          "role": "user"
+        },
+        {
+          "content": "Bây giờ tạo cho mình ticket hỗ trợ thay ổ cứng máy DT-099 mức urgent.",
+          "role": "user"
+        },
+        {
+          "content": "Yêu cầu xác nhận lại các thông tin trước khi gửi ticket.",
+          "role": "user"
+        }
+      ],
+      "failure_type": "wrong_boundary",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "clarify",
+            "args": {
+              "response_type": "yes_no"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "policy_search_then_ticket_confirmation",
+        "difficulty": "hard",
+        "what_it_tests": "Kết hợp tra cứu chính sách rồi chuyển sang quy trình tạo ticket, dừng lại để xác nhận trước khi thực hiện ghi."
+      }
+    }
+  ]
 }
