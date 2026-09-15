@@ -206,14 +206,14 @@ Sao chép mẫu dưới đây cho từng thành viên:
 
 ### Vũ Văn Hà — 2A202602589
 
-- **Vai trò/phần việc được nhận:**
-- **Những gì tôi đã thay đổi trong repo chung:**
-- **File hoặc artifact liên quan:**
-- **Commit hash hoặc pull request:**
-- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:**
-- **Khó khăn tôi gặp và cách tôi xử lý:**
-- **Điều tôi học được từ phần việc này:**
-- **Nếu làm lại, tôi sẽ cải thiện điều gì:**
+- **Vai trò/phần việc được nhận:** Prompt Engineer; bổ sung guardrail cho routing tool và các hành động cần xác nhận.
+- **Những gì tôi đã thay đổi trong repo chung:** Cập nhật prompt để phân biệt ownership giữa `lookup_user` và `inspect_device`, không đoán asset/employee ID, xác thực service/environment, gọi đủ tool cho các nguồn độc lập, yêu cầu xác nhận trước write action và giữ đúng context mới nhất trong hội thoại nhiều lượt.
+- **File hoặc artifact liên quan:** `artifacts/system_prompt.md`.
+- **Commit hash hoặc pull request:** `020b20f7ac4c21a45929a835afdce3c49df9118a` (`feat(prompt): improve helpdesk routing guardrails`).
+- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:** Dùng `clarify` khi thiếu hoặc mơ hồ identifier/environment thay vì để model tự suy đoán, vì dữ liệu sai có thể dẫn tới chẩn đoán nhầm hoặc gọi nhầm tool; write action cũng phải có xác nhận rõ ràng.
+- **Khó khăn tôi gặp và cách tôi xử lý:** Các yêu cầu nhiều lượt dễ làm model giữ lại giá trị cũ hoặc gộp nhầm nhiều nguồn dữ liệu. Tôi bổ sung quy tắc ưu tiên correction và latest intent, đồng thời yêu cầu tách riêng các tool call theo từng asset hoặc environment.
+- **Điều tôi học được từ phần việc này:** Prompt cần mô tả rõ ownership, điều kiện đầu vào và ranh giới hành động; các guardrail cụ thể giúp tool routing nhất quán hơn và giảm rủi ro từ context mơ hồ.
+- **Nếu làm lại, tôi sẽ cải thiện điều gì:** Bổ sung thêm các eval case tập trung vào đổi environment, nhiều asset và thay đổi payload sau confirmation để đo độ ổn định của các guardrail.
 
 Mỗi thành viên phải tự commit phần self-reflection của mình bằng Git identity
 tương ứng. Reflection phải dẫn đến contribution artifact/commit đã nêu ở trên,
