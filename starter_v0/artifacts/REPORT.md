@@ -12,12 +12,21 @@
 
 ## A1. Agent này làm được gì
 
-> Viết 1–2 câu mô tả capability và giới hạn của agent.
-> *(D điền)*
+> Agent IT Helpdesk nhận yêu cầu tiếng Việt và tự chọn tool để tra trạng thái dịch vụ
+> dùng chung (VPN/email/SSO/Wi-Fi/printing), chẩn đoán một asset cụ thể, tra directory
+> nhân viên, tìm knowledge base và policy nội bộ, format báo cáo sự cố, tạo ticket sau
+> xác nhận, và tra thông tin sản phẩm công khai qua web — toàn bộ trên dữ liệu giả lập
+> trong repo.
+> Giới hạn có chủ đích: không đoán asset/employee ID mà hỏi lại bằng `clarify`; không
+> nhận hoặc lưu password/token/MFA/OTP; chỉ tạo ticket khi `confirmed is True`; chỉ gửi
+> manufacturer/model/query_type công khai ra external search. Lỗ hổng còn lại đã ghi
+> nhận là A10 (xác nhận cũ bị tái dùng khi payload đã đổi) — xem B4a.
 
 **Link dùng thử:**
 
-> URL: *(D điền)*
+> Chạy local: `cd starter_v0 && streamlit run app.py` (UI Streamlit dùng chung
+> `run_model_tool_loop` với CLI/eval). Source: https://github.com/songiangvn/K4-Day04-2A202602747
+> — *chưa deploy public; cập nhật URL tại đây nếu triển khai.*
 
 ## A2. Tool agent có
 
@@ -36,17 +45,24 @@
 
 ## A3. Câu hỏi mẫu
 
-1. *(D điền)*
-2.
-3.
+1. "VPN dạo này chậm quá, có sự cố gì ở production không?" — routing đúng sang
+   `check_service_status` (dịch vụ dùng chung), không bịa asset ID.
+2. "Kiểm tra Wi-Fi trên laptop của mình giúp nhé." — thiếu asset ID → agent hỏi lại
+   bằng `clarify` thay vì đoán thiết bị.
+3. "Tạo ticket mức high cho lỗi VPN trên LT-204 giúp mình." — write action → dừng ở
+   ranh giới xác nhận, không ghi file trước khi có confirmation.
 
 ## A4. Kịch bản demo đã rehearse
 
+Bốn transcript dưới đã ghi qua UI/`chat.py` (cùng `run_model_tool_loop`), dùng làm
+fallback nếu provider/network trục trặc lúc demo. Chi tiết từng lượt ở B4.
+
 | Scenario | Tool trace cần thấy | Cải thiện version | Fallback run/transcript |
 |---|---|---|---|
-| *(D điền — gợi ý: tra cứu thông thường)* |  |  |  |
-| *(D điền — gợi ý: thiếu mã máy, agent hỏi lại)* |  |  |  |
-| *(D điền — gợi ý: từ chối tạo ticket khi chưa xác nhận)* |  |  |  |
+| Tra cứu thông thường (single-turn) | `check_service_status{vpn, production}` → `inspect_device{LT-204, vpn}` | v1 (ranh giới routing) + v2 (thu hẹp `check`) | `evidence/transcripts/v8_openai_20260915T094226607523.transcript.json` |
+| Thiếu mã máy → agent hỏi lại | `clarify{response_type: text}` → `inspect_device{LT-240, network}` | v3 (clarify khi thiếu identifier) | `evidence/transcripts/v8_openai_20260915T094304386122.transcript.json` |
+| Multi-turn carry-over + đổi tool | `check_service_status{email, staging}` → `{vpn, staging}` → `inspect_device{DT-087, security}` | v3 (carry-over + latest intent) | `evidence/transcripts/v8_openai_20260915T094317943421.transcript.json` |
+| Action boundary (xác nhận trước khi ghi) | `clarify{response_type: yes_no}` trước, không tạo ticket khi chưa confirm | v2 (confirmation boundary) + v6 (guardrail lớp 2) | `evidence/transcripts/v8_openai_20260915T094332479255.transcript.json` |
 
 # PHẦN B — Chi tiết và evidence
 
@@ -513,14 +529,50 @@ có thể đối chiếu đóng góp.
 
 ### Lê Tuấn Anh — 2A202602952
 
-- **Vai trò/phần việc được nhận:** UI & Report Lead
-- **Những gì tôi đã thay đổi trong repo chung:**
-- **File hoặc artifact liên quan:**
-- **Commit hash hoặc pull request:**
-- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:**
-- **Khó khăn tôi gặp và cách tôi xử lý:**
-- **Điều tôi học được từ phần việc này:**
-- **Nếu làm lại, tôi sẽ cải thiện điều gì:**
+- **Vai trò/phần việc được nhận:** UI & Report Lead. Phụ trách dựng Live Chat UI
+  bằng Streamlit (`app.py`), chạy các kịch bản demo để lấy transcript evidence, và
+  tổng hợp `REPORT.md`.
+
+- **Những gì tôi đã thay đổi trong repo chung:** Tôi dựng `app.py` — giao diện chat
+  Streamlit **tái sử dụng `run_model_tool_loop` từ `chat.py`** thay vì viết agent loop
+  riêng, để CLI, eval và UI dùng chung một loop và không lệch hành vi. UI hiển thị
+  từng tool call với arguments, phân biệt rõ result và error, chỉ báo trạng thái vòng
+  lặp (`waiting_for_user`, `needs_confirmation`, `created`), artifact version + hash
+  đang chạy, và nút tải transcript làm evidence. Ở phần report, tôi tổng hợp
+  `REPORT.md` từ evidence của cả nhóm và điền các mục A1, A3, A4 (dẫn thẳng tới 4
+  transcript trong `evidence/transcripts/`).
+
+- **File hoặc artifact liên quan:** `starter_v0/app.py`,
+  `starter_v0/artifacts/REPORT.md`, `starter_v0/evidence/transcripts/` (4 phiên live
+  chat).
+
+- **Commit hash hoặc pull request:** `974c944` (Live Chat UI Streamlit, PR #4).
+  *(bổ sung commit report nếu có)*
+
+- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:** Tôi quyết định **không viết
+  loop mới cho UI** mà import `run_model_tool_loop`, và phát hiện bước clarify bằng
+  flag `awaiting_user` trong result thay vì hard-code tên tool. Lý do: nếu UI có loop
+  riêng thì hành vi demo có thể khác hành vi eval, làm evidence mất giá trị; còn dựa
+  vào flag thay vì tên tool giúp UI không vỡ khi nhóm đổi tên tool.
+
+- **Khó khăn tôi gặp và cách tôi xử lý:** Phần rối nhất với tôi là làm sao cho UI
+  hiển thị đúng những gì thực sự xảy ra bên trong loop. Một lượt có thể gồm nhiều
+  round tool, mỗi round lại nhiều tool call, nên lúc đầu tôi gộp hết lại và nhìn vào
+  chẳng hiểu tool nào chạy trước, args ra sao, cái nào lỗi. Tôi tách lại thành từng
+  event theo round, mỗi event bọc trong một expander riêng để xem được cả arguments
+  lẫn result, và tô đậm khi result có key `error`. Một chỗ khó nữa là phân biệt lúc
+  agent dừng để hỏi (`awaiting_user`) với lúc chờ xác nhận ghi ticket
+  (`needs_confirmation`) — hai trạng thái nhìn na ná nhau nhưng ý nghĩa khác hẳn, tôi
+  phải đọc kỹ output của `run_model_tool_loop` rồi map từng trạng thái ra một nhãn
+  riêng trên giao diện. Ngoài ra vì chỉ máy của Giang có API key nên tôi ít tự chạy
+  live được, phải hẹn ngồi chung mới quay đủ bốn transcript demo.
+
+- **Điều tôi học được từ phần việc này:** Tôi nhận ra một UI mà nhìn vào audit được hành vi tool thì đáng giá hơn nhiều một UI đẹp. Khi tôi bày ra rõ từng tool call với args và error, cả nhóm mới dễ chỉ ra chỗ model route sai để đi sửa prompt hay schema. Và chính lúc ngồi xem UI tôi mới thấm rằng tên tool, mô tả và schema thật ra cũng là một phần của prompt — cùng một câu hỏi, mô tả tool mơ hồ thì model chọn nhầm, còn mô tả rõ ranh giới thì nó chọn đúng, hiện ra ngay trên màn hình.
+- **Nếu làm lại, tôi sẽ cải thiện điều gì:** Tôi sẽ quay transcript cho cả bốn tình
+  huống ngay trong lúc dựng UI, thay vì dồn tới cuối mới làm — như vậy vừa test UI liên
+  tục, vừa không bị thiếu evidence lúc gần nộp. Tôi cũng muốn thêm một chỉ báo trực
+  quan cho ranh giới an toàn, ví dụ cảnh báo nổi bật ngay khi có một ticket được ghi ra
+  đĩa, để người demo nhìn phát là biết agent vừa vượt boundary hay chưa.
 
 ### Vũ Thường Tín — 2A202602955
 
