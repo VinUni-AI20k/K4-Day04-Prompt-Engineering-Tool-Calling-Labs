@@ -228,7 +228,6 @@ Nguyễn Minh Đức — 2A202602783 (GitHub: @minhduckx2004)
 
 
 
-
 ### Vũ Gia Khải — MSSV: 2A202602786 (GitHub: @vukhai248)
 
 - **Vai trò/phần việc được nhận:** Phụ trách Test Cases / Eval Author (Role C).
@@ -256,7 +255,15 @@ Nguyễn Minh Đức — 2A202602783 (GitHub: @minhduckx2004)
 - **Nếu làm lại, tôi sẽ cải thiện điều gì:** Thêm tab tổng hợp eval metrics và nút export selected evidence trực tiếp sang format của report.
 
 
-### Trần Đức Lộc — MSSV: 2A202602734 (GitHub: @tranducloc2472003-web)
+### Trần Đức Lộc — MSSV: 2A202602734 (GitHub: @ducloc24)
+- **Vai trò/phần việc được nhận:** Phụ trách Bảo mật & Bonus Tool (Role E).
+- **Những gì tôi đã thay đổi trong repo chung:** Tích hợp bonus tool `ticket_status_lookup` để tra cứu trạng thái ticket local theo ticket ID chính xác; bổ sung eval bonus `eval_bonus.json` và smoke script `smoke_ticket_status.py`. Rà soát an toàn ranh giới dữ liệu nội bộ.
+- **File hoặc artifact liên quan:** `starter_v0/tools/ticket_status_lookup/TOOL.md`, `starter_v0/tools/ticket_status_lookup/tool.py`, `starter_v0/data/eval_bonus.json`, `starter_v0/scripts/smoke_ticket_status.py`, `starter_v0/tools/__init__.py`, `starter_v0/artifacts/tools.yaml`.
+- **Commit hash hoặc pull request:** `99745ee` (Branch: `tranducloc`).
+- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:** Thiết kế bonus tool hoàn toàn read-only để không tạo side effect lên hệ thống mock data, đồng thời bổ sung negative test case khi ticket ID không tồn tại.
+- **Khó khăn tôi gặp và cách tôi xử lý:** Đảm bảo tool name đồng bộ ở 5 file: `tools.yaml`, `tools/__init__.py`, `TOOL.md`, `eval_bonus.json` và `REPORT.md`.
+- **Điều tôi học được từ phần việc này:** Ranh giới an toàn của các tool có side effect, cách xây dựng một capability tool mở rộng đúng chuẩn contract và có test kiểm thử đầy đủ.
+- **Nếu làm lại, tôi sẽ cải thiện điều gì:** Thêm tính năng lọc ticket theo trạng thái hoặc ngày tạo.
 
 
 
