@@ -224,7 +224,14 @@ Failure còn lại là G03, G05 và G09 trong group eval, tương ứng với mi
 - **Nếu làm lại, tôi sẽ cải thiện điều gì:** Mở rộng thêm các kịch bản test kết hợp giữa lỗi mạng và phần cứng trên cùng một thiết bị, hoặc kiểm thử tương thích với Bonus Tool mới do nhóm phát triển.
 
 ### Thân Tiến Đạt — MSSV: 2A202603023 (GitHub: @Datbadboiz11)
-
+- **Vai trò/phần việc được nhận:** Phụ trách UI & Báo cáo (Role D).
+- **Những gì tôi đã thay đổi trong repo chung:** Xây dựng Streamlit UI (`app.py`) để demo agent, hiển thị câu trả lời, tool calls, arguments, tool results, status, artifact version và transcript path. Tôi cũng cập nhật report bằng group eval evidence, UI evidence và bonus tool evidence hiện có.
+- **File hoặc artifact liên quan:** `starter_v0/app.py`, `starter_v0/requirements.txt`, `starter_v0/artifacts/REPORT.md`, `starter_v0/artifacts/UI_REPORT_NOTES.md`, `starter_v0/transcripts/ui_20260914T194553484133.transcript.json`.
+- **Commit hash hoặc pull request:** `1dc0e48`, `15b9734`, `bdae8ea`, `0a949e9` (Branch: `tiendat`).
+- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:** UI tái sử dụng `run_model_tool_loop` từ `chat.py` để demo, CLI và eval không bị lệch behavior.
+- **Khó khăn tôi gặp và cách tôi xử lý:** Cần hiển thị evidence rõ ràng cho người review, nên tôi thiết kế từng tool round thành expander và hiển thị JSON cho tool calls/results.
+- **Điều tôi học được từ phần việc này:** UI của agent không chỉ cần đẹp mà còn phải audit được: người review phải thấy tool nào được gọi, args nào được truyền và result nào hỗ trợ câu trả lời.
+- **Nếu làm lại, tôi sẽ cải thiện điều gì:** Thêm tab tổng hợp eval metrics và nút export selected evidence trực tiếp sang format của report.
 
 
 ### Trần Đức Lộc — MSSV: 2A202602734 (GitHub: @tranducloc2472003-web)
