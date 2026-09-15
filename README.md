@@ -177,3 +177,25 @@ Xem [LAB-GUIDE.md](LAB-GUIDE.md) để tham khảo một quy trình làm bài g�
 Xem [SUBMISSION-GUIDE.md](SUBMISSION-GUIDE.md) để xem hướng dẫn cách nộp bài lab
 
 Không nộp `.env`, API key, `.venv`, cache, generated tickets hoặc dữ liệu thật.
+
+## Chạy Web UI của nhóm
+
+```powershell
+cd starter_v0
+python -m pip install -r requirements.txt
+python ui/server.py
+```
+
+Mở `http://localhost:8080` để dùng giao diện chat. Có thể truyền port khác,
+ví dụ `python ui/server.py 8081`.
+
+UI đọc cấu hình từ `starter_v0/.env`. Tối thiểu cần cấu hình một provider:
+
+```dotenv
+OPENROUTER_API_KEY=your_key_here
+OPENROUTER_MODEL=cx/gpt-5.5
+```
+
+Không commit file `.env`; repo chỉ cung cấp `.env.example` làm mẫu. Giao diện
+cho phép chuyển v0-v3, xem tool calls, arguments, result/error, dữ liệu mock và
+các run evidence gần nhất.
