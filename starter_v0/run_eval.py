@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import time
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -262,7 +263,7 @@ def print_table(results: list[dict[str, Any]], summary: dict[str, Any]) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run IT Helpdesk Agent live evals.")
     parser.add_argument("--phase", choices=["B"], default="B")
-    parser.add_argument("--suite", choices=["base", "group", "cross", "extension", "adversarial"], default="base", help="Run label saved to JSON; does not filter --eval-cases.")
+    parser.add_argument("--suite", choices=["base", "group", "cross", "extension", "adversarial", "bonus"], default="base", help="Run label saved to JSON; does not filter --eval-cases.")
     parser.add_argument("--version", required=True)
     parser.add_argument("--provider", choices=["openai", "openrouter", "anthropic", "gemini"], required=True)
     parser.add_argument("--model", default=None)
@@ -291,7 +292,19 @@ def main() -> None:
         agent = HelpdeskAgent(provider, system_prompt=system_prompt, tools=openai_tools, model=args.model)
         try:
             tool_choice = None if case["expect"].get("no_tool") else "required"
-            run = agent.run(case_messages(case), tool_choice=tool_choice)
+            max_retries = 5
+            for attempt in range(max_retries):
+                try:
+                    run = agent.run(case_messages(case), tool_choice=tool_choice)
+                    break
+                except Exception as exc:
+                    err_str = str(exc)
+                    if ("429" in err_str or "503" in err_str or "RESOURCE_EXHAUSTED" in err_str or "UNAVAILABLE" in err_str) and attempt < max_retries - 1:
+                        wait_sec = 12 * (attempt + 1)
+                        print(f"  ⏳ [API Busy/Limit {err_str[:30]}...] Chờ {wait_sec}s rồi tự động thử lại (lần {attempt + 1}/{max_retries})...", flush=True)
+                        time.sleep(wait_sec)
+                    else:
+                        raise
             calls = [{"name": call.name, "args": call.args} for call in run.tool_calls]
             result = evaluate_phase_b(case, calls, run.text)
             tool_results = run.tool_results
@@ -321,6 +334,7 @@ def main() -> None:
             "result": result,
             "tool_results": tool_results,
         })
+        time.sleep(2.5)
 
     summary = summarize(results)
     args.runs_dir.mkdir(parents=True, exist_ok=True)

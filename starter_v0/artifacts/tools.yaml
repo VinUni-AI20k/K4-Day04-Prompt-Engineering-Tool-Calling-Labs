@@ -8,24 +8,24 @@
 tools:
   # ---------------- Core tools ----------------
   - name: clarify
-    description: "Gửi một câu hỏi cho người dùng."
+    description: "Gửi một câu hỏi cho người dùng để làm rõ thông tin hoặc xin xác nhận. Bắt buộc truyền response_type (text, yes_no, hoặc choice)."
     parameters:
       type: object
       properties:
-        question: {type: string, default: "", description: "Câu hỏi"}
-        response_type: {type: string, enum: [text, yes_no, choice], default: "text", description: "Kiểu trả lời"}
-        options: {type: array, default: [], items: {type: string}, description: "Các lựa chọn"}
-      required: [question]
+        question: {type: string, default: "", description: "Nội dung câu hỏi"}
+        response_type: {type: string, enum: [text, yes_no, choice], default: "text", description: "Kiểu trả lời: 'text' để nhận thông tin nhập, 'yes_no' để xin xác nhận, 'choice' để chọn từ các options"}
+        options: {type: array, default: [], items: {type: string}, description: "Các lựa chọn khi response_type là choice"}
+      required: [question, response_type]
 
   - name: search_kb
-    description: "Tìm hướng dẫn hỗ trợ kỹ thuật."
+    description: "Tìm hướng dẫn hỗ trợ kỹ thuật trong Knowledge Base. Bắt buộc truyền category phù hợp với chủ đề (email, vpn, wifi, printing, account, security, hardware, software, meeting_room, hoặc all)."
     parameters:
       type: object
       properties:
         query: {type: string, default: "", description: "Nội dung cần tìm"}
         category: {type: string, enum: [all, vpn, email, wifi, printing, account, security, hardware, software, meeting_room], default: "all", description: "Nhóm hướng dẫn"}
         top_k: {type: integer, default: 3, description: "Số kết quả"}
-      required: [query]
+      required: [query, category]
 
   - name: check_service_status
     description: "Kiểm tra trạng thái một dịch vụ."
@@ -86,14 +86,14 @@ tools:
       required: [manufacturer, model, query_type]
 
   - name: policy
-    description: "Tìm trong chính sách IT nội bộ."
+    description: "Tìm trong chính sách IT nội bộ. Bắt buộc truyền policy_area phù hợp với lĩnh vực quy định (access_control, data_privacy, external_tools, incident_response, service_operations, ticketing, hoặc all)."
     parameters:
       type: object
       properties:
         query: {type: string, default: "", description: "Nội dung cần tìm"}
         policy_area: {type: string, enum: [all, access_control, data_privacy, external_tools, incident_response, service_operations, ticketing], default: "all", description: "Nhóm chính sách"}
         top_k: {type: integer, default: 3, description: "Số mục"}
-      required: [query]
+      required: [query, policy_area]
 
   - name: create_ticket
     description: "Tạo một ticket hỗ trợ."
@@ -105,3 +105,22 @@ tools:
         asset_id: {type: string, default: "", description: "Mã tài sản nếu có"}
         confirmed: {type: boolean, default: false, description: "Đã được người dùng xác nhận"}
       required: [summary]
+
+  # ---------------- Team Bonus tools ----------------
+  - name: lookup_ticket
+    description: "Tra cứu thông tin, trạng thái và tiến độ xử lý của một ticket hỗ trợ kỹ thuật theo mã ticket (ví dụ: LAB-B4A1C802 hoặc INC-1001). Không dùng để tạo ticket mới."
+    parameters:
+      type: object
+      properties:
+        ticket_id: {type: string, description: "Mã định danh của ticket cần tra cứu"}
+      required: [ticket_id]
+
+  - name: check_software_catalog
+    description: "Tra cứu danh mục phần mềm doanh nghiệp để kiểm tra xem một phần mềm có được phê duyệt, cần xin cấp phép đặc biệt, hay bị cấm cài đặt trên thiết bị công ty theo hệ điều hành."
+    parameters:
+      type: object
+      properties:
+        software_name: {type: string, description: "Tên phần mềm cần tra cứu, ví dụ: Docker Desktop, VS Code, Zoom, Wireshark, BitTorrent"}
+        platform: {type: string, enum: [all, windows, macos, linux], default: "all", description: "Hệ điều hành mục tiêu"}
+      required: [software_name]
+

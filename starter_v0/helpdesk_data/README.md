@@ -7,6 +7,8 @@ the lab and contain no real employee or company data.
 - `users.json`: 10 mock employees with varied account/MFA states and assigned assets.
 - `service_status.json`: mock shared-service status page.
 - `knowledge_base/`: 11 troubleshooting articles, including one safe prompt-injection fixture.
+- `tickets.json`: mock support tickets with varied status (open, in_progress, resolved, closed) for `lookup_ticket`.
+- `software_catalog.json`: approved, requires-approval, and prohibited software records for `check_software_catalog`.
 
 Students may extend this data when they build a new tool, but they must document
 their contract and add eval cases for the behavior they introduce.
