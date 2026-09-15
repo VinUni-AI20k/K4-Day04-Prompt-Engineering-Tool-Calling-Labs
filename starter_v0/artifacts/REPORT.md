@@ -201,7 +201,7 @@ có thể đối chiếu đóng góp.
 Sao chép mẫu dưới đây cho từng thành viên:
 
 ### Họ tên — MSSV
-### Nguyễn Thu Trang — 2A202602947
+### Nguyễn Thu Trang — 2A202602435
 
 - **Vai trò/phần việc được nhận:** Tối ưu System Prompt (`system_prompt.md`), nâng cấp Schema công cụ (`tools.yaml`), đo đạc kiểm thử 4 bộ test suites (`base`, `group`, `extension`, `adversarial`) và tổng hợp các báo cáo artifacts.
 - **Những gì tôi đã thay đổi trong repo chung:** 
