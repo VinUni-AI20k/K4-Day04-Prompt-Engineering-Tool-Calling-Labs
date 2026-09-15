@@ -1,7 +1,113 @@
 {
   "dataset_id": "day04_v3_helpdesk_group",
   "dataset_role": "group",
-  "description": "Template intentionally left empty. The team must write exactly 10 original IT helpdesk cases: 5 single-turn query cases and 5 multi-turn turns cases.",
+  "description": "Ten original IT helpdesk cases authored by the team: five single-turn cases (G01-G05) and five multi-turn cases (G06-G10).",
   "allowed_failure_types": ["wrong_tool", "wrong_arg_value", "wrong_boundary", "unnecessary_tool", "out_of_scope", "missing_info"],
-  "cases": []
+  "cases": [
+    {
+      "id": "G01_missing_vpn_asset",
+      "phase": "B",
+      "suite": "group",
+      "query": "Kiểm tra lỗi VPN trên laptop của mình giúp tôi.",
+      "failure_type": "missing_info",
+      "expect": {"tool_calls": [{"name": "clarify", "args": {"response_type": "text"}}]},
+      "metadata": {"skill": "clarify_missing_asset", "difficulty": "easy", "what_it_tests": "Không tự đoán asset ID khi user chỉ nói về laptop của mình."}
+    },
+    {
+      "id": "G02_policy_search",
+      "phase": "B",
+      "suite": "group",
+      "query": "Theo policy, có được lưu password trong transcript không?",
+      "failure_type": "wrong_tool",
+      "expect": {"tool_calls": [{"name": "policy", "args": {"policy_area": "data_privacy"}}]},
+      "metadata": {"skill": "policy_search", "difficulty": "easy", "what_it_tests": "Route password và transcript sang data-privacy policy có evidence thực tế."}
+    },
+    {
+      "id": "G03_ticket_missing_summary",
+      "phase": "B",
+      "suite": "group",
+      "query": "Tạo cho mình một ticket mới với nhé.",
+      "failure_type": "missing_info",
+      "expect": {"tool_calls": [{"name": "clarify", "args": {"response_type": "text"}}]},
+      "metadata": {"skill": "clarify_ticket_summary", "difficulty": "medium", "what_it_tests": "Thiếu thông tin summary nên phải hỏi lại."}
+    },
+    {
+      "id": "G04_parallel_policy_kb",
+      "phase": "B",
+      "suite": "group",
+      "query": "Theo policy service operations, cách xử lý lỗi máy in là gì? Đồng thời tìm hướng dẫn kết nối máy in.",
+      "failure_type": "wrong_tool",
+      "expect": {"tool_calls": [{"name": "policy", "args": {"policy_area": "service_operations"}}, {"name": "search_kb", "args": {"category": "printing"}}]},
+      "metadata": {"skill": "parallel_policy_kb", "difficulty": "hard", "what_it_tests": "Gọi đồng thời policy và search_kb, với cả hai nguồn có kết quả."}
+    },
+    {
+      "id": "G05_unnecessary_tool_polite",
+      "phase": "B",
+      "suite": "group",
+      "query": "Cảm ơn bạn, mình sửa được lỗi rồi.",
+      "failure_type": "unnecessary_tool",
+      "expect": {"no_tool": true, "behavior": "answer_without_tool"},
+      "metadata": {"skill": "polite_closure", "difficulty": "easy", "what_it_tests": "Không gọi tool khi user chỉ cảm ơn/đóng giao tiếp."}
+    },
+    {
+      "id": "G06_carry_asset_to_ticket",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Kiểm tra phần cứng máy LT-999."},
+        {"role": "user", "content": "Máy bị hỏng ổ cứng, tạo ticket lỗi phần cứng mức high cho máy này giúp mình."}
+      ],
+      "failure_type": "wrong_boundary",
+      "expect": {"tool_calls": [{"name": "clarify", "args": {"response_type": "yes_no"}}]},
+      "metadata": {"skill": "multiturn_ticket_carry_asset", "difficulty": "medium", "what_it_tests": "Sử dụng asset ID từ lượt trước để setup ticket và hỏi xác nhận."}
+    },
+    {
+      "id": "G07_switch_to_policy",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Dịch vụ SSO đang lỗi đúng không?"},
+        {"role": "user", "content": "Nếu vậy thì theo policy external tools, mình có được dùng công cụ bên ngoài không?"}
+      ],
+      "failure_type": "wrong_tool",
+      "expect": {"tool_calls": [{"name": "policy", "args": {"policy_area": "external_tools"}}]},
+      "metadata": {"skill": "multiturn_switch_policy", "difficulty": "hard", "what_it_tests": "Đổi ngữ cảnh sang policy search dựa trên câu hỏi mới."}
+    },
+    {
+      "id": "G08_correction_environment",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Kiểm tra trạng thái email staging."},
+        {"role": "user", "content": "À nhầm, kiểm tra email production mới đúng."}
+      ],
+      "failure_type": "wrong_arg_value",
+      "expect": {"tool_calls": [{"name": "check_service_status", "args": {"service": "email", "environment": "production"}}]},
+      "metadata": {"skill": "multiturn_correction_environment", "difficulty": "medium", "what_it_tests": "Dùng environment mới nhất sau khi user đính chính."}
+    },
+    {
+      "id": "G09_clarify_then_search_kb",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Làm sao để cấu hình email?"},
+        {"role": "user", "content": "Mình dùng Outlook trên Windows."}
+      ],
+      "failure_type": "wrong_arg_value",
+      "expect": {"tool_calls": [{"name": "search_kb", "args": {"category": "email"}}]},
+      "metadata": {"skill": "multiturn_clarify_then_search", "difficulty": "medium", "what_it_tests": "Sử dụng thông tin bổ sung để phân loại chính xác."}
+    },
+    {
+      "id": "G10_cancel_ticket_and_ask_status",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Tạo ticket lỗi sập mạng."},
+        {"role": "user", "content": "Thôi khoan, kiểm tra xem mạng nội bộ (wifi) ở production có đang lỗi chung không đã."}
+      ],
+      "failure_type": "wrong_tool",
+      "expect": {"tool_calls": [{"name": "check_service_status", "args": {"service": "wifi", "environment": "production"}}]},
+      "metadata": {"skill": "multiturn_cancel_ticket_check_status", "difficulty": "hard", "what_it_tests": "Hủy hành động tạo ticket để chuyển sang check status."}
+    }
+  ]
 }

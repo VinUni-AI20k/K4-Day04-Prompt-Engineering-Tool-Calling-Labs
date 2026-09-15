@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from env_loader import load_lab_env
+from agent import guard_tool_calls, normalize_final_response
 from providers import make_provider
 from providers.base import ToolCall
 from tools import TOOL_FUNCTIONS, load_tool_declarations, to_openai_tools
@@ -91,7 +92,7 @@ def run_model_tool_loop(
 
     for round_index in range(1, max_tool_rounds + 1):
         response = provider.complete(working_messages, tools, model=model, temperature=0.0)
-        calls = response.tool_calls
+        calls = guard_tool_calls(response.tool_calls, working_messages)
         round_record: dict[str, Any] = {
             "round": round_index,
             "assistant_text": response.text,
@@ -103,7 +104,7 @@ def run_model_tool_loop(
             rounds.append(round_record)
             return {
                 "status": "answered",
-                "assistant_text": response.text or "",
+                "assistant_text": normalize_final_response(response.text),
                 "rounds": rounds,
                 "tool_events": all_tool_events,
             }
@@ -137,7 +138,9 @@ def run_model_tool_loop(
 
     return {
         "status": "max_tool_rounds",
-        "assistant_text": f"Stopped after {max_tool_rounds} tool rounds. Inspect the transcript for details.",
+        "assistant_text": normalize_final_response(
+            f"Stopped after {max_tool_rounds} tool rounds. Inspect the transcript for details."
+        ),
         "rounds": rounds,
         "tool_events": all_tool_events,
     }

@@ -1,0 +1,73 @@
+{
+  "transcript_id": "v3_openai_20260915T012918312102.transcript",
+  "version": "v3",
+  "artifact_version": "v3+pa6ff25927cf8+t27958fdcd925",
+  "prompt_hash": "a6ff25927cf8b8ea02dc6143417102095eafc685ee6667b82b423917e860c8a8",
+  "tools_hash": "27958fdcd925e8a8e2e963066d90993b501f1b7a137645f73224b09a5ef99dfe",
+  "provider": "openai",
+  "model": "gpt-4o-mini",
+  "system_prompt": "artifacts/system_prompt.md",
+  "tools": "artifacts/tools.yaml",
+  "history_window": 5,
+  "max_tool_rounds": 4,
+  "created_at": "2026-09-15T01:29:18",
+  "updated_at": "2026-09-15T01:29:21",
+  "turns": [
+    {
+      "turn_index": 1,
+      "started_at": "2026-09-15T01:29:18",
+      "user": "Kiểm tra VPN trên laptop của tôi.",
+      "status": "waiting_for_user",
+      "assistant_text": "Vui lòng cung cấp mã asset của laptop để tôi có thể kiểm tra VPN.",
+      "rounds": [
+        {
+          "round": 1,
+          "assistant_text": null,
+          "tool_calls": [
+            {
+              "name": "clarify",
+              "args": {
+                "question": "Vui lòng cung cấp mã asset của laptop để tôi có thể kiểm tra VPN.",
+                "response_type": "text"
+              }
+            }
+          ],
+          "tool_results": [
+            {
+              "tool": "clarify",
+              "args": {
+                "question": "Vui lòng cung cấp mã asset của laptop để tôi có thể kiểm tra VPN.",
+                "response_type": "text"
+              },
+              "result": {
+                "tool": "clarify",
+                "question": "Vui lòng cung cấp mã asset của laptop để tôi có thể kiểm tra VPN.",
+                "response_type": "text",
+                "options": [],
+                "awaiting_user": true
+              }
+            }
+          ]
+        }
+      ],
+      "tool_events": [
+        {
+          "tool": "clarify",
+          "args": {
+            "question": "Vui lòng cung cấp mã asset của laptop để tôi có thể kiểm tra VPN.",
+            "response_type": "text"
+          },
+          "result": {
+            "tool": "clarify",
+            "question": "Vui lòng cung cấp mã asset của laptop để tôi có thể kiểm tra VPN.",
+            "response_type": "text",
+            "options": [],
+            "awaiting_user": true
+          }
+        }
+      ],
+      "ended_at": "2026-09-15T01:29:21"
+    }
+  ],
+  "source": "streamlit_ui"
+}
