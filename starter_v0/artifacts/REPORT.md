@@ -138,8 +138,7 @@ Trong dự án này, tôi chịu trách nhiệm chính ở vai trò B, tập tru
 
 Sao chép mẫu dưới đây cho từng thành viên:
 
-### Họ tên — MSSV
-Nguyễn Minh Đức — 2A202602783
+### Nguyễn Minh Đức — 2A202602783
 ## C2. Self-reflection của từng thành viên
 
 **Thành viên:** Nguyễn Minh Đức
