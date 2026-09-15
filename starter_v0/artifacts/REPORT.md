@@ -135,16 +135,16 @@ có thể đối chiếu đóng góp.
 
 Sao chép mẫu dưới đây cho từng thành viên:
 
-### Họ tên — MSSV
+### Trần Thế Anh - 2A202602516
 
-- **Vai trò/phần việc được nhận:**
-- **Những gì tôi đã thay đổi trong repo chung:**
-- **File hoặc artifact liên quan:**
-- **Commit hash hoặc pull request:**
-- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:**
-- **Khó khăn tôi gặp và cách tôi xử lý:**
-- **Điều tôi học được từ phần việc này:**
-- **Nếu làm lại, tôi sẽ cải thiện điều gì:**
+- **Vai trò/phần việc được nhận:** Tôi phụ trách vai trò C — Eval Author, thiết kế bộ G01–G10, chạy các suite đánh giá, kiểm tra tính hợp lệ của run, phân tích failure và tổng hợp evidence phục vụ report.
+- **Những gì tôi đã thay đổi trong repo chung:** Tôi xây dựng đúng 10 case nguyên bản gồm 5 single-turn và 5 multi-turn; chuẩn hóa coverage cho routing, missing information, format-only, privacy boundary, correction, cancellation, confirmation và multiple-tool calls. Tôi cũng chạy group eval `v3`, tái xuất bảng phân tích và ghi lại kết quả review thủ công thay vì chỉ dựa vào nhãn PASS/FAIL.
+- **File hoặc artifact liên quan:** `starter_v0/data/eval_group.json`, `starter_v0/artifacts/EVAL-EVIDENCE.md`, `starter_v0/artifacts/V0-FAILURE-ANALYSIS.md`, `starter_v0/artifacts/version_log.csv`, `starter_v0/runs/run-analysis.csv` và `starter_v0/runs/v3_B_group_openrouter_20260914T233516261660.json`.
+- **Commit hash hoặc pull request:** Commit kỹ thuật ban đầu `3371bdc` (`feat(eval): add group cases and baseline evidence`) và commit hoàn thiện `04f2f4f` (`feat(eval): finalize G01-G10 and group evidence`) trên branch `contrib/Thees-Anh-eval-final`, đã được gửi qua pull request vào repository chung.
+- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:** Tôi thiết kế mỗi case tập trung vào một quyết định hành vi chính và dùng expected arguments ở mức đủ để grader kiểm tra chính xác. Với G01 và G08, tôi cố ý yêu cầu nhiều tool call có arguments khác nhau để phát hiện việc model bỏ sót, gộp hoặc tráo dữ liệu. Cách này giúp kết quả phản ánh khả năng giữ đúng context, thay vì chỉ kiểm tra model có gọi đúng tên tool hay không.
+- **Khó khăn tôi gặp và cách tôi xử lý:** Khó khăn lớn nhất là phân biệt lỗi hành vi của agent với lỗi provider hoặc tool runtime. Tôi chỉ công nhận run khi `provider_error_cases == 0` và `measured_cases == total_cases`, sau đó đọc actual calls, arguments và tool results. Nhờ vậy tôi xác định G02 fail vì model tự ánh xạ “sandbox” thành `staging`, trong khi G05 được grader chấm PASS về routing/privacy nhưng external tool vẫn trả `missing_api_key`; hai kết quả này cần được diễn giải khác nhau.
+- **Điều tôi học được từ phần việc này:** Tôi hiểu rằng accuracy tổng không đủ để kết luận agent hoạt động tốt. Eval cần có dataset cân bằng, metadata rõ, artifact hash để truy vết và review thủ công các trace. Tôi cũng thấy regression là tín hiệu quan trọng: chuỗi base thay đổi từ `0.7000` lên `0.8667`, giảm còn `0.8333`, rồi tăng lên `0.9667`, cho thấy mỗi thay đổi prompt/schema đều cần chạy lại cùng suite trước khi kết luận.
+- **Nếu làm lại, tôi sẽ cải thiện điều gì:** Tôi sẽ thống nhất provider/model và quy ước version với nhóm ngay từ đầu, chốt ma trận G01–G10 trước khi chạy để tránh tạo evidence trên dataset trung gian, đồng thời preflight cả OpenRouter và Tavily sớm hơn. Tôi cũng sẽ bổ sung một vòng regression cho G02 sau khi A/B cải thiện quy tắc xử lý environment mơ hồ và chỉ chạy extension khi external tool đã có key hợp lệ.
 
 Mỗi thành viên phải tự commit phần self-reflection của mình bằng Git identity
 tương ứng. Reflection phải dẫn đến contribution artifact/commit đã nêu ở trên,
