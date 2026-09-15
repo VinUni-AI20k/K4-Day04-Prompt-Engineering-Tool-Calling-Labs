@@ -87,9 +87,9 @@ with st.sidebar.expander("📦 Artifact Version & Hashes", expanded=True):
 
 # Reset / New conversation button
 if st.sidebar.button("🔄 Bắt đầu phiên chat mới (New Session)", use_container_width=True):
-    st.session_state.pop("transcript_id", None)
-    st.session_state.pop("messages", None)
-    st.session_state.pop("raw_history", None)
+    # Invalidate the session configuration so initialization rebuilds all chat
+    # state together, including transcript, history and turn numbering.
+    st.session_state.pop("current_config", None)
     st.rerun()
 
 # ---------------------------------------------------------
