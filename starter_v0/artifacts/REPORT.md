@@ -169,8 +169,6 @@ repository chung. Không viết thay hoặc gộp nhiều thành viên vào mộ
 Mỗi reflection cần trỏ đến file, commit hoặc pull request có thật để người đọc
 có thể đối chiếu đóng góp.
 
-Sao chép mẫu dưới đây cho từng thành viên:
-
 ### Vũ Quang Tiến — 2A202602872
 
 - **Vai trò/phần việc được nhận:** Prompt Architect / Lead; tích hợp và kiểm tra cuối ở local.
@@ -184,14 +182,14 @@ Sao chép mẫu dưới đây cho từng thành viên:
 
 ### Ngô Minh Trí — 2A202602993
 
-- **Vai trò/phần việc được nhận:**
-- **Những gì tôi đã thay đổi trong repo chung:**
-- **File hoặc artifact liên quan:**
-- **Commit hash hoặc pull request:**
-- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:**
-- **Khó khăn tôi gặp và cách tôi xử lý:**
-- **Điều tôi học được từ phần việc này:**
-- **Nếu làm lại, tôi sẽ cải thiện điều gì:**
+- **Vai trò/phần việc được nhận:** Quản lý tool declarations và safety boundary cho tool calling.
+- **Những gì tôi đã thay đổi trong repo chung:** Chuẩn hóa description, enum, default, required arguments và giới hạn số kết quả trong `tools.yaml`. Tôi cũng đồng bộ tên tool `policy` với output của implementation, đồng thời làm rõ giới hạn dữ liệu được gửi sang Tavily của `search_device_info`.
+- **File hoặc artifact liên quan:** `starter_v0/artifacts/tools.yaml`; `starter_v0/tools/policy/tool.py`.
+- **Commit hash hoặc pull request:** `7f494987f176bd6ec09b472494a61db9cdf475a6` — `chuẩn hóa enums/arguments, đồng bộ tool name, Tavily API.`
+- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:** Giữ nguyên các public tool name đang được eval sử dụng (`policy`, `search_device_info`, `create_ticket`, ...), chỉ sửa output field của policy implementation từ `search_company_policy` thành `policy`. Quyết định này tránh name mismatch giữa declaration, registry, evaluator và tool result mà không buộc phải sửa hàng loạt eval cases.
+- **Khó khăn tôi gặp và cách tôi xử lý:** Một số arguments có default nhưng vẫn nằm trong `required`, khiến contract model nhìn thấy không nhất quán. Tôi đối chiếu schema với function signature và evaluator, sau đó giữ `findings` là required cho report formatter, còn `template` và `query_type` dùng default tương ứng.
+- **Điều tôi học được từ phần việc này:** Tool schema là một phần của prompt và là contract kỹ thuật, không chỉ là tài liệu. Description, enum, required/default và tool name lệch nhau đều có thể làm model route sai hoặc tạo kết quả khó audit.
+- **Nếu làm lại, tôi sẽ cải thiện điều gì:** Tôi sẽ tạo virtual environment sớm hơn để chạy YAML/runtime smoke test, sau đó chạy extension/adversarial suite có Tavily để kiểm chứng bằng run evidence rằng privacy boundary không chỉ đúng trên schema mà còn đúng ở tool result.
 
 ### Nguyễn Đức Anh — 2A202602625
 
