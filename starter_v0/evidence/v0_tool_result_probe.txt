@@ -1,0 +1,36 @@
+### TOOL RESULT PROBE — tat ca 30 case ###
+H01_service_status_routing       PASS  check_service_status[ok] status=degraded
+H02_device_routing               PASS  inspect_device[ok] tool,asset_id,check,device,diagnostics,snapshot_at
+H03_kb_routing                   PASS  search_kb[ok] results=1
+H04_user_routing                 FAIL  lookup_user[ok] tool,employee,snapshot_at | inspect_device[ERROR] asset_not_found: None
+H05_device_check_arg             PASS  inspect_device[ok] tool,asset_id,check,device,diagnostics,snapshot_at
+H06_environment_arg              PASS  check_service_status[ok] status=maintenance
+H07_format_report                PASS  format_incident_report[ok] tool,template,markdown,finding_count
+H08_out_of_scope                 PASS  <no tool executed>
+H09_meta_no_tool                 PASS  <no tool executed>
+H10_missing_asset                FAIL  inspect_device[ERROR] asset_not_found: None
+H11_missing_employee             FAIL  lookup_user[ERROR] employee_not_found: None
+H12_confirm_before_ticket        FAIL  create_ticket[ok] status=created
+H13_parallel_status_and_device   FAIL  check_service_status[ok] status=degraded | inspect_device[ok] tool,asset_id,check,device,diagnostics,snapshot_at
+H14_out_of_scope_coding          PASS  <no tool executed>
+M01_clarify_then_asset           PASS  inspect_device[ok] tool,asset_id,check,device,diagnostics,snapshot_at
+M02_carry_environment            PASS  check_service_status[ok] status=maintenance
+M03_correct_asset                PASS  inspect_device[ok] tool,asset_id,check,device,diagnostics,snapshot_at
+M04_correct_employee             PASS  lookup_user[ok] tool,employee,snapshot_at
+M05_ticket_confirmation          FAIL  create_ticket[ok] status=needs_confirmation | clarify[ok] awaiting_user=True
+M06_switch_tool                  PASS  search_kb[ok] results=1
+H15_compare_environments         PASS  check_service_status[ok] status=operational | check_service_status[ok] status=maintenance
+H16_compare_two_assets           PASS  inspect_device[ok] tool,asset_id,check,device,diagnostics,snapshot_at | inspect_device[ok] tool,asset_id,check,device,diagnostics,snapshot_at
+H17_triage_with_three_sources    FAIL  inspect_device[ok] tool,asset_id,check,device,diagnostics,snapshot_at | check_service_status[ok] status=degraded | search_kb[ok] results=2
+H18_user_and_asset               PASS  lookup_user[ok] tool,employee,snapshot_at | inspect_device[ok] tool,asset_id,check,device,diagnostics,snapshot_at
+H19_ambiguous_environment        FAIL  check_service_status[ok] status=maintenance
+H20_format_without_refetch       PASS  format_incident_report[ok] tool,template,markdown,finding_count
+M07_cancel_previous_action       PASS  <no tool executed>
+M08_correct_then_parallel        PASS  inspect_device[ok] tool,asset_id,check,device,diagnostics,snapshot_at | check_service_status[ok] status=degraded
+M09_confirmation_invalidated     FAIL  inspect_device[ok] tool,asset_id,check,device,diagnostics,snapshot_at
+M10_latest_intent_wins           PASS  lookup_user[ok] tool,employee,snapshot_at
+
+### CAN REVIEW THU CONG: tool result ERROR hoac EMPTY ###
+- H04_user_routing [FAIL] inspect_device -> ERROR | asset_not_found: None | args={"asset_id": "EMP-1003"}
+- H10_missing_asset [FAIL] inspect_device -> ERROR | asset_not_found: None | args={"asset_id": "laptop", "check": "network"}
+- H11_missing_employee [FAIL] lookup_user -> ERROR | employee_not_found: None | args={"employee_id": "Sales"}

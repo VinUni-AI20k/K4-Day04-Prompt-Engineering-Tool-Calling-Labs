@@ -1,7 +1,121 @@
 {
   "dataset_id": "day04_v3_helpdesk_group",
   "dataset_role": "group",
-  "description": "Template intentionally left empty. The team must write exactly 10 original IT helpdesk cases: 5 single-turn query cases and 5 multi-turn turns cases.",
+  "description": "Team-authored IT helpdesk cases: 5 single-turn query cases and 5 multi-turn turns cases.",
   "allowed_failure_types": ["wrong_tool", "wrong_arg_value", "wrong_boundary", "unnecessary_tool", "out_of_scope", "missing_info"],
-  "cases": []
+  "cases": [
+    {
+      "id": "G01_staging_wifi_status",
+      "phase": "B",
+      "suite": "group",
+      "query": "Kiểm tra trạng thái dịch vụ Wi-Fi ở môi trường staging giúp mình.",
+      "failure_type": "wrong_arg_value",
+      "expect": {"tool_calls": [{"name": "check_service_status", "args": {"service": "wifi", "environment": "staging"}}]},
+      "metadata": {"skill": "service_environment_routing", "difficulty": "medium", "what_it_tests": "Giữ đúng service và môi trường được nêu, không mặc định production."}
+    },
+    {
+      "id": "G02_missing_asset_for_hardware",
+      "phase": "B",
+      "suite": "group",
+      "query": "Kiểm tra phần cứng trên máy tính của tôi giúp nhé.",
+      "failure_type": "missing_info",
+      "expect": {"tool_calls": [{"name": "clarify", "args": {"response_type": "text"}}]},
+      "metadata": {"skill": "missing_asset_identifier", "difficulty": "medium", "what_it_tests": "Thiếu asset ID thì hỏi lại thay vì tự đoán thiết bị."}
+    },
+    {
+      "id": "G03_ambiguous_policy_or_status",
+      "phase": "B",
+      "suite": "group",
+      "query": "Theo policy, trạng thái dịch vụ VPN production hiện nay có được xem là sự cố nghiêm trọng không?",
+      "failure_type": "missing_info",
+      "expect": {"tool_calls": [{"name": "clarify", "args": {"response_type": "choice", "options": ["policy", "service_status"]}}]},
+      "metadata": {"skill": "ambiguous_policy_status", "difficulty": "hard", "what_it_tests": "Hỏi lại khi user vừa có ý định tra policy vừa có ý định kiểm tra service status."}
+    },
+    {
+      "id": "G04_out_of_scope_request",
+      "phase": "B",
+      "suite": "group",
+      "query": "Viết giúp mình một ứng dụng quản lý bán hàng bằng Python.",
+      "failure_type": "out_of_scope",
+      "expect": {"no_tool": true, "behavior": "refuse"},
+      "metadata": {"skill": "out_of_scope_refusal", "difficulty": "easy", "what_it_tests": "Yêu cầu ngoài IT helpdesk phải được từ chối và không gọi tool."}
+    },
+    {
+      "id": "G05_ticket_confirmation_boundary",
+      "phase": "B",
+      "suite": "group",
+      "query": "Tạo ticket mức medium cho lỗi máy in của LT-318.",
+      "failure_type": "wrong_boundary",
+      "expect": {"tool_calls": [{"name": "clarify", "args": {"response_type": "yes_no"}}]},
+      "metadata": {"skill": "action_confirmation", "difficulty": "medium", "what_it_tests": "Không tạo ticket trước khi có explicit confirmation."}
+    },
+    {
+      "id": "G06_correct_asset_and_scope",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Kiểm tra kết nối trên laptop của mình."},
+        {"role": "user", "content": "Mã máy là LT-240."},
+        {"role": "user", "content": "Chỉ kiểm tra network trên máy đúng mã đó."}
+      ],
+      "failure_type": "missing_info",
+      "expect": {"tool_calls": [{"name": "inspect_device", "args": {"asset_id": "LT-240", "check": "network"}}]},
+      "metadata": {"skill": "multiturn_fill_asset", "difficulty": "hard", "what_it_tests": "Sau khi thiếu asset ID, dùng mã máy được bổ sung và check mới nhất."}
+    },
+    {
+      "id": "G07_switch_service_keep_environment",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Kiểm tra VPN ở môi trường staging."},
+        {"role": "user", "content": "Không cần VPN nữa, kiểm tra SSO."},
+        {"role": "user", "content": "Vẫn là staging, chỉ cần trạng thái SSO."}
+      ],
+      "failure_type": "wrong_arg_value",
+      "expect": {"tool_calls": [{"name": "check_service_status", "args": {"service": "sso", "environment": "staging"}}]},
+      "metadata": {"skill": "multiturn_context_carry", "difficulty": "hard", "what_it_tests": "Đổi service nhưng giữ environment từ ngữ cảnh gần nhất."}
+    },
+    {
+      "id": "G08_cancel_pending_lookup",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Tra cứu tài khoản nhân viên EMP-1001."},
+        {"role": "user", "content": "Thôi, không cần tra cứu nữa."},
+        {"role": "user", "content": "Chỉ xác nhận là bạn đã hủy yêu cầu."}
+      ],
+      "failure_type": "unnecessary_tool",
+      "expect": {"no_tool": true},
+      "metadata": {"skill": "multiturn_cancellation", "difficulty": "medium", "what_it_tests": "Lệnh hủy ở lượt mới nhất ngăn tool call còn lại."}
+    },
+    {
+      "id": "G09_inspect_then_format",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Kiểm tra security của máy DT-087."},
+        {"role": "user", "content": "Dùng kết quả kiểm tra để lập báo cáo handoff."},
+        {"role": "user", "content": "Đặt tiêu đề báo cáo là DT-087 security review."}
+      ],
+      "failure_type": "wrong_tool",
+      "expect": {"tool_calls": [
+        {"name": "inspect_device", "args": {"asset_id": "DT-087", "check": "security"}},
+        {"name": "format_incident_report", "args": {"template": "handoff", "incident_title": "DT-087 security review"}}
+      ]},
+      "metadata": {"skill": "inspect_then_format_chain", "difficulty": "hard", "what_it_tests": "Xâu chuỗi inspect_device để thu thập finding rồi format thành handoff report."}
+    },
+    {
+      "id": "G10_approved_vpn_catalog",
+      "phase": "B",
+      "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Tra trong danh mục nội bộ phần mềm VPN cho macOS."},
+        {"role": "user", "content": "Chỉ kiểm tra catalog, không tìm web và không cài đặt."},
+        {"role": "user", "content": "Northstar SecureConnect có trạng thái approved cho macOS không?"}
+      ],
+      "failure_type": "wrong_tool",
+      "expect": {"tool_calls": [{"name": "approved_software_catalog", "args": {"category": "vpn", "operating_system": "macos", "approval_status": "approved"}}]},
+      "metadata": {"skill": "bonus_approved_software", "difficulty": "hard", "what_it_tests": "Team-built tool tra đúng approval record bằng dữ liệu local, không gọi web và không thực hiện cài đặt."}
+    }
+  ]
 }
