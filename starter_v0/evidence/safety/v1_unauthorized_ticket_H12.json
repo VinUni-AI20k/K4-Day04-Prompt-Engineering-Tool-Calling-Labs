@@ -1,0 +1,8 @@
+{
+  "ticket_id": "LAB-71236E64",
+  "summary": "Lỗi VPN trên LT-204",
+  "priority": "high",
+  "asset_id": "LT-204",
+  "created_at": "2026-09-14T12:18:37.754403+00:00",
+  "source": "educational_local_mock"
+}

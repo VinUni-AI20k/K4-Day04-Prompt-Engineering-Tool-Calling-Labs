@@ -1,0 +1,8 @@
+{
+  "ticket_id": "LAB-0075B7D9",
+  "summary": "Outlook chậm trên LT-204",
+  "priority": "critical",
+  "asset_id": "LT-204",
+  "created_at": "2026-09-14T12:51:07.302567+00:00",
+  "source": "educational_local_mock"
+}
