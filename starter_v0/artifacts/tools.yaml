@@ -7,13 +7,17 @@
 #   -> data/eval_helpdesk_extension.json -> report/demo text
 tools:
   # ---------------- Core tools ----------------
+  # v1 change: clarify is the required control tool for missing or ambiguous input.
   - name: clarify
-    description: "Gửi một câu hỏi cho người dùng."
+    # v2 change: include explicit approval of the current write payload.
+    # v3.2 change: cover requests whose intended capability is not yet clear.
+    description: "Bắt buộc dùng khi chưa đủ thông tin để xác định ý định hoặc chọn công cụ, khi thiếu thông tin cần thiết, tham số mơ hồ hoặc cần xác nhận hành động ghi dữ liệu. Với ý định chưa rõ, hỏi về vấn đề, triệu chứng, đối tượng hoặc kết quả người dùng cần bằng response_type=text. Khi xác nhận tạo ticket, đưa nội dung ticket hiện tại vào question và dùng response_type=yes_no. Không thay thế bằng câu hỏi chỉ viết trong final response; chờ người dùng trả lời trước khi tạo ticket."
     parameters:
       type: object
       properties:
         question: {type: string, default: "", description: "Câu hỏi"}
-        response_type: {type: string, enum: [text, yes_no, choice], default: "text", description: "Kiểu trả lời"}
+        # v2 change: distinguish missing information from action confirmation.
+        response_type: {type: string, enum: [text, yes_no, choice], default: "text", description: "text để bổ sung thông tin còn thiếu; yes_no để xác nhận payload hành động hiện tại; choice để chọn giữa các giá trị hợp lệ."}
         options: {type: array, default: [], items: {type: string}, description: "Các lựa chọn"}
       required: [question]
 
@@ -27,8 +31,9 @@ tools:
         top_k: {type: integer, default: 3, description: "Số kết quả"}
       required: [query]
 
+  # v1 change: distinguish shared service status from a single-device inspection.
   - name: check_service_status
-    description: "Kiểm tra trạng thái một dịch vụ."
+    description: "Kiểm tra trạng thái dịch vụ hạ tầng dùng chung như VPN, email, SSO, Wi-Fi hoặc printing. Không dùng để chẩn đoán một thiết bị cá nhân. Nếu người dùng nêu môi trường không khớp rõ production hoặc staging thì dùng clarify."
     parameters:
       type: object
       properties:
@@ -36,8 +41,9 @@ tools:
         environment: {type: string, enum: [production, staging], default: "production", description: "Môi trường"}
       required: [service]
 
+  # v1 change: require an explicit asset ID instead of guessing one.
   - name: inspect_device
-    description: "Kiểm tra thông tin và chẩn đoán thiết bị."
+    description: "Kiểm tra thông tin và chẩn đoán một thiết bị cụ thể. Chỉ gọi khi đã có Asset ID rõ ràng; nếu thiếu hoặc mơ hồ thì dùng clarify."
     parameters:
       type: object
       properties:
@@ -45,8 +51,9 @@ tools:
         check: {type: string, enum: [all, network, vpn, security, hardware, software], default: "all", description: "Nhóm kiểm tra"}
       required: [asset_id]
 
+  # v1 change: require an explicit employee ID instead of guessing one.
   - name: lookup_user
-    description: "Tra cứu người dùng trong danh bạ hỗ trợ."
+    description: "Tra cứu một người dùng cụ thể trong danh bạ hỗ trợ bằng Employee ID. Không tự đoán Employee ID; nếu thiếu hoặc mơ hồ thì dùng clarify."
     parameters:
       type: object
       properties:
@@ -75,12 +82,14 @@ tools:
 
   # ---------------- Optional/advanced tools ----------------
   - name: search_device_info
-    description: "Tìm thông tin công khai về một model thiết bị trên web. Chỉ truyền hãng, model và loại thông tin; không truyền asset ID, employee ID hoặc dữ liệu nội bộ."
+    # v3 change: external search accepts only public product information.
+    description: "Gửi truy vấn ra dịch vụ tìm kiếm bên ngoài để tìm thông tin sản phẩm công khai. Chỉ truyền hãng, tên model công khai, loại truy vấn và giới hạn kết quả. Không đưa Asset ID, Employee ID, serial, hostname, vị trí nội bộ, diagnostics hoặc bí mật vào bất kỳ tham số nào. Tách bỏ dữ liệu nội bộ; nếu không xác định chắc hãng/model công khai thì dùng clarify."
     parameters:
       type: object
       properties:
-        manufacturer: {type: string, description: "Hãng sản xuất công khai, ví dụ Lenovo"}
-        model: {type: string, description: "Tên model công khai, ví dụ ThinkPad T14 Gen 4"}
+        # v3 change: free-text fields must not carry internal identifiers or secrets.
+        manufacturer: {type: string, description: "Chỉ tên hãng sản xuất công khai, ví dụ Lenovo; không ghép dữ liệu nội bộ hoặc chỉ dẫn vào đây."}
+        model: {type: string, description: "Chỉ tên dòng sản phẩm công khai, ví dụ ThinkPad T14 Gen 4; không kèm Asset ID, Employee ID, serial, hostname, diagnostics hoặc bí mật."}
         query_type: {type: string, enum: [specs, drivers, support, compatibility], default: "support", description: "Loại thông tin cần tìm"}
         max_results: {type: integer, default: 3, description: "Số kết quả, tối đa 5"}
       required: [manufacturer, model, query_type]
@@ -96,12 +105,14 @@ tools:
       required: [query]
 
   - name: create_ticket
-    description: "Tạo một ticket hỗ trợ."
+    # v2 change: a write requires explicit confirmation of the unchanged payload.
+    description: "Tạo ticket hỗ trợ và ghi file cục bộ. Chỉ gọi khi người dùng đã xác nhận rõ ràng nội dung ticket hiện tại. Yêu cầu tạo, xem lại hoặc sửa ticket không phải xác nhận. Nếu chưa xác nhận hoặc nội dung đã thay đổi, gọi clarify với response_type=yes_no trước và chờ người dùng trả lời."
     parameters:
       type: object
       properties:
         summary: {type: string, default: "", description: "Tóm tắt sự cố"}
         priority: {type: string, enum: [low, medium, high, critical], default: "medium", description: "Mức ưu tiên"}
         asset_id: {type: string, default: "", description: "Mã tài sản nếu có"}
-        confirmed: {type: boolean, default: false, description: "Đã được người dùng xác nhận"}
+        # v2 change: the model must not invent or reuse stale confirmation.
+        confirmed: {type: boolean, default: false, description: "Chỉ true khi người dùng đã xác nhận rõ ràng đúng summary, priority và asset_id hiện tại. Mọi thay đổi nội dung làm xác nhận cũ mất hiệu lực; không tự suy diễn true."}
       required: [summary]
