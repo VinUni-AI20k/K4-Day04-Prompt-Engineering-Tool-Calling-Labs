@@ -77,6 +77,7 @@ routing accuracy.
 | `format_incident_report` | Local formatter | Không | Không |
 | `policy` | Local knowledge | `company_policy/*.md` | Không |
 | `create_ticket` | Local write action | Ghi vào `starter_v0/tickets/` | Không |
+| `lookup_ticket_status` | Local read-only | `helpdesk_data/ticket_status.json` | Không |
 | `search_device_info` | External search | Tavily Search API | `TAVILY_API_KEY` |
 
 ## 5. Local tools
@@ -139,6 +140,15 @@ python -c "from tools import TOOL_FUNCTIONS as T; r=T['policy']('dữ liệu nà
 ```
 
 PASS khi trả policy section có source metadata và trust boundary.
+
+### `lookup_ticket_status`
+
+```powershell
+python tools\lookup_ticket_status\smoke_test.py
+```
+
+PASS khi tra cứu đúng ticket giả lập, chuẩn hóa ID hợp lệ, từ chối ID sai định
+dạng và không thay đổi fixture nguồn.
 
 ## 6. Action tool: `create_ticket`
 
@@ -232,25 +242,35 @@ Adversarial:
 python run_eval.py --provider openrouter --version v3 --suite adversarial --eval-cases data/eval_adversarial.json
 ```
 
-Extension có thể gọi Tavily và tạo ticket local ở confirmed-action cases. Kiểm
-tra `.env`, quota và `tickets/` trước/sau khi chạy.
+Eval có thể gọi Tavily khi extension yêu cầu external search.
+Mọi ticket do eval tạo được chuyển vào thư mục tạm và tự dọn khi run kết thúc.
 
 ## 10. UI dependencies
 
-Starter không cung cấp UI implementation. Nếu chọn Streamlit:
+Operations Console dùng FastAPI và Uvicorn, đã được khai báo trong
+`requirements.txt`.
 
-```powershell
-python -m pip install "streamlit>=1.30.0"
+Khởi động từ thư mục `starter_v0/`:
+
+```bash
+python -m uvicorn ui_app:app --reload
 ```
 
-Thêm cùng version constraint vào `requirements.txt`, sau đó chạy:
+Mở `http://127.0.0.1:8000` trong browser.
+Console gọi lại `run_model_tool_loop` từ `chat.py` và stream từng round cùng
+tool event qua HTTP.
+API key provider vẫn phải có trong `.env`.
 
-```powershell
-streamlit run app.py
+Tạo lại năm transcript rehearsal bằng provider thật:
+
+```bash
+python scripts/rehearse_demo.py --provider openai --version v3
 ```
 
-UI nên tái sử dụng `run_model_tool_loop` từ `chat.py` để CLI, eval evidence và UI
-không dùng các agent loop khác nhau.
+Script ghi evidence vào `evidence/transcripts/` và cô lập confirmed ticket trong thư mục tạm.
+Trong UI, chọn một mục dưới `SAVED EVIDENCE` để phát lại transcript.
+Header phải hiển thị `PLAYBACK` và `Saved evidence` trong toàn bộ thời gian phát lại.
+
 
 ## 11. Troubleshooting
 

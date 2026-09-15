@@ -1,0 +1,41 @@
+{
+  "snapshot_at": "2026-09-14T09:00:00+07:00",
+  "tickets": [
+    {
+      "ticket_id": "LAB-A1B2C3D4",
+      "status": "open",
+      "priority": "high",
+      "summary": "VPN authentication failures on a managed laptop",
+      "asset_id": "LT-204",
+      "created_at": "2026-09-14T08:10:00+07:00",
+      "updated_at": "2026-09-14T08:45:00+07:00"
+    },
+    {
+      "ticket_id": "LAB-B2C3D4E5",
+      "status": "in_progress",
+      "priority": "medium",
+      "summary": "Corporate Wi-Fi connection is unavailable",
+      "asset_id": "LT-240",
+      "created_at": "2026-09-13T15:20:00+07:00",
+      "updated_at": "2026-09-14T08:30:00+07:00"
+    },
+    {
+      "ticket_id": "LAB-C3D4E5F6",
+      "status": "resolved",
+      "priority": "low",
+      "summary": "Outlook profile repair request",
+      "asset_id": "LT-318",
+      "created_at": "2026-09-12T10:00:00+07:00",
+      "updated_at": "2026-09-13T16:40:00+07:00"
+    },
+    {
+      "ticket_id": "LAB-D4E5F6A7",
+      "status": "closed",
+      "priority": "medium",
+      "summary": "Printer queue stopped processing jobs",
+      "asset_id": "PR-404",
+      "created_at": "2026-09-10T09:15:00+07:00",
+      "updated_at": "2026-09-11T14:05:00+07:00"
+    }
+  ]
+}

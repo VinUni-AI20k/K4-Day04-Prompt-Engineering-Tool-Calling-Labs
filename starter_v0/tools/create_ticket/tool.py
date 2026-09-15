@@ -67,6 +67,8 @@ def create_ticket(
         TICKET_DIR.mkdir(parents=True, exist_ok=True)
         path = TICKET_DIR / f"{ticket_id}.json"
         path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
-        return {"tool": "create_ticket", "status": "created", "ticket_id": ticket_id, "path": str(path)}
+        default_ticket_dir = (ROOT / "tickets").resolve()
+        path_label = f"tickets/{path.name}" if TICKET_DIR.resolve() == default_ticket_dir else f"isolated_ticket/{path.name}"
+        return {"tool": "create_ticket", "status": "created", "ticket_id": ticket_id, "path": path_label}
     except Exception as exc:
         return err("create_ticket", exc)

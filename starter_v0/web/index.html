@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Northstar Helpdesk</title>
+  <link rel="stylesheet" href="/assets/styles.css">
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="Northstar Helpdesk home"><span class="brand-mark">N</span><span>Northstar<span class="brand-light"> / Helpdesk</span></span></a>
+      <div class="top-status"><span class="pulse"></span><span id="connectionLabel">Đang kiểm tra kết nối</span><span class="dot-separator"></span><span id="modelLabel">OpenAI</span></div>
+      <details class="artifact-toggle">
+        <summary id="artifactLabel">Artifact</summary>
+        <div class="artifact-popover"><span>PROMPT <code id="promptHash">...</code></span><span>TOOLS <code id="toolsHash">...</code></span></div>
+      </details>
+      <button class="reset-button" id="resetButton" type="button">New conversation <span>↗</span></button>
+    </header>
+
+    <section class="hero">
+      <div><p class="eyebrow">AGENT OPERATIONS CONSOLE</p><h1>See every decision.<br><em>Trust every outcome.</em></h1></div>
+      <div class="hero-note"><span class="note-icon">✦</span><p>Live tool calls, grounded answers and full execution evidence in one calm workspace.</p></div>
+    </section>
+
+    <section class="workspace">
+      <aside class="left-rail">
+        <div class="section-heading"><span>DEMO SCENARIOS</span><span class="count">05</span></div>
+        <div class="scenario-list" id="scenarioList"></div>
+        <div class="section-heading evidence-heading"><span>SAVED EVIDENCE</span><span class="count">PLAYBACK</span></div>
+        <div class="scenario-list" id="rehearsalList"></div>
+        <div class="rail-footer"><span class="green-dot"></span><span>All local tools ready</span></div>
+      </aside>
+
+      <section class="chat-panel">
+        <div class="panel-header"><div><p class="eyebrow">CONVERSATION</p><h2>Helpdesk workspace</h2></div><div class="conversation-status"><span class="trace-count" id="traceCount">Ready</span><span class="live-pill" id="livePill">LIVE</span></div></div>
+        <div class="messages" id="messages">
+          <div class="welcome"><div class="welcome-icon">✦</div><h3>Ready when you are.</h3><p>Ask about services, devices, users, policy or tickets.<br>Every action will appear in this conversation as it happens.</p></div>
+        </div>
+        <form class="composer" id="composer"><textarea id="messageInput" rows="1" placeholder="Ask Northstar Helpdesk anything…" aria-label="Message Northstar Helpdesk"></textarea><button type="submit" id="sendButton" aria-label="Send message">↑</button></form>
+        <p class="composer-note">Enter to send <span>·</span> Shift + Enter for a new line</p>
+      </section>
+
+    </section>
+  </main>
+  <template id="traceTemplate"><article class="trace-card"><div class="trace-meta"><span class="trace-round"></span><span class="trace-state"></span></div><div class="trace-body"></div></article></template>
+  <script src="/assets/app.js"></script>
+</body>
+</html>
