@@ -176,4 +176,15 @@ Xem [TOOL-SETUP.md](TOOL-SETUP.md) để cài môi trường và kiểm tra từ
 Xem [LAB-GUIDE.md](LAB-GUIDE.md) để tham khảo một quy trình làm bài gợi ý.
 Xem [SUBMISSION-GUIDE.md](SUBMISSION-GUIDE.md) để xem hướng dẫn cách nộp bài lab
 
+## Live chat UI
+
+Sau khi cài requirements và cấu hình provider key, chạy UI từ `starter_v0/`:
+
+```powershell
+streamlit run app.py
+```
+
+UI dùng trực tiếp `run_model_tool_loop` trong `chat.py`, hiển thị artifact hash,
+tool arguments, result/error, status và lưu transcript vào `transcripts/`.
+
 Không nộp `.env`, API key, `.venv`, cache, generated tickets hoặc dữ liệu thật.
