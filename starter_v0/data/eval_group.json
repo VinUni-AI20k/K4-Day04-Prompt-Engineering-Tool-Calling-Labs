@@ -1,7 +1,101 @@
 {
   "dataset_id": "day04_v3_helpdesk_group",
   "dataset_role": "group",
-  "description": "Template intentionally left empty. The team must write exactly 10 original IT helpdesk cases: 5 single-turn query cases and 5 multi-turn turns cases.",
+  "description": "Ten original team-authored IT helpdesk cases: five single-turn and five multi-turn cases covering clarification, ambiguous intent, refusal, correction, cancellation, and inspect-to-report chaining.",
   "allowed_failure_types": ["wrong_tool", "wrong_arg_value", "wrong_boundary", "unnecessary_tool", "out_of_scope", "missing_info"],
-  "cases": []
+  "cases": [
+    {
+      "id": "G01_missing_asset_clarify", "phase": "B", "suite": "group",
+      "query": "Wi-Fi ở chỗ mình chập chờn, kiểm tra giúp trên laptop của mình nhé; mình đang ở tầng 4.",
+      "failure_type": "missing_info",
+      "expect": {"tool_calls": [{"name": "clarify", "args": {"response_type": "text"}}]},
+      "metadata": {"skill": "missing_asset_clarify", "difficulty": "medium", "what_it_tests": "Location và loại thiết bị không thay thế asset ID; agent phải hỏi mã máy."}
+    },
+    {
+      "id": "G02_ambiguous_policy_status", "phase": "B", "suite": "group",
+      "query": "Email production đang chậm; mình nên xem tình trạng dịch vụ hay quy định xử lý trước?",
+      "failure_type": "missing_info",
+      "expect": {"tool_calls": [{"name": "clarify", "args": {"response_type": "choice"}}]},
+      "metadata": {"skill": "ambiguous_policy_or_status", "difficulty": "hard", "what_it_tests": "Cô lập nhánh lựa chọn giữa policy và live status thay vì tự chọn một tool."}
+    },
+    {
+      "id": "G03_out_of_scope_refuse", "phase": "B", "suite": "group",
+      "query": "Tài khoản Facebook cá nhân của mình bị khóa, hãy dùng các tool helpdesk để mở khóa giúp.",
+      "failure_type": "out_of_scope",
+      "expect": {"no_tool": true, "behavior": "refuse"},
+      "metadata": {"skill": "out_of_scope_refusal", "difficulty": "medium", "what_it_tests": "Yêu cầu có yếu tố tài khoản nhưng không thuộc Northstar IT helpdesk phải bị từ chối."}
+    },
+    {
+      "id": "G04_shared_service_status", "phase": "B", "suite": "group",
+      "query": "Nhiều người ở tầng 4 không vào được Wi-Fi công ty; kiểm tra trạng thái Wi-Fi production giúp mình.",
+      "failure_type": "wrong_tool",
+      "expect": {"tool_calls": [{"name": "check_service_status", "args": {"service": "wifi", "environment": "production"}}]},
+      "metadata": {"skill": "shared_service_routing", "difficulty": "medium", "what_it_tests": "Ảnh hưởng nhiều người và environment rõ phải dùng shared status, không inspect một máy."}
+    },
+    {
+      "id": "G05_ambiguous_environment_clarify", "phase": "B", "suite": "group",
+      "query": "Email của team QA ở môi trường test đang lỗi, kiểm tra giúp mình.",
+      "failure_type": "missing_info",
+      "expect": {"tool_calls": [{"name": "clarify", "args": {"response_type": "choice"}}]},
+      "metadata": {"skill": "unsupported_environment", "difficulty": "hard", "what_it_tests": "test/QA không được tự ánh xạ sang production hoặc staging; phải hỏi enum hợp lệ."}
+    },
+    {
+      "id": "G06_missing_asset_then_provided", "phase": "B", "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Kiểm tra network trên máy của tôi."},
+        {"role": "assistant", "content": "Bạn cho mình mã asset cụ thể của thiết bị nhé."},
+        {"role": "user", "content": "Mã máy là LT-411. Chỉ kiểm tra network."}
+      ],
+      "failure_type": "missing_info",
+      "expect": {"tool_calls": [{"name": "inspect_device", "args": {"asset_id": "LT-411", "check": "network"}}]},
+      "metadata": {"skill": "clarify_then_device", "difficulty": "hard", "what_it_tests": "Carry asset ID sau khi clarify và giữ diagnostic group mới nhất."}
+    },
+    {
+      "id": "G07_correction_turn2", "phase": "B", "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Kiểm tra security trên LT-204."},
+        {"role": "user", "content": "Sửa lại, mã đúng là LT-240; vẫn kiểm tra security."},
+        {"role": "user", "content": "Dùng mã đã sửa ở lượt trước."}
+      ],
+      "failure_type": "wrong_arg_value",
+      "expect": {"tool_calls": [{"name": "inspect_device", "args": {"asset_id": "LT-240", "check": "security"}}]},
+      "metadata": {"skill": "latest_correction_wins", "difficulty": "hard", "what_it_tests": "Correction ở turn sau thay thế asset ID cũ, không dùng stale context."}
+    },
+    {
+      "id": "G08_cancellation_turn2", "phase": "B", "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Tạo ticket lỗi máy in PR-404 mức low."},
+        {"role": "user", "content": "Thôi, hủy yêu cầu và không tạo ticket."},
+        {"role": "user", "content": "Chỉ xác nhận đã hủy, không gọi tool."}
+      ],
+      "failure_type": "unnecessary_tool",
+      "expect": {"no_tool": true, "behavior": "answer_without_tool"},
+      "metadata": {"skill": "action_cancellation", "difficulty": "hard", "what_it_tests": "Cancellation mới nhất phải thắng action request trước đó."}
+    },
+    {
+      "id": "G09_inspect_then_format", "phase": "B", "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Mình đang xử lý sự cố phần cứng trên LT-240."},
+        {"role": "assistant", "content": "Mình sẽ kiểm tra snapshot phần cứng rồi lập báo cáo bàn giao."},
+        {"role": "user", "content": "Hãy kiểm tra hardware trên LT-240, sau đó format findings thành handoff report tên 'LT-240 hardware handoff'."}
+      ],
+      "failure_type": "wrong_tool",
+      "expect": {"tool_calls": [
+        {"name": "inspect_device", "args": {"asset_id": "LT-240", "check": "hardware"}},
+        {"name": "format_incident_report", "args": {"template": "handoff", "incident_title": "LT-240 hardware handoff"}}
+      ]},
+      "metadata": {"skill": "inspect_to_report_chain", "difficulty": "hard", "what_it_tests": "Request rõ ràng cần cả inspect và format, không bỏ hoặc thêm tool không liên quan."}
+    },
+    {
+      "id": "G10_context_service_switch", "phase": "B", "suite": "group",
+      "turns": [
+        {"role": "user", "content": "Printing production có đang lỗi không?"},
+        {"role": "user", "content": "Đổi sang Wi-Fi, vẫn kiểm tra production."},
+        {"role": "user", "content": "Chỉ kiểm tra Wi-Fi production ở lượt này."}
+      ],
+      "failure_type": "wrong_arg_value",
+      "expect": {"tool_calls": [{"name": "check_service_status", "args": {"service": "wifi", "environment": "production"}}]},
+      "metadata": {"skill": "context_service_correction", "difficulty": "hard", "what_it_tests": "Giữ environment hợp lệ nhưng thay service theo intent mới nhất."}
+    }
+  ]
 }

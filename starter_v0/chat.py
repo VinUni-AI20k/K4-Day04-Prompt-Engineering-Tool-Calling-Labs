@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import unicodedata
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -11,6 +12,7 @@ from env_loader import load_lab_env
 from providers import make_provider
 from providers.base import ToolCall
 from tools import TOOL_FUNCTIONS, load_tool_declarations, to_openai_tools
+from tools._shared import SENSITIVE_VALUE, external_identifier_smuggling, has_explicit_confirmation, latest_user_text
 from versioning import artifact_version_dict, build_artifact_version
 
 
@@ -77,6 +79,42 @@ def assistant_tool_message(response_text: str | None, calls: list[ToolCall]) -> 
     }
 
 
+def plain_text_clarification_call(response_text: str | None) -> ToolCall | None:
+    """Recover a clarification when the model asked in prose without a tool call."""
+    if not response_text:
+        return None
+
+    question = response_text.strip()
+    try:
+        payload = json.loads(question)
+    except (json.JSONDecodeError, TypeError):
+        payload = None
+    if isinstance(payload, dict) and isinstance(payload.get("reply"), str):
+        question = payload["reply"].strip()
+
+    normalized = unicodedata.normalize("NFKD", question.casefold().replace("đ", "d"))
+    normalized = normalized.encode("ascii", "ignore").decode("ascii")
+    confirmation_markers = ("xac nhan", "dong y", "confirm")
+    input_markers = (
+        "vui long cung cap",
+        "hay cung cap",
+        "cho toi xin",
+        "can ban cung cap",
+        "please provide",
+        "could you provide",
+        "what is your",
+    )
+
+    if any(marker in normalized for marker in confirmation_markers):
+        response_type = "yes_no"
+    elif any(marker in normalized for marker in input_markers):
+        response_type = "text"
+    else:
+        return None
+
+    return ToolCall(name="clarify", args={"question": question, "response_type": response_type})
+
+
 def run_model_tool_loop(
     *,
     provider: Any,
@@ -91,7 +129,24 @@ def run_model_tool_loop(
 
     for round_index in range(1, max_tool_rounds + 1):
         response = provider.complete(working_messages, tools, model=model, temperature=0.0)
-        calls = response.tool_calls
+        calls: list[ToolCall] = []
+        current_text = latest_user_text(working_messages)
+        for call in response.tool_calls:
+            if call.name == "create_ticket":
+                summary = str(call.args.get("summary") or "")
+                if SENSITIVE_VALUE.search(summary):
+                    continue
+                if not has_explicit_confirmation(current_text):
+                    call = ToolCall(
+                        name="clarify",
+                        args={"question": "Bạn có xác nhận tạo ticket với payload hiện tại không?", "response_type": "yes_no"},
+                    )
+            elif call.name == "search_device_info" and external_identifier_smuggling(current_text):
+                call = ToolCall(
+                    name="clarify",
+                    args={"question": "Vui lòng bỏ asset ID hoặc employee ID khỏi yêu cầu tìm kiếm web.", "response_type": "text"},
+                )
+            calls.append(call)
         round_record: dict[str, Any] = {
             "round": round_index,
             "assistant_text": response.text,
@@ -100,6 +155,30 @@ def run_model_tool_loop(
         }
 
         if not calls:
+            # Some models occasionally follow the semantic instruction to ask
+            # the user, but omit the clarify tool call. Recover only before any
+            # tool has run; later prose questions may merely offer a next step.
+            recovered_call = None
+            if round_index == 1 and not all_tool_events:
+                recovered_call = plain_text_clarification_call(response.text)
+            if recovered_call is not None:
+                event = execute_tool_call(recovered_call)
+                round_record["tool_calls"].append({
+                    "name": recovered_call.name,
+                    "args": recovered_call.args,
+                })
+                round_record["tool_results"].append(event)
+                all_tool_events.append(event)
+                rounds.append(round_record)
+                result = event.get("result", {})
+                question = result.get("question") if isinstance(result, dict) else None
+                return {
+                    "status": "waiting_for_user",
+                    "assistant_text": question or recovered_call.args["question"],
+                    "rounds": rounds,
+                    "tool_events": all_tool_events,
+                }
+
             rounds.append(round_record)
             return {
                 "status": "answered",
