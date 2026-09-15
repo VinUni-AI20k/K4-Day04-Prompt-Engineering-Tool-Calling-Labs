@@ -1,0 +1,65 @@
+{
+  "snapshot_at": "2026-09-14T09:00:00+07:00",
+  "tickets": [
+    {
+      "ticket_id": "LAB-B4A1C802",
+      "summary": "VPN connection timeout during handshake on macOS",
+      "priority": "high",
+      "status": "in_progress",
+      "asset_id": "LT-318",
+      "requester_id": "EMP-1005",
+      "assignee_id": "EMP-1004",
+      "created_at": "2026-09-13T14:20:00+07:00",
+      "updated_at": "2026-09-14T08:30:00+07:00",
+      "notes": "Network team inspected gateway logs; client cert renewal required."
+    },
+    {
+      "ticket_id": "LAB-A12F3490",
+      "summary": "External monitor flickering when connected to dock",
+      "priority": "low",
+      "status": "open",
+      "asset_id": "DT-087",
+      "requester_id": "EMP-1007",
+      "assignee_id": "EMP-1009",
+      "created_at": "2026-09-14T08:15:00+07:00",
+      "updated_at": "2026-09-14T08:15:00+07:00",
+      "notes": "Dispatched replacement Thunderbolt 4 cable to Bangkok office."
+    },
+    {
+      "ticket_id": "LAB-C98D71E4",
+      "summary": "Outlook desktop client asks for credential repeatedly",
+      "priority": "medium",
+      "status": "resolved",
+      "asset_id": "LT-204",
+      "requester_id": "EMP-1001",
+      "assignee_id": "EMP-1006",
+      "created_at": "2026-09-12T10:00:00+07:00",
+      "updated_at": "2026-09-13T16:45:00+07:00",
+      "notes": "Cleared credential manager cache and re-enrolled MFA session. User verified working."
+    },
+    {
+      "ticket_id": "LAB-F012E8B9",
+      "summary": "Wi-Fi 802.1x authentication failure on mobile device",
+      "priority": "critical",
+      "status": "closed",
+      "asset_id": null,
+      "requester_id": "EMP-1008",
+      "assignee_id": "EMP-1004",
+      "created_at": "2026-09-11T09:30:00+07:00",
+      "updated_at": "2026-09-11T11:00:00+07:00",
+      "notes": "Re-issued root CA profile to mobile device. Ticket closed after verification."
+    },
+    {
+      "ticket_id": "INC-1001",
+      "summary": "Floor 3 printer PR-512 paper feed sensor error",
+      "priority": "medium",
+      "status": "in_progress",
+      "asset_id": "PR-512",
+      "requester_id": "EMP-1003",
+      "assignee_id": "EMP-1009",
+      "created_at": "2026-09-14T07:45:00+07:00",
+      "updated_at": "2026-09-14T08:50:00+07:00",
+      "notes": "Technician on site inspecting roller assembly."
+    }
+  ]
+}

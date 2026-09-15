@@ -1,8 +1,15 @@
 {
   "dataset_id": "day04_v3_helpdesk_group",
   "dataset_role": "group",
-  "description": "Ten original team-authored IT helpdesk cases: 5 single-turn query cases and 5 multi-turn turns cases.",
-  "allowed_failure_types": ["wrong_tool", "wrong_arg_value", "wrong_boundary", "unnecessary_tool", "out_of_scope", "missing_info"],
+  "description": "Ten original team-authored IT helpdesk cases: 5 single-turn query cases and 5 multi-turn cases.",
+  "allowed_failure_types": [
+    "wrong_tool",
+    "wrong_arg_value",
+    "wrong_boundary",
+    "unnecessary_tool",
+    "out_of_scope",
+    "missing_info"
+  ],
   "cases": [
     {
       "id": "G01_meeting_room_kb",
@@ -10,8 +17,22 @@
       "suite": "group",
       "query": "Tìm hướng dẫn xử lý lỗi âm thanh trong phòng họp, chỉ lấy tối đa 2 kết quả.",
       "failure_type": "wrong_arg_value",
-      "expect": {"tool_calls": [{"name": "search_kb", "args": {"category": "meeting_room", "top_k": 2}}]},
-      "metadata": {"skill": "kb_category_and_limit", "difficulty": "medium", "what_it_tests": "Phân biệt sự cố phòng họp với audio trên thiết bị cá nhân và truyền đúng giới hạn kết quả."}
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "search_kb",
+            "args": {
+              "category": "meeting_room",
+              "top_k": 2
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "kb_category_and_limit",
+        "difficulty": "medium",
+        "what_it_tests": "Phân biệt sự cố phòng họp với audio trên thiết bị cá nhân và truyền đúng giới hạn kết quả."
+      }
     },
     {
       "id": "G02_staging_printing_status",
@@ -19,8 +40,22 @@
       "suite": "group",
       "query": "Dịch vụ in ở staging hiện có đang gián đoạn không?",
       "failure_type": "wrong_arg_value",
-      "expect": {"tool_calls": [{"name": "check_service_status", "args": {"service": "printing", "environment": "staging"}}]},
-      "metadata": {"skill": "service_and_environment", "difficulty": "medium", "what_it_tests": "Trích đúng printing và giữ staging thay vì dùng production mặc định."}
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "check_service_status",
+            "args": {
+              "service": "printing",
+              "environment": "staging"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "service_and_environment",
+        "difficulty": "medium",
+        "what_it_tests": "Trích đúng printing và giữ staging thay vì dùng production mặc định."
+      }
     },
     {
       "id": "G03_external_tools_policy",
@@ -28,8 +63,21 @@
       "suite": "group",
       "query": "Theo chính sách nội bộ, nhân viên có được tải log chẩn đoán lên một công cụ AI bên ngoài không?",
       "failure_type": "wrong_tool",
-      "expect": {"tool_calls": [{"name": "policy", "args": {"policy_area": "external_tools"}}]},
-      "metadata": {"skill": "external_tools_policy", "difficulty": "medium", "what_it_tests": "Câu hỏi về việc dùng công cụ bên ngoài phải tra policy, không gọi search web hoặc inspect device."}
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "policy",
+            "args": {
+              "policy_area": "external_tools"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "external_tools_policy",
+        "difficulty": "medium",
+        "what_it_tests": "Câu hỏi về việc dùng công cụ bên ngoài phải tra policy, không gọi search web hoặc inspect device."
+      }
     },
     {
       "id": "G04_public_compatibility_search",
@@ -37,8 +85,24 @@
       "suite": "group",
       "query": "Tìm thông tin tương thích docking station chính hãng cho Dell Latitude 7440, tối đa 5 kết quả.",
       "failure_type": "wrong_arg_value",
-      "expect": {"tool_calls": [{"name": "search_device_info", "args": {"manufacturer": "Dell", "model": "Latitude 7440", "query_type": "compatibility", "max_results": 5}}]},
-      "metadata": {"skill": "public_model_compatibility", "difficulty": "hard", "what_it_tests": "Dùng external search cho model công khai và chọn đúng query_type compatibility cùng giới hạn tối đa."}
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "search_device_info",
+            "args": {
+              "manufacturer": "Dell",
+              "model": "Latitude 7440",
+              "query_type": "compatibility",
+              "max_results": 5
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "public_model_compatibility",
+        "difficulty": "hard",
+        "what_it_tests": "Dùng external search cho model công khai và chọn đúng query_type compatibility cùng giới hạn tối đa."
+      }
     },
     {
       "id": "G05_format_brief_findings",
@@ -46,73 +110,195 @@
       "suite": "group",
       "query": "Đã có findings: PR-512 queue stuck, printer reachable=false. Chỉ trình bày thành báo cáo ngắn tên 'PR-512 printing'; không kiểm tra lại.",
       "failure_type": "unnecessary_tool",
-      "expect": {"tool_calls": [{"name": "format_incident_report", "args": {"template": "brief", "incident_title": "PR-512 printing"}}]},
-      "metadata": {"skill": "format_existing_findings", "difficulty": "medium", "what_it_tests": "Yêu cầu format-only phải bỏ qua các tool thu thập dữ liệu và chọn brief template."}
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "format_incident_report",
+            "args": {
+              "template": "brief",
+              "incident_title": "PR-512 printing"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "format_existing_findings",
+        "difficulty": "medium",
+        "what_it_tests": "Yêu cầu format-only phải bỏ qua các tool thu thập dữ liệu và chọn brief template."
+      }
     },
     {
       "id": "G06_clarify_then_staging_status",
       "phase": "B",
       "suite": "group",
       "turns": [
-        {"role": "user", "content": "Kiểm tra Wi-Fi ở môi trường test giúp mình."},
-        {"role": "user", "content": "Ý mình là môi trường staging."},
-        {"role": "user", "content": "Chỉ cần trạng thái dịch vụ Wi-Fi."}
+        {
+          "role": "user",
+          "content": "Kiểm tra Wi-Fi ở môi trường test giúp mình."
+        },
+        {
+          "role": "user",
+          "content": "Ý mình là môi trường staging."
+        },
+        {
+          "role": "user",
+          "content": "Chỉ cần trạng thái dịch vụ Wi-Fi."
+        }
       ],
       "failure_type": "missing_info",
-      "expect": {"tool_calls": [{"name": "check_service_status", "args": {"service": "wifi", "environment": "staging"}}]},
-      "metadata": {"skill": "multiturn_resolve_environment", "difficulty": "hard", "what_it_tests": "Không tự map test thành enum; sau khi người dùng làm rõ phải dùng status tool với staging."}
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "check_service_status",
+            "args": {
+              "service": "wifi",
+              "environment": "staging"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "multiturn_resolve_environment",
+        "difficulty": "hard",
+        "what_it_tests": "Không tự map test thành enum; sau khi người dùng làm rõ phải dùng status tool với staging."
+      }
     },
     {
       "id": "G07_latest_narrower_directory_request",
       "phase": "B",
       "suite": "group",
       "turns": [
-        {"role": "user", "content": "Tra nhân viên EMP-1010 và xem luôn máy được cấp."},
-        {"role": "user", "content": "Thôi, mình chỉ cần thông tin trong danh bạ của nhân viên đó."},
-        {"role": "user", "content": "Không cần kiểm tra thiết bị."}
+        {
+          "role": "user",
+          "content": "Tra nhân viên EMP-1010 và xem luôn máy được cấp."
+        },
+        {
+          "role": "user",
+          "content": "Thôi, mình chỉ cần thông tin trong danh bạ của nhân viên đó."
+        },
+        {
+          "role": "user",
+          "content": "Không cần kiểm tra thiết bị."
+        }
       ],
       "failure_type": "unnecessary_tool",
-      "expect": {"tool_calls": [{"name": "lookup_user", "args": {"employee_id": "EMP-1010"}}]},
-      "metadata": {"skill": "multiturn_narrow_scope", "difficulty": "hard", "what_it_tests": "Intent mới loại bỏ device inspection; chỉ giữ directory lookup với employee ID đã nêu."}
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "lookup_user",
+            "args": {
+              "employee_id": "EMP-1010"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "multiturn_narrow_scope",
+        "difficulty": "hard",
+        "what_it_tests": "Intent mới loại bỏ device inspection; chỉ giữ directory lookup với employee ID đã nêu."
+      }
     },
     {
       "id": "G08_correct_public_model",
       "phase": "B",
       "suite": "group",
       "turns": [
-        {"role": "user", "content": "Tìm driver cho HP EliteBook 840 G9."},
-        {"role": "user", "content": "Xin lỗi, hãng đúng là Lenovo và model là ThinkPad X1 Carbon Gen 11."},
-        {"role": "user", "content": "Đổi nhu cầu thành thông tin compatibility cho model mới."}
+        {
+          "role": "user",
+          "content": "Tìm driver cho HP EliteBook 840 G9."
+        },
+        {
+          "role": "user",
+          "content": "Xin lỗi, hãng đúng là Lenovo và model là ThinkPad X1 Carbon Gen 11."
+        },
+        {
+          "role": "user",
+          "content": "Đổi nhu cầu thành thông tin compatibility cho model mới."
+        }
       ],
       "failure_type": "wrong_arg_value",
-      "expect": {"tool_calls": [{"name": "search_device_info", "args": {"manufacturer": "Lenovo", "model": "ThinkPad X1 Carbon Gen 11", "query_type": "compatibility"}}]},
-      "metadata": {"skill": "multiturn_external_correction", "difficulty": "hard", "what_it_tests": "Thông tin model và loại truy vấn được sửa ở các lượt sau phải thay thế toàn bộ giá trị cũ."}
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "search_device_info",
+            "args": {
+              "manufacturer": "Lenovo",
+              "model": "ThinkPad X1 Carbon Gen 11",
+              "query_type": "compatibility"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "multiturn_external_correction",
+        "difficulty": "hard",
+        "what_it_tests": "Thông tin model và loại truy vấn được sửa ở các lượt sau phải thay thế toàn bộ giá trị cũ."
+      }
     },
     {
       "id": "G09_revision_of_report_format",
       "phase": "B",
       "suite": "group",
       "turns": [
-        {"role": "user", "content": "Các finding đã thu thập: SSO timeout và account locked. Format thành brief report tên 'SSO access'."},
-        {"role": "user", "content": "Đổi tên thành 'SSO access review'."},
-        {"role": "user", "content": "Và dùng template technical, vẫn chỉ format các finding có sẵn."}
+        {
+          "role": "user",
+          "content": "Các finding đã thu thập: SSO timeout và account locked. Format thành brief report tên 'SSO access'."
+        },
+        {
+          "role": "user",
+          "content": "Đổi tên thành 'SSO access review'."
+        },
+        {
+          "role": "user",
+          "content": "Và dùng template technical, vẫn chỉ format các finding có sẵn."
+        }
       ],
       "failure_type": "wrong_arg_value",
-      "expect": {"tool_calls": [{"name": "format_incident_report", "args": {"template": "technical", "incident_title": "SSO access review"}}]},
-      "metadata": {"skill": "multiturn_report_revision", "difficulty": "hard", "what_it_tests": "Theo payload mới nhất của yêu cầu format và không gọi lại tool thu thập dữ liệu."}
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "format_incident_report",
+            "args": {
+              "template": "technical",
+              "incident_title": "SSO access review"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "skill": "multiturn_report_revision",
+        "difficulty": "hard",
+        "what_it_tests": "Theo payload mới nhất của yêu cầu format và không gọi lại tool thu thập dữ liệu."
+      }
     },
     {
       "id": "G10_cancel_kb_search",
       "phase": "B",
       "suite": "group",
       "turns": [
-        {"role": "user", "content": "Tìm hướng dẫn xử lý lỗi Outlook profile."},
-        {"role": "user", "content": "Dừng yêu cầu đó lại, không cần tìm nữa."},
-        {"role": "user", "content": "Chỉ xác nhận là đã hủy, không gọi tool."}
+        {
+          "role": "user",
+          "content": "Tìm hướng dẫn xử lý lỗi Outlook profile."
+        },
+        {
+          "role": "user",
+          "content": "Dừng yêu cầu đó lại, không cần tìm nữa."
+        },
+        {
+          "role": "user",
+          "content": "Chỉ xác nhận là đã hủy, không gọi tool."
+        }
       ],
       "failure_type": "unnecessary_tool",
-      "expect": {"no_tool": true, "behavior": "answer_without_tool"},
-      "metadata": {"skill": "multiturn_cancel_readonly", "difficulty": "medium", "what_it_tests": "Lệnh hủy mới nhất phải ngăn cả read-only search và clarify không cần thiết."}
+      "expect": {
+        "no_tool": true,
+        "behavior": "answer_without_tool"
+      },
+      "metadata": {
+        "skill": "multiturn_cancel_readonly",
+        "difficulty": "medium",
+        "what_it_tests": "Lệnh hủy mới nhất phải ngăn cả read-only search và clarify không cần thiết."
+      }
     }
   ]
 }

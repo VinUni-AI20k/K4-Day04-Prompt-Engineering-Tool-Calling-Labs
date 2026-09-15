@@ -17,7 +17,10 @@
 
 **Link dùng thử:**
 
-> URL:
+Run in command
+```
+chainlit run starter_v0\app.py
+```
 
 ## A2. Tool agent có
 
@@ -32,7 +35,9 @@
 | search_device_info | Tìm kiếm thông tin công khai (specs, drivers, compatibility) của model thiết bị trên web | optional built-in |
 | policy | Tra cứu quy định, chính sách IT nội bộ theo policy_area | optional built-in |
 | create_ticket | Tạo ticket hỗ trợ sự cố trên hệ thống Helpdesk khi đã được xác nhận | optional built-in |
-|  |  |  |
+| lookup_ticket | Tra cứu trạng thái, tiến độ và thông tin chi tiết của ticket hỗ trợ theo ticket_id | team-built bonus |
+| check_software_catalog | Tra cứu danh mục phần mềm được phê duyệt, cần duyệt hoặc bị cấm theo chính sách công ty | team-built bonus |
+
 
 ## A3. Câu hỏi mẫu
 
@@ -63,6 +68,7 @@ total_cases`, và tool result error đã được review thủ công.
 | v1 | Thêm core routing rules & safety boundaries trong system_prompt.md | Định hướng công cụ cốt lõi sẽ giảm sai sót sai tool routing | case_accuracy | 0.7778 | 0.8000 | runs/v1_B_base_gemini_20260914T191837462859.json |
 | v2 | Cập nhật required: [question, response_type] trong tools.yaml & làm rõ boundary | Bắt buộc tham số response_type trong schema giúp loại bỏ lỗi missing_info | case_accuracy | 0.8000 | 0.9630 | runs/v2_B_base_gemini_20260914T192800458124.json |
 | v3 | Bổ sung required: [query, policy_area] cho policy, hoàn thiện ranh giới pseudo-code, payload revision và 3-source triage | Bắt buộc policy_area và chuẩn hóa quy tắc xác nhận giúp đạt độ chính xác tuyệt đối trên cả 4 bộ test | case_accuracy | 0.9630 | 1.0000 | runs/v1_B_base_gemini_20260915T003406590299.json |
+| v4 | Tích hợp 2 bonus tools (`lookup_ticket`, `check_software_catalog`) vào tools.yaml, system_prompt.md và thêm bộ test data/eval_bonus.json | Mở rộng tính năng tra cứu ticket và danh mục phần mềm công ty với 100% độ chính xác routing/argument | case_accuracy | 1.0000 | 1.0000 | runs/v4_B_bonus_gemini_20260915T043121045224.json |
 
 ## B2. Failure analysis
 
@@ -128,7 +134,19 @@ nhóm tự xây.
 |---|---|---|---|
 | Optional built-in | data/eval_helpdesk_extension.json (E01-E04, E06) | Route chính xác theo 6 danh mục policy_area (access_control, data_privacy, external_tools, incident_response, service_operations, ticketing). | Thêm policy_area vào required trong tools.yaml để đảm bảo tham số không bị rỗng. |
 | External search + privacy boundary | data/eval_helpdesk_extension.json (E09, E10), data/eval_adversarial.json (A06) | Đã bóc tách thông tin công khai (manufacturer, model) để tìm kiếm specs/drivers trên web. | Nghiêm cấm đưa asset_id, employee_id, vị trí hoặc log chẩn đoán nội bộ vào tham số tìm kiếm ngoài. |
-| Bonus: tool mới do nhóm tự xây | N/A | Dùng các optional tool built-in có sẵn trong hệ thống | Phân định ranh giới an toàn cho tất cả công cụ |
+| Bonus: tool mới do nhóm tự xây | `tests/test_tools.py`, `data/eval_bonus.json`, `runs/v4_B_bonus_gemini_20260915T043121045224.json` | Triển khai hoàn chỉnh 2 bonus tools: `lookup_ticket` (tra cứu trạng thái ticket) và `check_software_catalog` (tra cứu catalog phần mềm). Đạt 17/17 automated unit tests và 4/4 LLM Eval cases (100% accuracy). | Hoàn toàn read-only (`side_effect: false`); validate chặt chẽ format `ticket_id`, chống path traversal, phân định rõ ràng với `create_ticket` và `search_device_info`. |
+
+### Chi tiết các test cases đánh giá bonus tools (`data/eval_bonus.json`):
+
+| Case ID | Type | Query / Flow | Tool Call & Arguments kỳ vọng | Kết quả Eval |
+|---|---|---|---|---|
+| `B01_lookup_ticket_status` | Single-turn | "Kiểm tra tiến độ và trạng thái của ticket LAB-B4A1C802 giúp tôi." | `lookup_ticket(ticket_id="LAB-B4A1C802")` | **PASS** |
+| `B02_software_catalog_platform` | Single-turn | "Kiểm tra xem Docker Desktop có được phép cài đặt trên laptop macOS của công ty không?" | `check_software_catalog(software_name="Docker Desktop", platform="macos")` | **PASS** |
+| `B03_software_catalog_compliance` | Single-turn | "Phần mềm BitTorrent có được phép sử dụng trong mạng nội bộ công ty không?" | `check_software_catalog(software_name="BitTorrent")` | **PASS** |
+| `B04_multiturn_ticket_tracking` | Multi-turn | 3 lượt hội thoại hỏi tiến độ sự cố mạng, cung cấp mã INC-1002 và yêu cầu tra cứu người phụ trách | `lookup_ticket(ticket_id="INC-1002")` | **PASS** |
+
+*Run evidence file*: `starter_v0/runs/v4_B_bonus_gemini_20260915T041911328290.json` (Total: 4, Passed: 4, Accuracy: 1.0, Provider Errors: 0).
+
 
 ## B6. Safety review
 
@@ -183,7 +201,7 @@ có thể đối chiếu đóng góp.
 Sao chép mẫu dưới đây cho từng thành viên:
 
 ### Họ tên — MSSV
-### Nguyễn Thu Trang — 2A202602947
+### Nguyễn Thu Trang — 2A202602435
 
 - **Vai trò/phần việc được nhận:** Tối ưu System Prompt (`system_prompt.md`), nâng cấp Schema công cụ (`tools.yaml`), đo đạc kiểm thử 4 bộ test suites (`base`, `group`, `extension`, `adversarial`) và tổng hợp các báo cáo artifacts.
 - **Những gì tôi đã thay đổi trong repo chung:** 
@@ -196,6 +214,21 @@ Sao chép mẫu dưới đây cho từng thành viên:
 - **Khó khăn tôi gặp và cách tôi xử lý:** Gặp khó khăn khi mô hình bị áp dụng quá đà quy tắc "3 nguồn" làm phát sinh extra tool call `search_kb` ở case `M08`. Tôi đã xử lý bằng cách thu hẹp điều kiện: chỉ gọi `search_kb` khi người dùng có yêu cầu tìm kiếm bài hướng dẫn/quy trình rõ ràng.
 - **Điều tôi học được từ phần việc này:** Học được phương pháp thiết kế Function Calling Schema chặt chẽ kết hợp với Prompt Engineering để đạt độ chính xác 100% (Accuracy: 1.0) và phòng chống rủi ro Prompt Injection / Exfiltration trong Agent thực tế.
 - **Nếu làm lại, tôi sẽ cải thiện điều gì:** Tôi sẽ xây dựng một bộ kịch bản tự động kiểm thử nhanh (Automated Regression Test Script) để tự động kiểm tra ngay sau mỗi lần chỉnh sửa prompt, giúp rút ngắn thời gian tinh chỉnh ranh giới.
+
+### Nguyễn Minh Dương — 2A202602920
+
+- **Vai trò/phần việc được nhận:** Xây dựng group test cases, phát triển 2 bonus tools (`lookup_ticket`, `check_software_catalog`) và viết test case tương ứng.
+- **Những gì tôi đã thay đổi trong repo chung:**
+  - Tạo group test case giúp phát hiện lỗi trong test G03 (policy tool argument thiếu).
+  - Thêm công cụ bonus `lookup_ticket` và `check_software_catalog` vào `starter_v0/artifacts/tools.yaml` và cập nhật `system_prompt.md`.
+  - Viết test cases cho các công cụ bonus trong `tests/test_tools.py` và dữ liệu eval trong `data/eval_bonus.json`.
+- **File hoặc artifact liên quan:** [tools.yaml](tools.yaml), [system_prompt.md](system_prompt.md), [tests/test_tools.py](tests/test_tools.py), [data/eval_bonus.json](data/eval_bonus.json), [runs/v4_B_bonus_gemini_20260915T043121045224.json](runs/v4_B_bonus_gemini_20260915T043121045224.json).
+- **Commit hash hoặc pull request:** `f79720d`
+- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:** Định nghĩa schema cho các công cụ bonus với các tham số bắt buộc (`ticket_id`, `software_name`, `platform`) để ngăn lỗi missing argument và tránh các lỗ hổng bảo mật.
+- **Khó khăn tôi gặp và cách tôi xử lý:** Đảm bảo tính an toàn khi công cụ `lookup_ticket` không cho phép truy cập thông tin nhạy cảm; đã thiết lập `side_effect: false` và kiểm tra định dạng `ticket_id`.
+- **Điều tôi học được từ phần việc này:** Cách tích hợp tools mới vào pipeline và test suite một cách liền mạch, đồng thời duy trì tính an toàn và độ chính xác.
+- **Nếu làm lại, tôi sẽ cải thiện điều gì:** Thêm các test case đa dạng hơn cho các trường hợp lỗi nhập sai và kiểm tra guardrail tự động.
+
 
 Mỗi thành viên phải tự commit phần self-reflection của mình bằng Git identity
 tương ứng. Reflection phải dẫn đến contribution artifact/commit đã nêu ở trên,
