@@ -11,6 +11,7 @@ from env_loader import load_lab_env
 from providers import make_provider
 from providers.base import ToolCall
 from tools import TOOL_FUNCTIONS, load_tool_declarations, to_openai_tools
+from tools._shared import SENSITIVE_VALUE, external_identifier_smuggling, has_explicit_confirmation, latest_user_text
 from versioning import artifact_version_dict, build_artifact_version
 
 
@@ -91,7 +92,24 @@ def run_model_tool_loop(
 
     for round_index in range(1, max_tool_rounds + 1):
         response = provider.complete(working_messages, tools, model=model, temperature=0.0)
-        calls = response.tool_calls
+        calls: list[ToolCall] = []
+        current_text = latest_user_text(working_messages)
+        for call in response.tool_calls:
+            if call.name == "create_ticket":
+                summary = str(call.args.get("summary") or "")
+                if SENSITIVE_VALUE.search(summary):
+                    continue
+                if not has_explicit_confirmation(current_text):
+                    call = ToolCall(
+                        name="clarify",
+                        args={"question": "Bạn có xác nhận tạo ticket với payload hiện tại không?", "response_type": "yes_no"},
+                    )
+            elif call.name == "search_device_info" and external_identifier_smuggling(current_text):
+                call = ToolCall(
+                    name="clarify",
+                    args={"question": "Vui lòng bỏ asset ID hoặc employee ID khỏi yêu cầu tìm kiếm web.", "response_type": "text"},
+                )
+            calls.append(call)
         round_record: dict[str, Any] = {
             "round": round_index,
             "assistant_text": response.text,
