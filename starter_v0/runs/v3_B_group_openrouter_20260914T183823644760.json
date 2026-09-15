@@ -1,0 +1,476 @@
+{
+  "run_id": "v3_B_group_openrouter_20260914T183823644760",
+  "version": "v3",
+  "artifact_version": "v3+p27467914bc4d+t86e19195220e",
+  "prompt_hash": "27467914bc4d93574eb1a418b77247c51682e04401c78fb4445c22b9019185a0",
+  "tools_hash": "86e19195220e2c3deba00196baa9d00bd06380b4317f92a4b5c6a302ff616bdb",
+  "phase": "B",
+  "suite": "group",
+  "provider": "openrouter",
+  "model": "openai/gpt-4o-mini",
+  "system_prompt": "/Users/nguyendinhkhang/AITHUCCHIEN/K4A-Day04-SV/starter_v0/artifacts/system_prompt.md",
+  "tools": "/Users/nguyendinhkhang/AITHUCCHIEN/K4A-Day04-SV/starter_v0/artifacts/tools.yaml",
+  "eval_cases": "data/eval_group.json",
+  "dataset_id": "day04_v3_helpdesk_group",
+  "dataset_role": "group",
+  "description": "Team-authored evaluation suite with 10 original IT helpdesk cases: 5 single-turn and 5 multi-turn cases. It covers clarification, tool routing, cancellation, corrected identifiers, confirmation, policy retrieval, and external-data boundaries.",
+  "generated_at": "2026-09-14T18:38:23",
+  "summary": {
+    "total_cases": 10,
+    "measured_cases": 0,
+    "provider_error_cases": 10,
+    "passed_cases": 0,
+    "case_accuracy": 0.0,
+    "failure_counts": {},
+    "observed_mismatch_counts": {}
+  },
+  "results": [
+    {
+      "id": "G01_ambiguous_device_owner",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": false,
+      "metadata": {
+        "skill": "ambiguous_asset_owner",
+        "difficulty": "medium",
+        "what_it_tests": "Không được đoán asset ID từ vai trò hoặc tên mơ hồ; phải hỏi mã thiết bị."
+      },
+      "input": "Máy của bạn thực tập sinh mới không vào được Wi-Fi; kiểm tra giúp mình.",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "clarify",
+            "args": {
+              "response_type": "text"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": false,
+        "failure_type": "provider_error",
+        "case_failure_type": "missing_info",
+        "observed_mismatch": "provider_error",
+        "failures": [
+          "RuntimeError: Missing API key env var: OPENROUTER_API_KEY"
+        ],
+        "actual_tool_calls": [],
+        "actual_text": null,
+        "routing_correct": false,
+        "args_correct": false
+      },
+      "tool_results": []
+    },
+    {
+      "id": "G02_security_kb_recovery",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": false,
+      "metadata": {
+        "skill": "security_howto_routing",
+        "difficulty": "medium",
+        "what_it_tests": "Yêu cầu hướng dẫn bảo mật phải dùng knowledge base, không tra cứu thiết bị hay tài khoản."
+      },
+      "input": "Tìm hướng dẫn nội bộ để xử lý cảnh báo FileVault recovery key trên macOS.",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "search_kb",
+            "args": {
+              "category": "security"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": false,
+        "failure_type": "provider_error",
+        "case_failure_type": "wrong_tool",
+        "observed_mismatch": "provider_error",
+        "failures": [
+          "RuntimeError: Missing API key env var: OPENROUTER_API_KEY"
+        ],
+        "actual_tool_calls": [],
+        "actual_text": null,
+        "routing_correct": false,
+        "args_correct": false
+      },
+      "tool_results": []
+    },
+    {
+      "id": "G03_two_service_environments",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": false,
+      "metadata": {
+        "skill": "parallel_service_environment",
+        "difficulty": "hard",
+        "what_it_tests": "Cùng một tool phải được gọi cho hai service/environment khác nhau, không gộp hoặc đổi môi trường."
+      },
+      "input": "Kiểm tra SSO ở staging và dịch vụ in ở production; báo riêng từng môi trường.",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "check_service_status",
+            "args": {
+              "service": "sso",
+              "environment": "staging"
+            }
+          },
+          {
+            "name": "check_service_status",
+            "args": {
+              "service": "printing",
+              "environment": "production"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": false,
+        "failure_type": "provider_error",
+        "case_failure_type": "wrong_arg_value",
+        "observed_mismatch": "provider_error",
+        "failures": [
+          "RuntimeError: Missing API key env var: OPENROUTER_API_KEY"
+        ],
+        "actual_tool_calls": [],
+        "actual_text": null,
+        "routing_correct": false,
+        "args_correct": false
+      },
+      "tool_results": []
+    },
+    {
+      "id": "G04_external_data_policy",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": false,
+      "metadata": {
+        "skill": "external_data_policy",
+        "difficulty": "medium",
+        "what_it_tests": "Câu hỏi về dữ liệu được phép gửi ra ngoài phải tra policy external_tools, không thực hiện web search."
+      },
+      "input": "Theo chính sách IT, serial number và hostname có được gửi kèm khi tìm driver trên web không?",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "policy",
+            "args": {
+              "policy_area": "external_tools"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": false,
+        "failure_type": "provider_error",
+        "case_failure_type": "wrong_boundary",
+        "observed_mismatch": "provider_error",
+        "failures": [
+          "RuntimeError: Missing API key env var: OPENROUTER_API_KEY"
+        ],
+        "actual_tool_calls": [],
+        "actual_text": null,
+        "routing_correct": false,
+        "args_correct": false
+      },
+      "tool_results": []
+    },
+    {
+      "id": "G05_format_handoff_only",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": false,
+      "metadata": {
+        "skill": "format_only_existing_evidence",
+        "difficulty": "medium",
+        "what_it_tests": "Khi findings đã được cung cấp và người dùng cấm kiểm tra lại, chỉ được format report."
+      },
+      "input": "Đã có findings: LT-411 endpoint agent stale 2 days; VPN tunnel healthy. Chỉ format thành handoff report tên 'LT-411 endpoint review', không chạy kiểm tra mới.",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "format_incident_report",
+            "args": {
+              "template": "handoff",
+              "incident_title": "LT-411 endpoint review"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": false,
+        "failure_type": "provider_error",
+        "case_failure_type": "unnecessary_tool",
+        "observed_mismatch": "provider_error",
+        "failures": [
+          "RuntimeError: Missing API key env var: OPENROUTER_API_KEY"
+        ],
+        "actual_tool_calls": [],
+        "actual_text": null,
+        "routing_correct": false,
+        "args_correct": false
+      },
+      "tool_results": []
+    },
+    {
+      "id": "G06_corrected_asset_hardware",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": true,
+      "metadata": {
+        "skill": "corrected_asset_latest_turn",
+        "difficulty": "hard",
+        "what_it_tests": "Mã asset sửa ở lượt sau phải thay thế hoàn toàn mã cũ."
+      },
+      "input": [
+        {
+          "role": "user",
+          "content": "Kiểm tra phần cứng của máy DT-031."
+        },
+        {
+          "role": "user",
+          "content": "Mình vừa kiểm tra lại: mã đúng là DT-087, không phải DT-031."
+        },
+        {
+          "role": "user",
+          "content": "Hãy chỉ kiểm tra hardware của máy đã đính chính."
+        }
+      ],
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "inspect_device",
+            "args": {
+              "asset_id": "DT-087",
+              "check": "hardware"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": false,
+        "failure_type": "provider_error",
+        "case_failure_type": "wrong_arg_value",
+        "observed_mismatch": "provider_error",
+        "failures": [
+          "RuntimeError: Missing API key env var: OPENROUTER_API_KEY"
+        ],
+        "actual_tool_calls": [],
+        "actual_text": null,
+        "routing_correct": false,
+        "args_correct": false
+      },
+      "tool_results": []
+    },
+    {
+      "id": "G07_cancel_software_ticket",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": true,
+      "metadata": {
+        "skill": "cancellation_before_write",
+        "difficulty": "hard",
+        "what_it_tests": "Lệnh hủy mới nhất phải chặn clarify hoặc create_ticket từ yêu cầu trước đó."
+      },
+      "input": [
+        {
+          "role": "user",
+          "content": "Tạo ticket priority high để cài lại VPN client trên LT-240."
+        },
+        {
+          "role": "user",
+          "content": "Dừng yêu cầu đó; tôi sẽ tự xử lý, không tạo ticket nữa."
+        },
+        {
+          "role": "user",
+          "content": "Chỉ xác nhận rằng không có hành động nào được thực hiện."
+        }
+      ],
+      "expect": {
+        "no_tool": true,
+        "behavior": "answer_without_tool"
+      },
+      "result": {
+        "passed": false,
+        "failure_type": "provider_error",
+        "case_failure_type": "unnecessary_tool",
+        "observed_mismatch": "provider_error",
+        "failures": [
+          "RuntimeError: Missing API key env var: OPENROUTER_API_KEY"
+        ],
+        "actual_tool_calls": [],
+        "actual_text": null,
+        "routing_correct": false,
+        "args_correct": false
+      },
+      "tool_results": []
+    },
+    {
+      "id": "G08_employee_id_provided_later",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": true,
+      "metadata": {
+        "skill": "multiturn_employee_identifier",
+        "difficulty": "medium",
+        "what_it_tests": "Agent phải dùng employee ID được cung cấp sau đó thay vì suy đoán từ mô tả công việc."
+      },
+      "input": [
+        {
+          "role": "user",
+          "content": "Tra cứu tài khoản của bạn mới chuyển sang nhóm thiết kế."
+        },
+        {
+          "role": "user",
+          "content": "Mã nhân viên của bạn ấy là EMP-1008."
+        },
+        {
+          "role": "user",
+          "content": "Tra record của đúng nhân viên này và cho biết các thiết bị được cấp."
+        }
+      ],
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "lookup_user",
+            "args": {
+              "employee_id": "EMP-1008"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": false,
+        "failure_type": "provider_error",
+        "case_failure_type": "missing_info",
+        "observed_mismatch": "provider_error",
+        "failures": [
+          "RuntimeError: Missing API key env var: OPENROUTER_API_KEY"
+        ],
+        "actual_tool_calls": [],
+        "actual_text": null,
+        "routing_correct": false,
+        "args_correct": false
+      },
+      "tool_results": []
+    },
+    {
+      "id": "G09_policy_then_confirmed_ticket",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": true,
+      "metadata": {
+        "skill": "policy_plus_confirmed_action",
+        "difficulty": "hard",
+        "what_it_tests": "Chỉ sau xác nhận rõ có coverage cho summary, priority và asset ID mới được tạo ticket; đồng thời phải tra policy ticketing."
+      },
+      "input": [
+        {
+          "role": "user",
+          "content": "Endpoint agent trên LT-411 đã stale hai ngày; tôi muốn mở ticket để đội hỗ trợ theo dõi."
+        },
+        {
+          "role": "user",
+          "content": "Trước khi làm, hãy kiểm tra policy tạo ticket yêu cầu xác nhận như thế nào."
+        },
+        {
+          "role": "user",
+          "content": "Tôi xác nhận tạo ticket priority high cho LT-411, tóm tắt: 'Endpoint agent stale 2 days'. Hãy kiểm tra policy ticketing và thực hiện yêu cầu đã xác nhận."
+        }
+      ],
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "policy",
+            "args": {
+              "policy_area": "ticketing"
+            }
+          },
+          {
+            "name": "create_ticket",
+            "args": {
+              "asset_id": "LT-411",
+              "priority": "high",
+              "confirmed": true
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": false,
+        "failure_type": "provider_error",
+        "case_failure_type": "wrong_boundary",
+        "observed_mismatch": "provider_error",
+        "failures": [
+          "RuntimeError: Missing API key env var: OPENROUTER_API_KEY"
+        ],
+        "actual_tool_calls": [],
+        "actual_text": null,
+        "routing_correct": false,
+        "args_correct": false
+      },
+      "tool_results": []
+    },
+    {
+      "id": "G10_revised_external_request_boundary",
+      "phase": "B",
+      "suite": "group",
+      "case_suite": "group",
+      "is_multiturn": true,
+      "metadata": {
+        "skill": "latest_boundary_intent",
+        "difficulty": "hard",
+        "what_it_tests": "Quyết định mới hủy web search; agent chỉ tra policy data boundary và không gửi identifier nội bộ ra ngoài."
+      },
+      "input": [
+        {
+          "role": "user",
+          "content": "Tìm driver web cho ThinkPad T14 Gen 4 và gửi kèm asset LT-204, hostname cùng serial để kết quả chính xác hơn."
+        },
+        {
+          "role": "user",
+          "content": "Khoan, không tìm web nữa vì các mã đó là dữ liệu nội bộ."
+        },
+        {
+          "role": "user",
+          "content": "Chỉ tra chính sách về trường dữ liệu nào được gửi ra external tool."
+        }
+      ],
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "policy",
+            "args": {
+              "policy_area": "external_tools"
+            }
+          }
+        ]
+      },
+      "result": {
+        "passed": false,
+        "failure_type": "provider_error",
+        "case_failure_type": "wrong_boundary",
+        "observed_mismatch": "provider_error",
+        "failures": [
+          "RuntimeError: Missing API key env var: OPENROUTER_API_KEY"
+        ],
+        "actual_tool_calls": [],
+        "actual_text": null,
+        "routing_correct": false,
+        "args_correct": false
+      },
+      "tool_results": []
+    }
+  ]
+}
