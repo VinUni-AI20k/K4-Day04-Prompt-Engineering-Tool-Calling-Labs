@@ -239,7 +239,7 @@ người khác viết thay. Các commit có thể dùng làm evidence ban đầu
 
 Mỗi thành viên sao chép và tự hoàn thành mẫu sau:
 
-### [TODO: Nguyễn Vũ Quang Anh] — [TODO: 2A202602805]
+### Nguyễn Vũ Quang Anh — 2A202602805
 
 - **Vai trò/phần việc được nhận:**Leader điều phối hoạt động nhóm và hoàn thiện tools và system prompt
 - **Những gì tôi đã thay đổi trong repo chung:**Sửa file run_eval để có thể tự log kết quả, quản lý commit, git của cả nhóm và làm version cuối của artifact
