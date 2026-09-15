@@ -1,0 +1,13 @@
+# Dark, minimal theme for the IT Helpdesk Agent UI test surface.
+# Pairs with the small CSS block in app.py for spacing/typography/bubbles.
+
+[theme]
+base = "dark"
+primaryColor = "#5B8DEF"
+backgroundColor = "#212121"
+secondaryBackgroundColor = "#171717"
+textColor = "#ECECEC"
+font = "sans serif"
+
+[browser]
+gatherUsageStats = false
