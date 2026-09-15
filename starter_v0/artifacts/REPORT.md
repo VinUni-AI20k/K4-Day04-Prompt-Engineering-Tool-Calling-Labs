@@ -502,14 +502,14 @@ có thể đối chiếu đóng góp.
 
 ### Nguyễn Ngọc Thái An — 2A202602462
 
-- **Vai trò/phần việc được nhận:** Eval & Red-Team
-- **Những gì tôi đã thay đổi trong repo chung:**
-- **File hoặc artifact liên quan:**
-- **Commit hash hoặc pull request:**
-- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:**
-- **Khó khăn tôi gặp và cách tôi xử lý:**
-- **Điều tôi học được từ phần việc này:**
-- **Nếu làm lại, tôi sẽ cải thiện điều gì:**
+- **Vai trò/phần việc được nhận:** Eval & Red-Team. Tôi phụ trách viết các test case cho nhóm trong `eval_group.json` và chạy bộ kiểm tra `eval_adversarial.json` để đánh giá các adversarial attacks và ranh giới an toàn của agent.
+- **Những gì tôi đã thay đổi trong repo chung:** Tôi xây dựng 10 test case cho nhóm trong `eval_group.json`, gồm 5 single-turn và 5 multi-turn. Các case tập trung vào thiếu thông tin, ambiguity, confirmation boundary, cancel flow, chuỗi inspect device rồi format report, và giới hạn của tool. Tôi cũng chạy bộ adversarial suite trong `eval_adversarial.json` để kiểm tra prompt injection, forged confirmation, suy đoán identifier nội bộ, tạo ticket trái phép và nguy cơ gửi dữ liệu nhạy cảm ra ngoài. Sau đó, tôi review kết quả để phân biệt lỗi routing với lỗi safety và ghi lại evidence cho nhóm.
+- **File hoặc artifact liên quan:** `starter_v0/data/eval_group.json`, `starter_v0/data/eval_adversarial.json`, `starter_v0/evidence/runs/`, `starter_v0/evidence/v5_adversarial_review.md`, `starter_v0/evidence/v6_second_guardrail_layer.md`, `starter_v0/artifacts/REPORT.md`.
+- **Commit hash hoặc pull request:** `4fe72e6`
+- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:** Tôi thiết kế test case để đánh giá cả correctness và safety, thay vì chỉ kiểm tra model có gọi đúng tên tool hay không. Vì vậy, các case cũng kiểm tra việc agent có hỏi lại khi thiếu identifier, chờ explicit confirmation trước write action, giữ đúng context trong multi-turn và không gửi dữ liệu nội bộ ra external tool. Cách này giúp phát hiện những failure mà automatic score có thể bỏ sót.
+- **Khó khăn tôi gặp và cách tôi xử lý:** Khó khăn lớn nhất là phân biệt giữa trường hợp agent cần hỏi lại và trường hợp đã đủ thông tin để xử lý. Một số case có intent gần giống nhau nhưng khác nhau ở confirmation boundary hoặc quyền truy cập dữ liệu. Tôi đọc `LAB-GUIDE.md`, `README.md`, `eval_base.json` và `tools.yaml`, sau đó đối chiếu expected tool calls với `tool_results` và filesystem để kiểm tra hành vi thực tế.
+- **Điều tôi học được từ phần việc này:** Tôi học được rằng evaluation của tool-calling agent không thể chỉ dựa vào PASS/FAIL. Cần kiểm tra thêm `tool_results`, side effect và dữ liệu có rời khỏi hệ thống hay không. Một tool call có thể đúng về mặt cú pháp nhưng vẫn dẫn đến hành vi sai, chẳng hạn format report từ findings bịa hoặc tạo ticket khi confirmation đã hết hiệu lực.
+- **Nếu làm lại, tôi sẽ cải thiện điều gì:** Tôi sẽ chuẩn hóa template cho từng eval case ngay từ đầu, ghi rõ expected behavior, actual calls, failure mode và safety impact. Tôi cũng sẽ chạy adversarial suite sớm hơn và lưu evidence riêng cho từng case để dễ phát hiện regression sau mỗi lần thay đổi prompt hoặc tool implementation.
 
 ### Lê Tuấn Anh — 2A202602952
 
@@ -524,14 +524,64 @@ có thể đối chiếu đóng góp.
 
 ### Vũ Thường Tín — 2A202602955
 
-- **Vai trò/phần việc được nhận:** Security & Bonus Tool
-- **Những gì tôi đã thay đổi trong repo chung:**
-- **File hoặc artifact liên quan:**
-- **Commit hash hoặc pull request:**
-- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:**
-- **Khó khăn tôi gặp và cách tôi xử lý:**
-- **Điều tôi học được từ phần việc này:**
-- **Nếu làm lại, tôi sẽ cải thiện điều gì:**
+- **Vai trò/phần việc được nhận:** Security & Bonus Tool. Tôi phụ trách rà soát
+  ranh giới dữ liệu và hành động của agent, xây capability tra cứu phần mềm được
+  phê duyệt, đồng thời cải thiện khả năng quan sát và lưu evidence trên giao diện
+  Streamlit.
+
+- **Những gì tôi đã thay đổi trong repo chung:** Tôi nâng cấp `app.py` để hiển
+  thị rõ trạng thái của từng tool call (`error`, `needs_confirmation`,
+  `awaiting_user`, `created`), số tool call/error/round, artifact version, tùy
+  chỉnh history window và max tool rounds, reset hội thoại và tải transcript.
+  Tôi cũng xây tool bonus `approved_software_catalog`: tạo dữ liệu catalog giả
+  lập, implementation, contract, declaration trong `tools.yaml`, đăng ký tool,
+  smoke test và case G10 trong team eval. Ngoài chức năng tra cứu, tôi bổ sung
+  security smoke test để kiểm tra forged confirmation, dữ liệu nhạy cảm,
+  identifier nội bộ và prompt injection trong nội dung được retrieve.
+
+- **File hoặc artifact liên quan:** `starter_v0/app.py`,
+  `starter_v0/tools/approved_software_catalog/`,
+  `starter_v0/helpdesk_data/approved_software.json`,
+  `starter_v0/scripts/role_e_security_smoke.py`,
+  `starter_v0/evidence/bonus/`, `starter_v0/artifacts/tools.yaml` và case
+  `G10_approved_vpn_catalog` trong `starter_v0/data/eval_group.json`.
+
+- **Commit hash hoặc pull request:** `acf9641` (nâng cấp UI, thuộc PR #4) và
+  `8123c30` (bonus tool cùng security evidence, thuộc PR #5).
+
+- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:** Tôi thiết kế
+  `approved_software_catalog` là một lookup local, deterministic và read-only,
+  với `side_effect: false`, thay vì dùng web search hoặc thực hiện cài đặt. Trạng
+  thái phê duyệt phần mềm là dữ liệu nội bộ giả lập và kết quả tra cứu không thể
+  được coi là quyền cho phép thay đổi hệ thống. Tôi cũng chặn asset ID, employee
+  ID và credential ngay trong implementation, vì các trường này không cần thiết
+  cho truy vấn catalog; như vậy ranh giới vẫn được giữ kể cả khi model truyền
+  argument sai.
+
+- **Khó khăn tôi gặp và cách tôi xử lý:** Khó khăn lớn nhất là ranh giới routing
+  giữa tool mới và `search_kb`, vì cả hai đều có thể liên quan đến phần mềm. Tôi
+  mô tả rõ tool mới chỉ sở hữu trạng thái phê duyệt và compatibility, thêm case
+  G10 để đo riêng, rồi dùng run của cả bốn suite để kiểm tra tool thứ 10 có làm
+  nhiễu chín tool cũ không. Kết quả cho thấy tool chỉ xuất hiện ở G10; base và
+  extension giữ nguyên điểm. Tuy nhiên G10 vẫn FAIL vì model gọi đúng tool nhưng
+  thiếu `category`. Nhóm đã thử làm declaration chi tiết hơn và cấm gọi lặp,
+  nhưng không tăng điểm, thậm chí gây regression ở G02, nên tôi đồng ý giữ bản
+  v8 ổn định và ghi rõ giới hạn thay vì che kết quả không tốt.
+
+- **Điều tôi học được từ phần việc này:** Một tool mới chưa hoàn thành chỉ vì
+  implementation trả đúng dữ liệu. Nó còn cần contract, declaration, registry,
+  mock data, eval case, evidence và guardrail phù hợp. Tôi cũng thấy rõ automatic
+  score và security là hai việc khác nhau: G10 bị chấm FAIL về argument, nhưng
+  smoke test vẫn chứng minh tool read-only, không làm rò rỉ identifier hoặc
+  credential và không tạo side effect. Guardrail ở tầng implementation là lớp
+  bảo vệ cần thiết bên cạnh hướng dẫn dành cho model.
+
+- **Nếu làm lại, tôi sẽ cải thiện điều gì:** Tôi sẽ thiết kế eval case và ma
+  trận phân biệt capability với `search_kb` trước khi chốt schema, sau đó thử
+  nhiều cách biểu diễn argument bắt buộc trên cùng một tập regression nhỏ trước
+  khi merge. Tôi cũng sẽ tạo live transcript riêng cho bonus tool ngay trong
+  vòng phát triển, để ngoài smoke test deterministic còn có evidence trực tiếp
+  cho việc model chọn tool và truyền đủ bộ lọc trong UI.
 
 Mỗi thành viên phải tự commit phần self-reflection của mình bằng Git identity
 tương ứng. Reflection phải dẫn đến contribution artifact/commit đã nêu ở trên,
