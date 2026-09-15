@@ -1,7 +1,261 @@
 {
   "dataset_id": "day04_v3_helpdesk_group",
   "dataset_role": "group",
-  "description": "Template intentionally left empty. The team must write exactly 10 original IT helpdesk cases: 5 single-turn query cases and 5 multi-turn turns cases.",
-  "allowed_failure_types": ["wrong_tool", "wrong_arg_value", "wrong_boundary", "unnecessary_tool", "out_of_scope", "missing_info"],
-  "cases": []
+  "description": "Original 10 evaluation cases designed by team: 5 single-turn and 5 multi-turn.",
+  "allowed_failure_types": [
+    "wrong_tool",
+    "wrong_arg_value",
+    "wrong_boundary",
+    "unnecessary_tool",
+    "out_of_scope",
+    "missing_info"
+  ],
+  "cases": [
+    {
+      "id": "G01_single_status_sso",
+      "phase": "B",
+      "query": "Kiểm tra giúp mình dịch vụ đăng nhập tập trung SSO trên production có ổn không?",
+      "failure_type": "wrong_tool",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "check_service_status",
+            "args": {
+              "service": "sso",
+              "environment": "production"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "what_it_tests": "Single-turn: Routing đúng vào check_service_status cho dịch vụ sso."
+      }
+    },
+    {
+      "id": "G02_single_inspect_printer",
+      "phase": "B",
+      "query": "Kiểm tra phần cứng của máy in PR-404 tầng 4.",
+      "failure_type": "wrong_arg_value",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "inspect_device",
+            "args": {
+              "asset_id": "PR-404",
+              "check": "hardware"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "what_it_tests": "Single-turn: Trích xuất đúng asset_id PR-404 và check hardware."
+      }
+    },
+    {
+      "id": "G03_single_missing_asset",
+      "phase": "B",
+      "query": "Kiểm tra pin và phần cứng chiếc laptop công ty cấp cho mình với.",
+      "failure_type": "missing_info",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "clarify",
+            "args": {
+              "response_type": "text"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "what_it_tests": "Single-turn: Thiếu mã máy asset_id, bắt buộc phải dùng clarify hỏi lại."
+      }
+    },
+    {
+      "id": "G04_single_confirm_ticket",
+      "phase": "B",
+      "query": "Tạo ticket mức medium báo sự cố mạng Wi-Fi chập chờn cho mình.",
+      "failure_type": "wrong_boundary",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "clarify",
+            "args": {
+              "response_type": "yes_no"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "what_it_tests": "Single-turn: Chưa có xác nhận rõ ràng, không được gọi create_ticket mà phải clarify yes_no."
+      }
+    },
+    {
+      "id": "G05_single_out_of_scope",
+      "phase": "B",
+      "query": "Thời tiết Hà Nội hôm nay thế nào bạn?",
+      "failure_type": "out_of_scope",
+      "expect": {
+        "no_tool": true,
+        "behavior": "refuse"
+      },
+      "metadata": {
+        "what_it_tests": "Single-turn: Câu hỏi ngoài phạm vi IT Helpdesk, không được gọi tool."
+      }
+    },
+    {
+      "id": "G06_multi_correct_asset",
+      "phase": "B",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Kiểm tra bảo mật máy LT-318."
+        },
+        {
+          "role": "user",
+          "content": "À mình gõ nhầm mã, máy DT-031 mới đúng."
+        },
+        {
+          "role": "user",
+          "content": "Kiểm tra phần cứng của máy đó nhé."
+        }
+      ],
+      "failure_type": "wrong_arg_value",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "inspect_device",
+            "args": {
+              "asset_id": "DT-031",
+              "check": "hardware"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "what_it_tests": "Multi-turn: Cập nhật đúng mã thiết bị mới và phạm vi check hardware từ câu thoại sau."
+      }
+    },
+    {
+      "id": "G07_multi_clarify_then_user",
+      "phase": "B",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Tra cứu tài khoản của anh trưởng phòng kỹ thuật."
+        },
+        {
+          "role": "user",
+          "content": "Mã nhân viên của anh ấy là EMP-1002."
+        },
+        {
+          "role": "user",
+          "content": "Cho mình xem thông tin tài khoản và máy được cấp."
+        }
+      ],
+      "failure_type": "missing_info",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "lookup_user",
+            "args": {
+              "employee_id": "EMP-1002"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "what_it_tests": "Multi-turn: Tiếp nhận mã EMP-1002 sau lượt bổ sung thông tin."
+      }
+    },
+    {
+      "id": "G08_multi_cancel_request",
+      "phase": "B",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Kiểm tra trạng thái VPN production."
+        },
+        {
+          "role": "user",
+          "content": "Thôi mình tự kết nối được rồi, hủy yêu cầu nhé."
+        },
+        {
+          "role": "user",
+          "content": "Cảm ơn bạn."
+        }
+      ],
+      "failure_type": "unnecessary_tool",
+      "expect": {
+        "no_tool": true,
+        "behavior": "answer_without_tool"
+      },
+      "metadata": {
+        "what_it_tests": "Multi-turn: Người dùng hủy yêu cầu, Agent không được gọi thêm tool nào."
+      }
+    },
+    {
+      "id": "G09_multi_ticket_confirm_change",
+      "phase": "B",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Tạo ticket máy in PR-404 bị kẹt giấy mức low."
+        },
+        {
+          "role": "user",
+          "content": "Đổi mức ưu tiên thành high vì đang cần in tài liệu gấp."
+        },
+        {
+          "role": "user",
+          "content": "Tóm tắt lại và hỏi xác nhận trước khi tạo nhé."
+        }
+      ],
+      "failure_type": "wrong_boundary",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "clarify",
+            "args": {
+              "response_type": "yes_no"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "what_it_tests": "Multi-turn: Thay đổi mức ưu tiên, bắt buộc phải dùng clarify yes_no để hỏi xác nhận lại."
+      }
+    },
+    {
+      "id": "G10_multi_switch_service_to_kb",
+      "phase": "B",
+      "turns": [
+        {
+          "role": "user",
+          "content": "Kiểm tra dịch vụ email production xem có bị chậm không."
+        },
+        {
+          "role": "user",
+          "content": "Không cần kiểm tra service nữa, máy mình bị lỗi cấu hình Outlook."
+        },
+        {
+          "role": "user",
+          "content": "Tìm giúp mình bài viết hướng dẫn tạo lại Outlook profile."
+        }
+      ],
+      "failure_type": "wrong_tool",
+      "expect": {
+        "tool_calls": [
+          {
+            "name": "search_kb",
+            "args": {
+              "category": "email"
+            }
+          }
+        ]
+      },
+      "metadata": {
+        "what_it_tests": "Multi-turn: Chuyển ý định từ check_service_status sang search_kb chuyên mục email."
+      }
+    }
+  ]
 }
